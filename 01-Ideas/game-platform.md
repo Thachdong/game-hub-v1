@@ -134,3 +134,11 @@ chung).
 
 - Quy trình cấp vai trò "Game Admin" cho từng game (ai cấp, theo tiêu chí gì) chưa được định
   nghĩa ở mức platform — sẽ làm rõ khi viết idea/BRD riêng cho từng game.
+
+## BRD liên quan
+
+- [[BRD-ACCOUNT-SOCIAL-001]] — Đăng nhập & Trang Account
+- [[BRD-ACCOUNT-SOCIAL-002]] — Kết bạn
+- [[BRD-TRUST-REPORT-001]] — Report user & Admin review
+- [[BRD-TRUST-REPORT-002]] — Điểm tin cậy (Trust Score)
+- [[BRD-NOTIFICATION-001]] — Thông báo in-app
