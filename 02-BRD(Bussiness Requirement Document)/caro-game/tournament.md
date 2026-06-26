@@ -163,8 +163,8 @@ tranh ngắn hạn độc lập với elo, và tăng tương tác cộng đồng
   ký, và để tính lại elo sau mỗi trận trong tournament.
 - [[BRD-NOTIFICATION-001]] phụ thuộc domain này để gửi thông báo "sự kiện tournament" (huỷ giải,
   bắt đầu, ghép cặp...).
-- Phụ thuộc vai trò Game Admin (Caro), được gán bởi cơ chế ngoài phạm vi platform hiện tại (xem
-  [[IDEA-002]] mục Giả định).
+- Phụ thuộc [[BRD-ACCOUNT-SOCIAL-001]] (FR-8, FR-9, FR-10) để xác định một account có đang giữ
+  vai trò Game Admin của Caro hay không (cần để duyệt/revoke request Tournament Creator).
 
 ## 10. Câu hỏi mở / Rủi ro
 

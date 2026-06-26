@@ -70,8 +70,9 @@ thống tuân theo các tham số đã được kiểm soát.
 
 ## 8. Giả định & Ràng buộc (Assumptions & Constraints)
 
-- Giả định vai trò Game Admin (Caro) tồn tại và được gán bởi cơ chế ngoài phạm vi BRD này (có
-  thể do Platform Admin gán thủ công) — xem [[IDEA-002]] mục Giả định.
+- Vai trò Game Admin (Caro) được Platform Admin gán/thu hồi qua chức năng quản trị định nghĩa ở
+  [[BRD-ACCOUNT-SOCIAL-001]] (FR-8, FR-9); BRD này chỉ tiêu thụ kết quả gán đó (user có hay
+  không có vai trò Game Admin Caro), không định nghĩa lại cơ chế gán.
 - Giả định xoá một cấu hình đang được dùng cho ván chưa kết thúc không ảnh hưởng tới ván đó
   (ván giữ nguyên tham số đã chọn lúc tạo) — cần xác nhận, xem mục 10.
 
@@ -79,8 +80,8 @@ thống tuân theo các tham số đã được kiểm soát.
 
 - [[BRD-CARO-GAME-002]] (Ván cờ) phụ thuộc domain này: player chỉ chọn được cấu hình do Game
   Admin đã tạo khi tạo ván mới.
-- Phụ thuộc khái niệm Game Admin/role do [[game-platform|IDEA-001]] hoặc cơ chế gán role ngoài
-  phạm vi platform định nghĩa.
+- Phụ thuộc [[BRD-ACCOUNT-SOCIAL-001]] (FR-8, FR-9, FR-10) để xác định một account có đang giữ
+  vai trò Game Admin của Caro hay không.
 
 ## 10. Câu hỏi mở / Rủi ro
 

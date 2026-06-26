@@ -27,6 +27,8 @@ toàn bộ game mà platform cung cấp.
   xanh).
 - Xác định vai trò Platform Admin bằng cách so khớp email đăng nhập với danh sách email cấu
   hình qua biến môi trường.
+- Platform Admin gán hoặc thu hồi vai trò Game Admin (theo từng game cụ thể, vd "Game Admin của
+  Caro") cho một account bất kỳ trên platform.
 - Guest (chưa đăng nhập) xem được nội dung public; quyền xem cụ thể của guest theo từng game
   do game đó tự định nghĩa (ngoài phạm vi BRD này).
 
@@ -34,15 +36,22 @@ toàn bộ game mà platform cung cấp.
 
 - Đăng nhập bằng email/password.
 - Liên kết nhiều tài khoản Google vào cùng một account platform.
-- UI quản lý/gán role Platform Admin (chỉ qua biến môi trường, không qua UI).
+- UI quản lý/gán role Platform Admin (chỉ qua biến môi trường, không qua UI) — khác với vai trò
+  Game Admin, vốn được Platform Admin gán qua chức năng quản trị (xem FR-8, FR-9).
 - Định nghĩa quyền cụ thể của Guest theo từng game.
+- Định nghĩa quyền hạn chi tiết của Game Admin trong từng game (vd Game Admin Caro được làm gì)
+  — thuộc phạm vi BRD riêng của từng game.
 
 ## 3. Đối tượng liên quan (Stakeholders & Actors)
 
 - **Player**: user đã đăng nhập, xem/quản lý account của mình.
 - **Guest**: user chưa đăng nhập, chỉ xem nội dung public.
 - **Platform Admin**: xác định qua danh sách email trong biến môi trường; có quyền truy cập
-  các chức năng quản trị ở domain khác (report — xem [[BRD-TRUST-REPORT-001]]).
+  các chức năng quản trị ở domain khác (report — xem [[BRD-TRUST-REPORT-001]]), và quyền gán/
+  thu hồi vai trò Game Admin cho account bất kỳ.
+- **Game Admin** (theo từng game): account được Platform Admin gán vai trò Game Admin cho một
+  game cụ thể; quyền hạn chi tiết của vai trò này do BRD riêng của từng game định nghĩa (vd
+  [[BRD-CARO-GAME-001]] cho Caro).
 
 ## 4. Yêu cầu chức năng (Functional Requirements)
 
@@ -57,6 +66,12 @@ toàn bộ game mà platform cung cấp.
 - **FR-6**: Hệ thống xác định một user đăng nhập là Platform Admin nếu email của user khớp với
   danh sách email cấu hình trong biến môi trường tại thời điểm hệ thống khởi động.
 - **FR-7**: Hệ thống cho phép Guest xem nội dung public của platform mà không cần đăng nhập.
+- **FR-8**: Hệ thống cho phép Platform Admin gán vai trò Game Admin của một game cụ thể cho một
+  account bất kỳ trên platform.
+- **FR-9**: Hệ thống cho phép Platform Admin thu hồi (revoke) vai trò Game Admin đã gán cho một
+  account.
+- **FR-10**: Hệ thống cho phép một account giữ vai trò Game Admin của nhiều game khác nhau độc
+  lập với nhau (gán riêng cho từng game).
 
 ## 5. Business Rules
 
@@ -66,6 +81,10 @@ toàn bộ game mà platform cung cấp.
 - Danh sách email Platform Admin chỉ đọc từ biến môi trường lúc khởi động; thay đổi danh sách
   yêu cầu cập nhật biến môi trường và khởi động lại hệ thống.
 - Trang Account luôn hiển thị đủ toàn bộ game platform cung cấp, không lọc theo game đã chơi.
+- Vai trò Game Admin chỉ được gán/thu hồi bởi Platform Admin, qua chức năng quản trị (khác với
+  Platform Admin — vốn xác định tự động qua biến môi trường, không qua hành động gán tay).
+- Vai trò Game Admin luôn gắn với một game cụ thể; một account có thể là Game Admin của game A
+  mà không phải của game B.
 
 ## 6. Acceptance Criteria
 
@@ -79,6 +98,12 @@ toàn bộ game mà platform cung cấp.
   có tick.
 - **AC-4** (FR-6): Given email đăng nhập khớp với danh sách email trong biến môi trường, When
   user đăng nhập, Then user được hệ thống coi là Platform Admin trong suốt session đó.
+- **AC-5** (FR-8): Given Platform Admin chọn account của user X và game Caro, When Platform
+  Admin gán vai trò Game Admin (Caro) cho X, Then X có quyền Game Admin của Caro (vd tạo cấu
+  hình ván cờ ở [[BRD-CARO-GAME-001]]) trong các lần đăng nhập sau đó.
+- **AC-6** (FR-9): Given user X đang là Game Admin của Caro, When Platform Admin thu hồi vai trò
+  đó, Then X không còn quyền Game Admin của Caro trong các lần đăng nhập sau đó; các cấu hình/
+  tournament X đã tạo trước đó vẫn giữ nguyên (xem [[BRD-CARO-GAME-003]]).
 
 ## 7. Yêu cầu phi chức năng (Non-functional Requirements)
 
@@ -100,6 +125,8 @@ toàn bộ game mà platform cung cấp.
   FR-6.
 - [[BRD-NOTIFICATION-001]] không phụ thuộc trực tiếp domain này, nhưng cần khái niệm user/player
   để gửi thông báo tới đúng người.
+- [[BRD-CARO-GAME-001]], [[BRD-CARO-GAME-003]] phụ thuộc domain này để biết một account có đang
+  giữ vai trò Game Admin của Caro hay không (qua FR-8/FR-9/FR-10).
 
 ## 10. Câu hỏi mở / Rủi ro
 
