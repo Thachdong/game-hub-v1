@@ -1,3 +1,5 @@
+> [!done] Đã xử lý → [[IDEA-001]]
+
 Một game platform cho phép user có thể chơi các trò chơi khác nhau trên cùng một account
 Mỗi game sẽ có data và cách quản lý data khác nhau
 Game sẽ chạy trên: browser và mobile app (có thể cả 2, chỉ trên browser, chỉ trên mobile app)
@@ -8,6 +10,8 @@ Tất cả các game sẽ có một số tính năng chung như:
 - Report user khác gian lận
 - Kết bạn thông qua email
 - Account page: chứa thông tin cơ bản như: username, email, avatar, danh sách bạn bè, danh sách các game đã chơi
+
+> [!done] Đã xử lý → [[IDEA-002]]
 
 Game caro:
 - Người chơi có thể tạo ván cờ với các config khác nhau
@@ -44,6 +48,8 @@ Game caro:
   + trong tourname sẽ có room chat chung
 - Người chơi có thể xem profile cờ caro: tỉ lệ thăng/thua/hoà, số ván đã chơi, danh sách các ván cờ đã chơi
 - Người chơi chưa đăng ký / đăng nhập vẫn có thể vào hệ thống, nhưng chỉ được phép xem
+
+> [!todo] Chưa xử lý — chưa đủ nội dung để làm rõ (mới có 1 câu mô tả)
 
 Game "Truy tìm kho báo":
 sẽ được triển khai sau khi làm xong tính năng cơ bản và game caro
