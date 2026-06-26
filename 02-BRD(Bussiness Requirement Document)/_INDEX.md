@@ -9,3 +9,4 @@ quy ước tại `.claude/skills/_shared-ba-pipeline/CONVENTIONS.md`.
 | Account & Social | [[account-social/_INDEX|account-social]] | 2 | Đăng nhập Google, trang Account, kết bạn |
 | Trust & Report | [[trust-report/_INDEX|trust-report]] | 2 | Report user, admin review, điểm tin cậy, khoá/hồi phục |
 | Notification | [[notification/_INDEX|notification]] | 1 | Thông báo in-app dùng chung cho toàn platform |
+| Caro Game | [[caro-game/_INDEX|caro-game]] | 4 | Ván cờ, tournament, leaderboard/profile, config Game Admin |

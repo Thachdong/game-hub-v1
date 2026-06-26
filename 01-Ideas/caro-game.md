@@ -198,3 +198,10 @@ in-app (mời chơi/kết bạn, sự kiện tournament, cảnh báo admin).
   chọn tuỳ ý, hay theo điều kiện elo/số ván đã chơi...)?
 - Có cần giới hạn số lượng viewer/spectator tối đa cho một ván hoặc tournament không?
 - Game Admin được cấp quyền bởi ai và theo cơ chế nào (ngoài phạm vi platform hiện tại)?
+
+## BRD liên quan
+
+- [[BRD-CARO-GAME-001]] — Cấu hình ván cờ (Game Admin)
+- [[BRD-CARO-GAME-002]] — Ván cờ (Match)
+- [[BRD-CARO-GAME-003]] — Tournament
+- [[BRD-CARO-GAME-004]] — Leaderboard & Profile
