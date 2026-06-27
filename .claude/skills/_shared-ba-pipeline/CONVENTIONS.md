@@ -12,7 +12,12 @@ dùng chung để 3 skill không lệch nhau về ID, frontmatter, cấu trúc t
 - `02-BRD(Bussiness Requirement Document)/` — mỗi nghiệp vụ (business domain) = 1 folder con
   `<feature-slug>/`, chứa nhiều file BRD nhỏ theo nhóm chức năng trong domain đó.
 - `03-ADR (Architecutre Decission Record)/` — mỗi nghiệp vụ = 1 folder con `<feature-slug>/`
-  cùng tên với folder tương ứng trong 02-BRD, chứa các file ADR (1 file = 1 quyết định).
+  cùng tên với folder tương ứng trong 02-BRD, chứa **đúng 1 file ADR cho mỗi 1 file BRD** (cùng
+  slug tên file với BRD nguồn, ID dùng chung số NNN — xem `brd-to-adr/SKILL.md`). ADR chỉ ghi
+  quyết định technology-layer (tech stack, architecture pattern, package, coding convention,
+  testing, security/infra) — không ghi business content/quyết định hẹp cho riêng 1 feature
+  (loại đó để `/speckit.plan` xử lý). Các ADR `accepted` được tổng hợp vào
+  `03-ADR (...)/_ADR-TONG.md` — file duy nhất, là input trực tiếp cho `/speckit.constitution`.
 - `04-Projects/` — nơi Speckit sinh spec/code từ BRD + ADR. Ngoài phạm vi 3 skill này.
 
 Tên folder feature (`<feature-slug>`) phải giống nhau giữa 02-BRD và 03-ADR để dễ đối chiếu.

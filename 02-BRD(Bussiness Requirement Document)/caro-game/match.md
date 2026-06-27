@@ -211,3 +211,8 @@ platform.
   mời có quyền huỷ lời mời từ phía mình sau khi đã Chấp nhận nhưng trước Start không, hay chỉ
   người tạo mới huỷ được toàn bộ ván) — tạm giả định chỉ người tạo huỷ được ván (FR-23); cần xác
   nhận nếu cần thêm hành vi cho người được mời.
+
+## ADR liên quan
+
+- [[ADR-CARO-GAME-002]] — Server-authoritative timer cho đồng hồ nước đi/cửa sổ Start. Quyết
+  định matchmaking concurrency cho Quick Pair được ghi ở [[ADR-CARO-GAME-003]] (dùng chung).

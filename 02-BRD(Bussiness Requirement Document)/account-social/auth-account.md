@@ -135,3 +135,10 @@ toàn bộ game mà platform cung cấp.
   platform-core riêng nếu phát sinh thêm nghiệp vụ.
 - Cơ chế game "tạo profile" cho user (để biết khi nào hiển thị tick xanh) thuộc phạm vi của
   từng game, BRD này chỉ giả định platform đọc được trạng thái đó.
+
+## ADR liên quan
+
+- [[ADR-ACCOUNT-SOCIAL-001]] — Modular monolith với module boundary rõ + JWT cho xác thực API
+  (2 quyết định technology-layer rút ra từ BRD này). Câu hỏi mở ở mục 10 (cơ chế "game registry")
+  được rà nhưng loại khỏi ADR vì là business content cho 1 feature cụ thể, không phải technology
+  layer — xem mục "Loại khỏi phạm vi" trong [[ADR-ACCOUNT-SOCIAL-001]], xử lý ở `/speckit.plan`.

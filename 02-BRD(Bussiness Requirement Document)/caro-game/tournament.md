@@ -175,3 +175,9 @@ tranh ngắn hạn độc lập với elo, và tăng tương tác cộng đồng
   (chỉ huỷ giải, hay cả bắt đầu/ghép cặp/kết thúc) — cần làm rõ khi thiết kế chi tiết.
 - Chưa rõ Game Admin xem danh sách request quyền Tournament Creator ở đâu (trang riêng, hay
   chung với trang quản lý report của platform) — chi tiết UI, không chặn tiến độ BRD.
+
+## ADR liên quan
+
+- [[ADR-CARO-GAME-003]] — DB row-lock (`SELECT...FOR UPDATE SKIP LOCKED`) cho concurrency khi
+  ghép cặp Swiss, giải đáp đúng rủi ro nêu ở NFR mục 7. Cùng quyết định áp dụng cho Quick Pair ở
+  [[ADR-CARO-GAME-002]].

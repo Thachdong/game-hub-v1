@@ -118,3 +118,8 @@ từng bước cảnh báo/khoá.
 - Idea gốc không nói rõ trong giai đoạn 7 ngày bị khoá, nếu user tiếp tục bị report hợp lệ thêm
   thì điểm tin cậy (đang ở 0, không thể âm) và thời gian khoá có bị gia hạn không — cần hỏi
   user để chốt quy tắc.
+
+## ADR liên quan
+
+- [[ADR-TRUST-REPORT-002]] — Atomic update ở tầng DB cho điểm tin cậy (và mọi counter bị ghi
+  đồng thời tương lai), tránh lost update khi nhiều report được xác nhận gần đồng thời.

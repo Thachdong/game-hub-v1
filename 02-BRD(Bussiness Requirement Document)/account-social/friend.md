@@ -87,3 +87,9 @@ cho các tính năng xã hội dùng chung của mọi game (vd mời bạn vào
   user có cần tính năng này ở giai đoạn này hay để lại cho phiên bản sau.
 - Idea gốc không nêu giới hạn số lượng bạn bè hoặc số lời mời gửi đi tối đa — giả định chưa cần
   giới hạn ở giai đoạn này, sẽ bổ sung nếu phát sinh yêu cầu chống spam.
+
+## ADR liên quan
+
+- [[ADR-ACCOUNT-SOCIAL-002]] — status: rejected. Đã rà BRD này, không có quyết định
+  technology-layer nào (race condition khi gửi lời mời kết bạn đồng thời là business logic, để
+  `/speckit.plan` xử lý trực tiếp khi implement feature).

@@ -102,3 +102,8 @@ sự kiện liên quan tới mình mà không cần kiểm tra thủ công.
   hay polling) sẽ thuộc bước ADR, nhưng cần biết kỳ vọng nghiệp vụ trước.
 - Chưa rõ thông báo có cơ chế tự xoá/hết hạn sau một thời gian hay lưu vô thời hạn — idea gốc
   không đề cập.
+
+## ADR liên quan
+
+- [[ADR-NOTIFICATION-001]] — Module khác kích hoạt notification qua event nội bộ (decoupled);
+  cập nhật badge/danh sách thông báo qua WebSocket/SSE realtime (giải đáp câu hỏi mở ở mục 10).

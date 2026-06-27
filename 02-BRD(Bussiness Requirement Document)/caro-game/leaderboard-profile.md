@@ -119,3 +119,8 @@ phép player xem lại quá trình chơi của bản thân/người khác qua pr
 - Nếu sau này muốn chuyển sang Glicko-2 (như lichess thực tế dùng) để có rating deviation chính
   xác hơn khi player mới chơi ít ván, đây sẽ là một quyết định kiến trúc (ADR) riêng, không thay
   đổi phạm vi BRD này.
+
+## ADR liên quan
+
+- [[ADR-CARO-GAME-004]] — Query trực tiếp DB có index cho leaderboard top-10. Việc ghi điểm elo
+  (read-modify-write) đã được bao phủ bởi atomic update ở [[ADR-TRUST-REPORT-002]].

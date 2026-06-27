@@ -89,3 +89,8 @@ thống tuân theo các tham số đã được kiểm soát.
   hình đang dùng cho ván đó — giả định tạm ở mục 8 là ván giữ nguyên tham số đã chọn.
 - Idea gốc chưa nêu Game Admin có thể đặt tên/mô tả riêng cho mỗi cấu hình hay chỉ hiển thị
   thẳng tổ hợp (kích thước, thời gian) cho player chọn — chi tiết UI, không chặn tiến độ BRD.
+
+## ADR liên quan
+
+- [[ADR-CARO-GAME-001]] — status: rejected. Không có quyết định technology-layer mới; cách lưu
+  config đã được bao phủ bởi [[ADR-TRUST-REPORT-001]].

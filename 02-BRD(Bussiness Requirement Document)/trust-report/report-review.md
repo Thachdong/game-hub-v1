@@ -109,3 +109,8 @@ cho việc tự động trừ điểm tin cậy ở [[BRD-TRUST-REPORT-002]].
   giả định ở mục 8 là không, cần xác nhận lại nếu sai.
 - Chưa rõ player có thấy được trạng thái report mình đã gửi (đang chờ/hợp lệ/không hợp lệ) hay
   không — idea không đề cập, tạm để ngoài phạm vi BRD này.
+
+## ADR liên quan
+
+- [[ADR-TRUST-REPORT-001]] — Admin-tunable config (loại report + điểm trừ) lưu trong DB table
+  riêng, đọc trực tiếp runtime, không hardcode/không cần deploy lại.

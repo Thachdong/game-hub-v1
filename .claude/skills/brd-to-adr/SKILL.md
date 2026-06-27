@@ -1,82 +1,105 @@
 ---
 name: brd-to-adr
-description: Phân tích BRD trong 02-BRD của một nghiệp vụ để xác định các điểm cần ra quyết định kiến trúc (data model, realtime, concurrency, service boundary, auth, scaling...), đề xuất 2-3 phương án kèm trade-off cho từng điểm, hỏi user chọn, rồi ghi ADR (Architecture Decision Record) vào 03-ADR theo chuẩn Context/Decision/Consequences. Dùng khi user nói "tạo ADR", "ra quyết định kiến trúc", "thiết kế hệ thống từ BRD", "architecture decision record".
+description: Phân tích BRD trong 02-BRD của một nghiệp vụ theo vai trò Tech Lead để rút ra quyết định technology-layer (tech stack, architecture pattern, package, coding convention, testing, security/infra) — không phải business logic. Ghi đúng 1 ADR cho mỗi BRD vào 03-ADR, rồi tổng hợp các ADR này thành 1 file ADR tổng (03-ADR/_ADR-TONG.md) làm input trực tiếp cho lệnh /speckit.constitution. Dùng khi user nói "tạo ADR", "ra quyết định kiến trúc", "thiết kế hệ thống từ BRD", "architecture decision record", "constitution".
 user-invocable: true
 ---
 
-# brd-to-adr — 02-BRD → 03-ADR
+# brd-to-adr — 02-BRD → 03-ADR → ADR tổng → constitution
 
-Một ADR ghi lại **một** quyết định kiến trúc và lý do chọn nó giữa các phương án — không phải
-một bản thiết kế tổng thể. Việc của skill này là đọc BRD để tìm ra những điểm bắt buộc phải
-quyết định, đưa phương án thực tế (không lý thuyết suông) cho user chọn, rồi ghi lại đúng
-quyết định đó. Skill **không tự chọn kiến trúc thay user** — nó đề xuất và chờ quyết định,
-đúng tinh thần một ADR là quyết định *đã được đưa ra*, có thể truy vết ai/vì sao chọn.
+## Bản chất ADR trong vault này
 
-Trước khi làm, đọc file quy ước chung:
-`.claude/skills/_shared-ba-pipeline/CONVENTIONS.md`. Áp dụng nguyên ID/frontmatter/cấu trúc
-thư mục mô tả trong đó.
+ADR ở đây tồn tại với **đúng một mục đích**: làm input cho `/speckit.constitution`. Ba quy tắc
+sau chi phối toàn bộ skill, áp dụng nghiêm ngặt hơn nguyên tắc ADR thông thường:
+
+- **Rule 1 — Chỉ chứa thứ KHÔNG THAY ĐỔI theo feature.** Phạm vi hợp lệ: tech stack/runtime
+  version, software architecture pattern, package được phép dùng/bị cấm, coding convention,
+  testing approach, security/infra rule. **Không** chứa business content từ BRD — không feature
+  list, không user story, không business logic, không thiết kế schema cho một entity nghiệp vụ
+  cụ thể (vd một bảng riêng cho một loại dữ liệu chỉ tồn tại vì 1 feature cụ thể yêu cầu — đó là
+  business/domain modeling, không phải technology layer, dù trông có vẻ "kiến trúc").
+- **Rule 2 — Nguồn gốc từ ADR (đọc BRD), không phải copy BRD.** Pipeline:
+  `BRD → đọc với vai trò Tech Lead → quyết định kỹ thuật → ADR → ADR tổng → constitution.md`.
+  BRD là nguyên liệu để suy ra quyết định kỹ thuật; nội dung BRD (FR/AC/business rule) **không**
+  được chép thẳng vào ADR tổng/constitution — ADR (file riêng theo từng BRD) được phép trích dẫn
+  ngắn FR/NFR nào đã kích hoạt quyết định (để truy vết), nhưng câu quyết định cuối cùng phải đọc
+  được độc lập, không cần biết BRD gốc nói gì.
+- **Rule 3 — Là guardrail tự động, không phải tài liệu để đọc.** Output cuối (ADR tổng) phải là
+  các câu khẳng định ngắn, declarative, kiểu constraint mà mọi lệnh Speckit sau (`/specify`,
+  `/plan`, `/tasks`) đọc ngầm để không vi phạm. Một câu tóm gọn: constitution nói **"build theo
+  chuẩn nào"**, không nói "build cái gì".
+
+Vì vậy: nếu một decision point chỉ tồn tại *vì có đúng 1 business requirement cụ thể yêu cầu*
+(tức nếu xoá feature đó đi thì quyết định cũng không còn lý do tồn tại), nó **không** đạt Rule 1
+dù có vẻ "kiến trúc" — loại đó để `/speckit.plan` xử lý trực tiếp khi implement feature, không
+ghi ADR ở đây.
+
+## Cấu trúc 3 tầng
+
+1. **`02-BRD(...)/<feature>/<brd>.md`** — business content, giữ nguyên, skill này không sửa nội
+   dung nghiệp vụ.
+2. **`03-ADR(...)/<feature>/<cùng-slug-với-brd>.md`** — **đúng 1 file ADR cho mỗi 1 file BRD**
+   (`ADR-<FEATURE>-NNN` ứng với `BRD-<FEATURE>-NNN`, cùng số NNN, không đánh số độc lập). Một
+   BRD có thể sinh ra 0, 1, hoặc nhiều quyết định technology-layer — nếu nhiều, viết nhiều
+   section `## Quyết định N` trong cùng 1 file, không tách nhiều file. Nếu rà hết BRD mà không
+   có quyết định nào đạt Rule 1, vẫn tạo file với `status: rejected` và ghi rõ lý do (đã rà,
+   không có gì thuộc technology layer) — để biết BRD đó đã được audit, không phải bị bỏ sót.
+3. **`03-ADR(...)/_ADR-TONG.md`** — file tổng hợp **duy nhất cho toàn project**, gom mọi quyết
+   định `accepted` từ tầng 2 thành các nguyên tắc declarative (đúng style Core Principle của
+   `/speckit.constitution`), đã lược bỏ hết tham chiếu FR/AC/BRD cụ thể. Đây là file đưa thẳng
+   vào `/speckit.constitution`. Cập nhật (amend) file này mỗi lần có ADR mới ở tầng 2, không chờ
+   xử lý hết toàn bộ vault rồi mới viết một lần.
+
+Trước khi làm, đọc file quy ước chung `.claude/skills/_shared-ba-pipeline/CONVENTIONS.md` và áp
+dụng nguyên ID/frontmatter/cấu trúc thư mục mô tả trong đó (trừ phần đánh số ADR độc lập theo
+feature — ở skill này, số NNN của ADR luôn khớp số NNN của BRD nguồn).
 
 ## Workflow
 
-1. **Chọn phạm vi BRD cần xử lý.** Nếu user chỉ định feature folder hoặc file BRD cụ thể,
-   dùng đúng cái đó. Nếu không, đọc `02-BRD(Bussiness Requirement Document)/_INDEX.md`, liệt
-   kê các feature folder, và với mỗi feature kiểm tra xem đã có folder tương ứng trong
-   `03-ADR (Architecutre Decission Record)/` chưa / các BRD nào trong đó chưa được tham chiếu
-   bởi `source_brd` của ADR nào — hỏi user muốn xử lý feature nào.
+1. **Chọn phạm vi BRD cần xử lý.** Nếu user chỉ định feature folder hoặc file BRD cụ thể, dùng
+   đúng cái đó. Nếu không, đọc `02-BRD(Bussiness Requirement Document)/_INDEX.md`, liệt kê các
+   feature folder, và với mỗi BRD kiểm tra đã có file ADR cùng slug trong
+   `03-ADR (Architecutre Decission Record)/<feature>/` chưa — hỏi user muốn xử lý BRD/feature
+   nào tiếp.
 
-2. **Đọc toàn bộ BRD trong feature folder đó**, không chỉ một file — các file BRD con trong
-   cùng feature (vd `match.md`, `tournament.md`, `leaderboard-profile.md` của `caro-game`)
-   thường chia sẻ quyết định kiến trúc (vd cùng cần realtime, cùng cần một data model cho
-   user/game session), nên phải có context đầy đủ của cả feature trước khi đề xuất phương án.
-   Nếu feature này phụ thuộc feature khác (mục Dependencies trong BRD, vd `caro-game` phụ
-   thuộc `account-social`), đọc nhanh BRD/ADR đã có của feature phụ thuộc đó để quyết định
-   không mâu thuẫn (vd nếu `account-social` đã chọn auth theo JWT thì `caro-game` không tự
-   chọn cơ chế khác).
+2. **Đọc BRD đang xử lý với vai trò Tech Lead**, không phải Business Analyst: mục tiêu không
+   phải hiểu "feature làm gì" (đã có trong BRD) mà là "feature này có ép buộc một quyết định
+   technology-layer nào mới không, hoặc có mâu thuẫn với quyết định đã chốt ở ADR khác không".
+   Nếu BRD/feature này phụ thuộc feature khác (mục Dependencies), đọc nhanh ADR tổng hiện có để
+   không chọn lại cái đã chốt (vd đã chọn JWT thì không tự chọn cơ chế khác).
 
-3. **Xác định các "decision point"** — chỉ liệt kê những gì thực sự bắt nguồn từ một FR/NFR/
-   Business Rule cụ thể trong BRD đang đọc, không áp đặt sẵn một danh sách chuẩn cho mọi
-   feature. Một số nhóm quyết định thường gặp, dùng làm gợi ý rà soát (rà từng nhóm rồi bỏ
-   qua nhóm không liên quan, đừng tạo ADR rỗng cho nhóm không áp dụng):
-   - **Data model & lưu trữ**: cấu trúc dữ liệu chính, loại datastore phù hợp (vd cần truy vấn
-     ranking/leaderboard hiệu quả, cần lưu lịch sử nước đi).
-   - **Giao tiếp realtime**: cách cập nhật trạng thái sống cho người chơi/người xem/chat/danh
-     sách phòng (WebSocket, SSE, long-poll...), khi BRD có yêu cầu "realtime" hoặc "ngay khi".
-   - **Concurrency & consistency**: các điểm có thể race condition theo Business Rule (vd 2
-     người cùng bấm "start" trong 15s, matchmaking ghép cặp tournament đồng thời).
-   - **Service/module boundary**: ranh giới module, cách feature này giao tiếp với feature đã
-     có ADR khác (đặc biệt khi nhiều feature cùng dùng chung dữ liệu, vd account dùng cho mọi
-     game).
-   - **Authentication/Authorization**: cách xác thực/uỷ quyền nếu BRD có yêu cầu phân quyền
-     theo actor (player/viewer/admin/tạo-tournament...).
-   - **Scaling/Availability**: chỉ khi NFR trong BRD có nêu cụ thể (vd số lượng người xem
-     đồng thời, độ trễ chấp nhận được).
-   Nếu rà hết các nhóm trên mà một feature chỉ có 1-2 decision point thực sự đáng ghi ADR, vậy
-   là đủ — không cần ép đủ số lượng.
+3. **Lọc decision point qua đúng 2 phép kiểm tra của Rule 1**, theo thứ tự:
+   - **Phép kiểm tra A (tính chất)**: quyết định có thuộc 1 trong các nhóm sau không — tech
+     stack/runtime, software architecture pattern (service boundary, layering...), package được
+     phép dùng/bị cấm, coding convention, testing approach, security/infra (auth, rate limit,
+     encryption...)? Nếu không thuộc nhóm nào, loại — đó là business/domain modeling (vd thiết
+     kế schema riêng cho 1 loại entity nghiệp vụ), không phải technology layer.
+   - **Phép kiểm tra B (tính bất biến theo feature)**: nếu feature/BRD này không tồn tại, quyết
+     định này còn cần thiết không? Nếu quyết định *chỉ* sinh ra để phục vụ đúng yêu cầu của BRD
+     này (xoá BRD thì quyết định cũng mất lý do tồn tại), loại — nó là business content trong lốt
+     kiến trúc, để `/speckit.plan` xử lý.
+   Chỉ giữ lại decision point qua được cả 2 phép kiểm tra. Gợi ý nhóm để rà (không áp đặt, bỏ qua
+   nhóm không liên quan): data store/tech stack, realtime transport, service/module boundary,
+   authentication/authorization mechanism, coding/testing convention, security/infra constraint.
+   Nếu rà hết mà không có decision point nào qua được cả 2 phép kiểm tra, đó là kết quả hợp lệ
+   (xem bước 6 — vẫn tạo 1 file ADR, status rejected, không phải lỗi).
 
-4. **Trình bày từng decision point cho user**, theo thứ tự decision có ảnh hưởng/rủi ro cao
-   hơn trước. Với mỗi decision point: nêu rõ FR/NFR/Business Rule nào trong BRD dẫn tới việc
-   phải quyết định, rồi đưa 2-3 phương án thực tế kèm ưu/nhược điểm ngắn gọn **gắn với chính
-   yêu cầu đó** (không nói chung kiểu "X nhanh hơn Y" mà không liên hệ ngữ cảnh). Dùng
-   `AskUserQuestion` để user chọn — luôn cho phép user nêu phương án khác ngoài danh sách đề
-   xuất (đó là việc `AskUserQuestion` tự hỗ trợ qua lựa chọn "Khác"). Hỏi theo từng decision
-   point hoặc nhóm 2-4 câu liên quan, không dồn hết mọi quyết định của cả feature vào một lượt
-   hỏi nếu số lượng lớn.
+4. **Trình bày từng decision point hợp lệ cho user**, theo thứ tự ảnh hưởng/rủi ro cao hơn
+   trước. Nêu rõ FR/NFR nào kích hoạt việc phải quyết định, đưa 2-3 phương án thực tế kèm ưu/
+   nhược điểm gắn với chính ngữ cảnh đó. Dùng `AskUserQuestion`, luôn cho phép "Khác". Hỏi theo
+   nhóm 2-4 câu liên quan, không dồn hết vào một lượt nếu số lượng lớn.
 
-5. **Lấy ID.** Với feature folder `03-ADR (Architecutre Decission Record)/<feature-slug>/`:
-   nếu chưa tồn tại, tạo folder + `_INDEX.md` mới. Nếu đã có, đọc `_INDEX.md` để lấy `NNN`
-   tiếp theo (tăng riêng theo feature, độc lập với BRD).
+5. **Lấy ID.** ID của ADR luôn dùng đúng số NNN của BRD nguồn: `BRD-<FEATURE>-NNN` →
+   `ADR-<FEATURE>-NNN`. Không đánh số độc lập theo feature như ADR thông thường — mục đích là
+   giữ 1 BRD ↔ 1 ADR rõ ràng, nhìn số là biết file nào tương ứng file nào.
 
-6. **Ghi một file ADR cho mỗi decision point đã được user quyết định** — không dồn nhiều
-   quyết định không liên quan vào một file, nhưng các quyết định cùng nằm trong một
-   trade-off lớn (vd chọn datastore kéo theo chọn luôn cách đánh index cho leaderboard) có thể
-   ghi trong cùng một ADR nếu tách ra sẽ rời rạc khó hiểu — dùng phán đoán, ưu tiên "1 ADR dễ
-   đọc độc lập" hơn là tách máy móc.
+6. **Ghi đúng 1 file ADR cho BRD đang xử lý**, đặt cùng slug tên file với BRD nguồn (vd
+   `02-BRD.../account-social/auth-account.md` → `03-ADR.../account-social/auth-account.md`):
 
    ```markdown
    ---
    id: ADR-<FEATURE>-NNN
-   title: <tên quyết định, dạng hành động, vd "Dùng WebSocket cho cập nhật ván cờ realtime">
-   status: accepted
+   title: <tóm tắt các quyết định technology-layer của BRD này, dạng hành động>
+   status: accepted | rejected
    source_brd: ["[[BRD-<FEATURE>-NNN]]"]
    created: <ngày hôm nay>
    tags: [adr, <feature-slug>]
@@ -85,40 +108,49 @@ thư mục mô tả trong đó.
    # <Title>
 
    ## Status
-   Accepted (<ngày hôm nay>)
+   Accepted | Rejected (<ngày hôm nay>)
+   <!-- nếu rejected: 1 câu giải thích đã rà BRD này, không có decision point nào qua được
+        Rule 1 (phép kiểm tra A/B), không phải bị bỏ sót -->
 
-   ## Context
-   <!-- vấn đề/yêu cầu từ BRD dẫn tới phải quyết định, trích rõ FR/NFR/Business Rule nào -->
+   ## Quyết định 1 — <tên ngắn>
+   ### Context
+   <!-- FR/NFR nào kích hoạt, trích ngắn không copy nguyên văn BRD -->
+   ### Decision Drivers
+   ### Các phương án đã xét (Options Considered)
+   ### Quyết định (Decision)
+   <!-- câu quyết định phải tự đứng vững, không cần đọc lại BRD mới hiểu -->
+   ### Hệ quả (Consequences)
 
-   ## Decision Drivers
-   <!-- tiêu chí ảnh hưởng quyết định: hiệu năng, chi phí, độ phức tạp vận hành, thời gian... -->
+   ## Quyết định 2 — <tên ngắn>
+   <!-- lặp lại cấu trúc trên nếu BRD này có nhiều hơn 1 quyết định technology-layer -->
 
-   ## Các phương án đã xét (Options Considered)
-   ### Option A — ...
-   Ưu điểm / Nhược điểm
-   ### Option B — ...
-   Ưu điểm / Nhược điểm
-
-   ## Quyết định (Decision)
-   <!-- chọn option nào, vì sao, theo đúng lựa chọn user đã chọn ở bước 4 -->
-
-   ## Hệ quả (Consequences)
-   <!-- tích cực / tiêu cực / rủi ro cần theo dõi sau này -->
+   ## Loại khỏi phạm vi (nếu có)
+   <!-- decision point tìm được nhưng không qua phép kiểm tra A hoặc B — ghi 1-2 câu lý do để
+        không bị hiểu nhầm là bỏ sót, không cần viết đầy đủ Options Considered -->
 
    ## Liên quan (Related)
    <!-- [[ADR-...]] khác nếu phụ thuộc hoặc supersede nhau -->
    ```
 
-   Nếu một decision point chưa đủ thông tin để chốt dứt điểm (user muốn để ngỏ, cần thử
-   nghiệm thêm), vẫn tạo file nhưng đặt `status: proposed` thay vì `accepted`, và nêu rõ trong
-   Decision điều kiện để chuyển sang accepted.
+   Nếu một quyết định chưa đủ thông tin chốt dứt điểm, vẫn ghi nhưng đặt trạng thái phụ "để ngỏ"
+   ngay trong section đó (frontmatter `status` ở mức file vẫn là `accepted` nếu có ít nhất 1
+   quyết định đã chốt trong file).
 
-7. **Cập nhật `_INDEX.md`** của feature folder và
-   `03-ADR (Architecutre Decission Record)/_INDEX.md` tổng.
+7. **Cập nhật `_INDEX.md`** của feature folder và `03-ADR.../_INDEX.md` tổng (chỉ liệt kê feature
+   + số ADR accepted/rejected, không cần liệt kê lại từng quyết định con).
 
-8. **Cập nhật các BRD liên quan**: thêm/cập nhật heading `## ADR liên quan` trong từng file
-   BRD đã tham chiếu, liệt kê `[[ADR-...]]` tương ứng (liên kết hai chiều).
+8. **Cập nhật BRD liên quan**: thêm/cập nhật `## ADR liên quan` trong file BRD, liệt kê đúng 1
+   `[[ADR-<FEATURE>-NNN]]` (liên kết hai chiều 1-1).
 
-9. **Báo cáo**: danh sách ADR đã ghi nhận (status accepted/proposed), quyết định chính của mỗi
-   ADR, và những decision point nào còn để ngỏ do thiếu thông tin hoặc user muốn cân nhắc
-   thêm trước khi đưa vào Speckit ở `04-Projects`.
+9. **Cập nhật `03-ADR(...)/_ADR-TONG.md`** (tạo mới nếu chưa có): với mỗi quyết định `accepted`
+   vừa ghi ở bước 6, thêm hoặc amend 1 Core Principle vào file này — câu nguyên tắc phải:
+   - Declarative, đọc độc lập, không nhắc FR/AC/tên BRD/tên feature cụ thể nào.
+   - Có rationale ngắn (1 câu) nếu không hiển nhiên.
+   - Nhóm theo loại (Architecture, Authentication/Security, Data Access, Coding Convention,
+     Testing, Infra...) giống cấu trúc Core Principles của `/speckit.constitution`.
+   Nếu một quyết định mới mâu thuẫn với nguyên tắc đã có trong `_ADR-TONG.md`, dừng lại, báo cho
+   user — không tự âm thầm ghi đè.
+
+10. **Báo cáo**: BRD nào vừa được audit, ADR nào accepted/rejected, nguyên tắc nào vừa thêm/amend
+    vào `_ADR-TONG.md`, và nhắc rằng `_ADR-TONG.md` là file cần copy nội dung khi chạy
+    `/speckit.constitution` (không phải toàn bộ `03-ADR`).
