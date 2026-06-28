@@ -5,6 +5,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
 import { authConfig } from './config/auth.config';
 import { googleOAuthConfig } from './config/google-oauth.config';
 import { appConfig, validationSchema } from './config/app.config';
+import { AccountSocialModule } from './account-social/account-social.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { appConfig, validationSchema } from './config/app.config';
       inject: [ConfigService],
     }),
     EventEmitterModule.forRoot({ wildcard: false }),
+    AccountSocialModule,
   ],
 })
 export class AppModule {}

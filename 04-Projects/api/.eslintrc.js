@@ -36,7 +36,7 @@ module.exports = {
   overrides: [
     {
       // Infrastructure and interface layers are allowed to import from anywhere
-      files: ['src/**/infrastructure/**/*.ts', 'src/**/interface/**/*.ts', 'src/config/**/*.ts', 'src/app.module.ts', 'src/main.ts', 'src/database/**/*.ts'],
+      files: ['src/**/infrastructure/**/*.ts', 'src/**/interface/**/*.ts', 'src/config/**/*.ts', 'src/app.module.ts', 'src/main.ts', 'src/database/**/*.ts', 'src/**/account-social.module.ts'],
       rules: {
         'no-restricted-imports': 'off',
       },
