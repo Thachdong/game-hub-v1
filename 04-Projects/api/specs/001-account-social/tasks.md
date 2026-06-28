@@ -34,10 +34,10 @@ description: "Task list for Account & Social API"
 
 **Purpose**: Bootstrap project and install all dependencies.
 
-- [ ] T001 Initialize NestJS project (nest new or manual setup); add all runtime dependencies to package.json: @nestjs/core @nestjs/common @nestjs/platform-express @nestjs/passport passport passport-google-oauth20 @nestjs/jwt typeorm pg @nestjs/typeorm @nestjs/config joi @nestjs/swagger @nestjs/event-emitter eventemitter2 reflect-metadata rxjs; dev deps: @types/passport-google-oauth20 @types/pg ts-jest @nestjs/testing supertest @types/supertest
-- [ ] T002 [P] Configure tsconfig.json: strict true, experimentalDecorators true, emitDecoratorMetadata true, paths aliases for @domain/* @application/* @infrastructure/* @interface/*
-- [ ] T003 [P] Configure .eslintrc.js with @typescript-eslint/recommended; add no-restricted-imports rule to prevent src/account-social/domain and src/account-social/application from importing src/account-social/infrastructure or @nestjs/* (enforces hexagonal layer boundary)
-- [ ] T004 [P] Create full directory skeleton: mkdir -p for all directories in plan.md project structure (src/account-social/{domain/{entities,events,ports,errors},application/{commands,queries},infrastructure/{persistence/typeorm-entities,google-oauth,events},interface/{http,dto/{auth,account,games,friends,admin},guards,filters}}, src/config, src/database/migrations)
+- [x] T001 Initialize NestJS project (nest new or manual setup); add all runtime dependencies to package.json: @nestjs/core @nestjs/common @nestjs/platform-express @nestjs/passport passport passport-google-oauth20 @nestjs/jwt typeorm pg @nestjs/typeorm @nestjs/config joi @nestjs/swagger @nestjs/event-emitter eventemitter2 reflect-metadata rxjs; dev deps: @types/passport-google-oauth20 @types/pg ts-jest @nestjs/testing supertest @types/supertest
+- [x] T002 [P] Configure tsconfig.json: strict true, experimentalDecorators true, emitDecoratorMetadata true, paths aliases for @domain/* @application/* @infrastructure/* @interface/*
+- [x] T003 [P] Configure .eslintrc.js with @typescript-eslint/recommended; add no-restricted-imports rule to prevent src/account-social/domain and src/account-social/application from importing src/account-social/infrastructure or @nestjs/* (enforces hexagonal layer boundary)
+- [x] T004 [P] Create full directory skeleton: mkdir -p for all directories in plan.md project structure (src/account-social/{domain/{entities,events,ports,errors},application/{commands,queries},infrastructure/{persistence/typeorm-entities,google-oauth,events},interface/{http,dto/{auth,account,games,friends,admin},guards,filters}}, src/config, src/database/migrations)
 
 ---
 
