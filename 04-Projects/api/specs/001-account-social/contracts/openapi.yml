@@ -1,0 +1,656 @@
+openapi: "3.1.0"
+
+info:
+  title: Game Hub API — Account & Social Module
+  version: "1.0.0"
+  description: >
+    REST contract for the account-social module. Covers Google OAuth2 authentication,
+    JWT token management, account profile, platform game list, friend management,
+    and Game Admin role management.
+
+servers:
+  - url: /api
+    description: Application base path
+
+tags:
+  - name: Auth
+    description: Google OAuth2 login and token refresh
+  - name: Account
+    description: Authenticated user profile
+  - name: Games
+    description: Platform game list (public + authenticated)
+  - name: Friends
+    description: Friend request and friendship management
+  - name: Admin
+    description: Platform Admin — Game Admin role management
+
+# ---------------------------------------------------------------------------
+# Security schemes
+# ---------------------------------------------------------------------------
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  # -------------------------------------------------------------------------
+  # Shared schemas
+  # -------------------------------------------------------------------------
+  schemas:
+
+    TokenPair:
+      type: object
+      required: [accessToken, refreshToken]
+      properties:
+        accessToken:
+          type: string
+          description: Short-lived JWT (15–30 min). Encodes sub, email, isPlatformAdmin, gameAdminRoles.
+        refreshToken:
+          type: string
+          description: Long-lived JWT (30 days). Use to obtain a new access token.
+
+    AccountProfile:
+      type: object
+      required: [id, email, username, avatarUrl]
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+          description: Immutable — sourced from Google.
+        username:
+          type: string
+          description: Display name from Google at first login.
+        avatarUrl:
+          type: string
+          format: uri
+
+    GameEntry:
+      type: object
+      required: [id, name, slug]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        slug:
+          type: string
+        hasProfile:
+          type: boolean
+          description: >
+            Present and `true` only when the caller is authenticated and has
+            an active profile in this game. Omitted for guest callers.
+
+    FriendRequestRecord:
+      type: object
+      required: [id, senderId, receiverId, status, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        senderId:
+          type: string
+          format: uuid
+        receiverId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [pending, accepted, rejected]
+        createdAt:
+          type: string
+          format: date-time
+        resolvedAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: Set when status transitions to accepted or rejected.
+
+    FriendProfile:
+      type: object
+      required: [id, email, username, avatarUrl]
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        username:
+          type: string
+        avatarUrl:
+          type: string
+          format: uri
+
+    GameAdminRoleRecord:
+      type: object
+      required: [accountId, gameId, grantedAt]
+      properties:
+        accountId:
+          type: string
+          format: uuid
+        gameId:
+          type: string
+          format: uuid
+        grantedAt:
+          type: string
+          format: date-time
+
+    ErrorResponse:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          description: Machine-readable error code.
+          example: AUTH_INVALID_CODE
+        message:
+          type: string
+          description: Human-readable description.
+
+  # -------------------------------------------------------------------------
+  # Shared error responses
+  # -------------------------------------------------------------------------
+  responses:
+    Unauthorized:
+      description: Missing or invalid access token.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: AUTH_TOKEN_INVALID
+            message: Access token is missing or has expired.
+
+    Forbidden:
+      description: Caller lacks required role (e.g., Platform Admin).
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: FORBIDDEN
+            message: This action requires Platform Admin privileges.
+
+    NotFound:
+      description: Requested resource not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: NOT_FOUND
+            message: The requested resource does not exist.
+
+    Conflict:
+      description: Request conflicts with current state.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+# ---------------------------------------------------------------------------
+# Paths
+# ---------------------------------------------------------------------------
+paths:
+
+  # ---- AUTH ----------------------------------------------------------------
+
+  /auth/google:
+    get:
+      tags: [Auth]
+      operationId: initiateGoogleOAuth
+      summary: Initiate Google OAuth2 login
+      description: >
+        Redirects the caller to Google's OAuth2 consent screen.
+        No request body or auth required.
+      responses:
+        "302":
+          description: Redirect to Google OAuth2 consent screen.
+
+  /auth/google/callback:
+    get:
+      tags: [Auth]
+      operationId: handleGoogleOAuthCallback
+      summary: Handle Google OAuth2 callback
+      description: >
+        Google redirects here with an authorization code. The system exchanges
+        the code for a Google user profile, creates the account if new (FR-002),
+        and returns a token pair. Platform Admin flag is embedded in the access
+        token if the email matches the configured list (FR-003).
+      parameters:
+        - name: code
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Authorization code from Google.
+        - name: state
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Login successful. Returns token pair and account profile.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/TokenPair'
+                  - type: object
+                    properties:
+                      account:
+                        $ref: '#/components/schemas/AccountProfile'
+              example:
+                accessToken: "eyJhbGci..."
+                refreshToken: "eyJhbGci..."
+                account:
+                  id: "550e8400-e29b-41d4-a716-446655440000"
+                  email: "player@example.com"
+                  username: "Player One"
+                  avatarUrl: "https://lh3.googleusercontent.com/..."
+        "400":
+          description: Invalid or expired authorization code.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: AUTH_INVALID_CODE
+                message: The authorization code is invalid or has already been used.
+        "503":
+          description: Google OAuth service unavailable (FR-022).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: GOOGLE_OAUTH_UNAVAILABLE
+                message: Google login service is temporarily unavailable. Please try again later.
+
+  /auth/refresh:
+    post:
+      tags: [Auth]
+      operationId: refreshAccessToken
+      summary: Refresh access token (FR-017)
+      description: >
+        Issues a new access token from a valid, non-expired refresh token.
+        Game Admin roles are re-read from the database at refresh time to reflect
+        any role changes since last login. Stateless — no server-side session storage.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refreshToken]
+              properties:
+                refreshToken:
+                  type: string
+      responses:
+        "200":
+          description: New access token issued.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [accessToken]
+                properties:
+                  accessToken:
+                    type: string
+        "401":
+          description: Refresh token is expired or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: AUTH_REFRESH_TOKEN_INVALID
+                message: Refresh token is expired or invalid.
+
+  # ---- ACCOUNT -------------------------------------------------------------
+
+  /accounts/me:
+    get:
+      tags: [Account]
+      operationId: getMyProfile
+      summary: Get own account profile (FR-004)
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Authenticated user's profile.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountProfile'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+
+  # ---- GAMES ---------------------------------------------------------------
+
+  /games:
+    get:
+      tags: [Games]
+      operationId: getGameList
+      summary: List all platform games (FR-005, FR-018)
+      description: >
+        Returns all games registered on the platform. If the caller is authenticated,
+        each game includes `hasProfile` (true if the caller has a game profile there).
+        Guest callers receive the list without `hasProfile`.
+      security:
+        - {}          # guest access allowed
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Full game list.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [games]
+                properties:
+                  games:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/GameEntry'
+              examples:
+                authenticated:
+                  summary: Authenticated caller
+                  value:
+                    games:
+                      - id: "a1b2c3d4-..."
+                        name: "Caro"
+                        slug: "caro"
+                        hasProfile: true
+                      - id: "e5f6a7b8-..."
+                        name: "Chess"
+                        slug: "chess"
+                        hasProfile: false
+                guest:
+                  summary: Guest caller
+                  value:
+                    games:
+                      - id: "a1b2c3d4-..."
+                        name: "Caro"
+                        slug: "caro"
+                      - id: "e5f6a7b8-..."
+                        name: "Chess"
+                        slug: "chess"
+
+  # ---- FRIENDS -------------------------------------------------------------
+
+  /friends/requests:
+    post:
+      tags: [Friends]
+      operationId: sendFriendRequest
+      summary: Send a friend request (FR-006, FR-007, FR-008, FR-020)
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [targetEmail]
+              properties:
+                targetEmail:
+                  type: string
+                  format: email
+                  description: Email of the account to invite.
+      responses:
+        "201":
+          description: Friend request created (or old rejected record replaced with new pending).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FriendRequestRecord'
+        "400":
+          description: Invalid input (e.g., targeting own account).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: FRIEND_REQUEST_SELF
+                message: You cannot send a friend request to yourself.
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "404":
+          description: No account found with the given email (FR-007).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: ACCOUNT_NOT_FOUND
+                message: No account is registered with that email address.
+        "409":
+          description: A pending request already exists, or accounts are already friends (FR-008).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                duplicatePending:
+                  value:
+                    code: FRIEND_REQUEST_DUPLICATE
+                    message: A pending friend request to this account already exists.
+                alreadyFriends:
+                  value:
+                    code: ALREADY_FRIENDS
+                    message: You are already friends with this account.
+
+    get:
+      tags: [Friends]
+      operationId: getFriendRequests
+      summary: List pending friend requests (FR-013)
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Incoming and outgoing pending friend requests.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [incoming, outgoing]
+                properties:
+                  incoming:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/FriendRequestRecord'
+                    description: Pending requests where the caller is the receiver.
+                  outgoing:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/FriendRequestRecord'
+                    description: Pending requests where the caller is the sender.
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+
+  /friends/requests/{requestId}:
+    patch:
+      tags: [Friends]
+      operationId: resolveFriendRequest
+      summary: Accept or reject a friend request (FR-009, FR-010, FR-019)
+      description: >
+        Only the receiver of the request may resolve it. If the two accounts are
+        already friends (cross-direction race — FR-019), returns 409 ALREADY_FRIENDS.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: requestId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [action]
+              properties:
+                action:
+                  type: string
+                  enum: [accept, reject]
+      responses:
+        "200":
+          description: Request resolved. Friendship created if action is accept.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FriendRequestRecord'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          description: Caller is not the receiver of this request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: FORBIDDEN
+                message: Only the request recipient can accept or reject this request.
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "409":
+          description: The two accounts are already friends (FR-019).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: ALREADY_FRIENDS
+                message: You are already friends with this account.
+
+  /friends:
+    get:
+      tags: [Friends]
+      operationId: getFriends
+      summary: List confirmed friends (FR-012)
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Mutual friends of the authenticated user.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [friends]
+                properties:
+                  friends:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/FriendProfile'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+
+  # ---- ADMIN ---------------------------------------------------------------
+
+  /admin/games/{gameId}/admins:
+    post:
+      tags: [Admin]
+      operationId: assignGameAdmin
+      summary: Assign Game Admin role (FR-014)
+      description: >
+        Idempotent — assigning a role the account already holds returns 201 with
+        the existing record and produces no error.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: gameId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID of the game for which the role is granted.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [accountId]
+              properties:
+                accountId:
+                  type: string
+                  format: uuid
+                  description: ID of the account to be granted Game Admin.
+      responses:
+        "201":
+          description: Role assigned (or already held — idempotent).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GameAdminRoleRecord'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          $ref: '#/components/responses/Forbidden'
+        "404":
+          description: Target account or game not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                accountNotFound:
+                  value:
+                    code: ACCOUNT_NOT_FOUND
+                    message: No account found with the given ID.
+                gameNotFound:
+                  value:
+                    code: GAME_NOT_FOUND
+                    message: No game is registered with the given ID.
+
+  /admin/games/{gameId}/admins/{accountId}:
+    delete:
+      tags: [Admin]
+      operationId: revokeGameAdmin
+      summary: Revoke Game Admin role (FR-015, FR-016)
+      description: >
+        Removes the Game Admin role for the specified game from the target account.
+        Has no effect on the account's Game Admin status in other games.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: gameId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: accountId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: Role revoked successfully.
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          $ref: '#/components/responses/Forbidden'
+        "404":
+          description: The account does not hold Game Admin for the specified game.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: GAME_ADMIN_ROLE_NOT_FOUND
+                message: The account does not hold Game Admin for this game.
