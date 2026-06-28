@@ -24,8 +24,8 @@ import { GetFriendsUseCase } from '../../application/queries/get-friends.use-cas
 import { GetFriendRequestsUseCase } from '../../application/queries/get-friend-requests.use-case';
 import { SendFriendRequestDto } from '../dto/friends/send-friend-request.dto';
 import { ResolveFriendRequestDto } from '../dto/friends/resolve-friend-request.dto';
+import { FriendRequestRecordDto } from '../dto/friends/friend-request-record.dto';
 import {
-  FriendRequestRecordDto,
   FriendsResponseDto,
   FriendRequestsResponseDto,
   FriendProfileDto,
