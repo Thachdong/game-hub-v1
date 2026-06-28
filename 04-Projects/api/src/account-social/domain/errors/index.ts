@@ -61,3 +61,9 @@ export class GameAdminRoleNotFoundError extends DomainError {
     super('GAME_ADMIN_ROLE_NOT_FOUND', 'The account does not hold Game Admin for this game.');
   }
 }
+
+export class GoogleOAuthUnavailableError extends DomainError {
+  constructor() {
+    super('GOOGLE_OAUTH_UNAVAILABLE', 'Google OAuth service is currently unavailable.');
+  }
+}
