@@ -1,0 +1,32 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "declaration": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "ES2021",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "incremental": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictPropertyInitialization": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "paths": {
+      "@domain/*": ["./src/account-social/domain/*"],
+      "@application/*": ["./src/account-social/application/*"],
+      "@infrastructure/*": ["./src/account-social/infrastructure/*"],
+      "@interface/*": ["./src/account-social/interface/*"],
+      "@config/*": ["./src/config/*"],
+      "@database/*": ["./src/database/*"]
+    }
+  },
+  "exclude": ["node_modules", "dist"]
+}
