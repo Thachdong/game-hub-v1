@@ -8,6 +8,10 @@ import {
   FRIENDSHIP_REPO,
   IFriendshipRepository,
 } from '@domain/ports/friendship.repository.port';
+import {
+  EVENT_PUBLISHER_PORT,
+  IEventPublisherPort,
+} from '@domain/ports/event-publisher.port';
 import { FriendRequest } from '@domain/entities/friend-request';
 import {
   AccountNotFoundError,
@@ -22,9 +26,13 @@ export class SendFriendRequestUseCase {
     @Inject(ACCOUNT_REPO) private readonly accountRepo: IAccountRepository,
     @Inject(FRIEND_REQUEST_REPO) private readonly friendRequestRepo: IFriendRequestRepository,
     @Inject(FRIENDSHIP_REPO) private readonly friendshipRepo: IFriendshipRepository,
+    @Inject(EVENT_PUBLISHER_PORT) private readonly eventPublisher: IEventPublisherPort,
   ) {}
 
   async execute(senderId: string, targetEmail: string): Promise<FriendRequest> {
+    const sender = await this.accountRepo.findById(senderId);
+    if (!sender) throw new AccountNotFoundError();
+
     const receiver = await this.accountRepo.findByEmail(targetEmail);
     if (!receiver) throw new AccountNotFoundError();
 
@@ -36,6 +44,14 @@ export class SendFriendRequestUseCase {
     const existing = await this.friendRequestRepo.findPendingBetween(senderId, receiver.id);
     if (existing) throw new FriendRequestDuplicateError();
 
-    return this.friendRequestRepo.upsert(senderId, receiver.id);
+    const request = await this.friendRequestRepo.upsert(senderId, receiver.id);
+
+    await this.eventPublisher.publish('notification.friend-or-game-invite', {
+      recipientId: receiver.id,
+      content: `${sender.username} sent you a friend request.`,
+      referenceId: request.id,
+    });
+
+    return request;
   }
 }

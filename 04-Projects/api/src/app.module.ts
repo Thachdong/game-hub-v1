@@ -8,6 +8,7 @@ import { googleOAuthConfig } from '@config/google-oauth.config';
 import { appConfig, validationSchema } from '@config/app.config';
 import { AccountSocialModule } from './account-social/account-social.module';
 import { SharedAuthModule } from './shared-auth/shared-auth.module';
+import { NotificationModule } from './notification/notification.module';
 import { DomainExceptionFilter } from './account-social/interface/filters/domain-exception.filter';
 
 @Module({
@@ -33,6 +34,7 @@ import { DomainExceptionFilter } from './account-social/interface/filters/domain
     EventEmitterModule.forRoot({ wildcard: false }),
     SharedAuthModule,
     AccountSocialModule,
+    NotificationModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: DomainExceptionFilter },
