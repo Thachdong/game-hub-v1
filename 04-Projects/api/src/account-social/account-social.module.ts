@@ -1,13 +1,10 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { PassportModule } from '@nestjs/passport';
-import { JwtModule } from '@nestjs/jwt';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { APP_FILTER } from '@nestjs/core';
+import { ConfigService } from '@nestjs/config';
 
 // Config
 import { APP_CONFIG, AppConfig } from '@config/app.config';
-import { AuthConfig } from '@config/auth.config';
+import { SharedAuthModule } from '../shared-auth/shared-auth.module';
 
 // ORM Entities
 import { AccountOrmEntity } from './infrastructure/persistence/typeorm-entities/account.orm-entity';
@@ -36,7 +33,6 @@ import { GameRegistryTypeOrmRepository } from './infrastructure/persistence/game
 import { EventPublisherAdapter } from './infrastructure/events/event-publisher.adapter';
 import { GameProfileCreatedListener } from './infrastructure/events/game-profile-created.listener';
 import { JwtTokenAdapter } from './infrastructure/auth/jwt-token.adapter';
-import { JwtStrategy } from './infrastructure/auth/jwt.strategy';
 import { GoogleOAuthAdapter } from './infrastructure/google-oauth/google-oauth.adapter';
 
 // Application Commands
@@ -46,6 +42,9 @@ import { SendFriendRequestUseCase } from './application/commands/send-friend-req
 import { ResolveFriendRequestUseCase } from './application/commands/resolve-friend-request.use-case';
 import { AssignGameAdminUseCase } from './application/commands/assign-game-admin.use-case';
 import { RevokeGameAdminUseCase } from './application/commands/revoke-game-admin.use-case';
+
+// Application Services
+import { AccountExistenceService } from './application/services/account-existence.service';
 
 // Application Queries
 import { GetAccountProfileUseCase } from './application/queries/get-account-profile.use-case';
@@ -59,7 +58,6 @@ import { AccountController } from './interface/http/account.controller';
 import { GamesController } from './interface/http/games.controller';
 import { FriendsController } from './interface/http/friends.controller';
 import { AdminController } from './interface/http/admin.controller';
-import { DomainExceptionFilter } from './interface/filters/domain-exception.filter';
 
 @Module({
   imports: [
@@ -70,18 +68,7 @@ import { DomainExceptionFilter } from './interface/filters/domain-exception.filt
       GameAdminRoleOrmEntity,
       PlayerGameProfileOrmEntity,
     ]),
-    PassportModule.register({ defaultStrategy: 'jwt' }),
-    JwtModule.registerAsync({
-      imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => {
-        const auth = configService.get<AuthConfig>('auth')!;
-        return {
-          secret: auth.jwtAccessSecret,
-          signOptions: { expiresIn: auth.jwtAccessExpiresIn },
-        };
-      },
-      inject: [ConfigService],
-    }),
+    SharedAuthModule,
   ],
   providers: [
     // Repository adapters bound to port tokens
@@ -103,8 +90,10 @@ import { DomainExceptionFilter } from './interface/filters/domain-exception.filt
 
     // Infrastructure
     GoogleOAuthAdapter,
-    JwtStrategy,
     GameProfileCreatedListener,
+
+    // Services
+    AccountExistenceService,
 
     // Commands
     LoginWithGoogleUseCase,
@@ -120,9 +109,8 @@ import { DomainExceptionFilter } from './interface/filters/domain-exception.filt
     GetFriendsUseCase,
     GetFriendRequestsUseCase,
 
-    // Global exception filter registered at module level via APP_FILTER token
-    { provide: APP_FILTER, useClass: DomainExceptionFilter },
   ],
+  exports: [AccountExistenceService],
   controllers: [
     AuthController,
     AccountController,

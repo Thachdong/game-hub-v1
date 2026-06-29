@@ -21,9 +21,24 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LoginResponseDto'
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      data:
+                        $ref: '#/components/schemas/LoginResponseDto'
         '503':
           description: Google OAuth unavailable
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      statusCode:
+                        example: 503
+                      data:
+                        nullable: true
+                        example: null
       tags:
         - Auth
   /api/auth/refresh:
@@ -43,11 +58,37 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RefreshResponseDto'
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      data:
+                        $ref: '#/components/schemas/RefreshResponseDto'
         '400':
           description: Missing refresh token
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      statusCode:
+                        example: 400
+                      data:
+                        nullable: true
+                        example: null
         '401':
           description: Invalid or expired refresh token
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      statusCode:
+                        example: 401
+                      data:
+                        nullable: true
+                        example: null
       tags:
         - Auth
       security:
@@ -63,9 +104,24 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AccountProfileDto'
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      data:
+                        $ref: '#/components/schemas/AccountProfileDto'
         '401':
           description: Unauthorized
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      statusCode:
+                        example: 401
+                      data:
+                        nullable: true
+                        example: null
       tags:
         - Account
       security:
@@ -81,7 +137,11 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GameListResponseDto'
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      data:
+                        $ref: '#/components/schemas/GameListResponseDto'
       tags:
         - Games
       security:
@@ -103,13 +163,50 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FriendRequestRecordDto'
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      data:
+                        $ref: '#/components/schemas/FriendRequestRecordDto'
         '400':
           description: Self-request
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      statusCode:
+                        example: 400
+                      data:
+                        nullable: true
+                        example: null
         '404':
           description: Account not found
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      statusCode:
+                        example: 404
+                      data:
+                        nullable: true
+                        example: null
         '409':
           description: Duplicate or already friends
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      statusCode:
+                        example: 409
+                      data:
+                        nullable: true
+                        example: null
       tags:
         - Friends
       security:
@@ -124,7 +221,11 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FriendRequestsResponseDto'
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      data:
+                        $ref: '#/components/schemas/FriendRequestsResponseDto'
       tags:
         - Friends
       security:
@@ -151,13 +252,50 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FriendRequestRecordDto'
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      data:
+                        $ref: '#/components/schemas/FriendRequestRecordDto'
         '403':
           description: Forbidden
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      statusCode:
+                        example: 403
+                      data:
+                        nullable: true
+                        example: null
         '404':
           description: Request not found
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      statusCode:
+                        example: 404
+                      data:
+                        nullable: true
+                        example: null
         '409':
           description: Already friends
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      statusCode:
+                        example: 409
+                      data:
+                        nullable: true
+                        example: null
       tags:
         - Friends
       security:
@@ -173,7 +311,11 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FriendsResponseDto'
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      data:
+                        $ref: '#/components/schemas/FriendsResponseDto'
       tags:
         - Friends
       security:
@@ -200,11 +342,37 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GameAdminRoleRecordDto'
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      data:
+                        $ref: '#/components/schemas/GameAdminRoleRecordDto'
         '403':
           description: Requires Platform Admin
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      statusCode:
+                        example: 403
+                      data:
+                        nullable: true
+                        example: null
         '404':
           description: Account or game not found
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      statusCode:
+                        example: 404
+                      data:
+                        nullable: true
+                        example: null
       tags:
         - Admin
       security:
@@ -226,13 +394,179 @@ paths:
             type: string
       responses:
         '204':
-          description: Role revoked
+          description: Role revoked (no body)
         '403':
           description: Requires Platform Admin
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      statusCode:
+                        example: 403
+                      data:
+                        nullable: true
+                        example: null
         '404':
           description: Role not found
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      statusCode:
+                        example: 404
+                      data:
+                        nullable: true
+                        example: null
       tags:
         - Admin
+      security:
+        - bearer: []
+  /api/notifications:
+    get:
+      operationId: NotificationsController_list
+      summary: Get authenticated player notification list (newest first)
+      parameters:
+        - name: limit
+          required: false
+          in: query
+          schema:
+            minimum: 1
+            maximum: 50
+            default: 20
+            example: 20
+            type: number
+        - name: cursorCreatedAt
+          required: false
+          in: query
+          schema:
+            example: '2026-06-29T09:59:00.000Z'
+            type: string
+        - name: cursorId
+          required: false
+          in: query
+          schema:
+            example: 4ab85f64-5717-4562-b3fc-2c963f66afa7
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      data:
+                        $ref: '#/components/schemas/NotificationListResponseDto'
+        '400':
+          description: Invalid query parameters
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      statusCode:
+                        example: 400
+                      data:
+                        nullable: true
+                        example: null
+        '401':
+          description: Missing or invalid JWT
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      statusCode:
+                        example: 401
+                      data:
+                        nullable: true
+                        example: null
+      tags:
+        - Notifications
+      security:
+        - bearer: []
+  /api/notifications/{id}/read:
+    patch:
+      operationId: NotificationsController_markRead
+      summary: Mark a notification as read (idempotent)
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      data:
+                        $ref: '#/components/schemas/MarkReadResponseDto'
+        '400':
+          description: Invalid UUID format
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      statusCode:
+                        example: 400
+                      data:
+                        nullable: true
+                        example: null
+        '401':
+          description: Missing or invalid JWT
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      statusCode:
+                        example: 401
+                      data:
+                        nullable: true
+                        example: null
+        '403':
+          description: Notification belongs to a different user
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      statusCode:
+                        example: 403
+                      data:
+                        nullable: true
+                        example: null
+        '404':
+          description: Notification not found
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      statusCode:
+                        example: 404
+                      data:
+                        nullable: true
+                        example: null
+      tags:
+        - Notifications
       security:
         - bearer: []
 info:
@@ -249,6 +583,24 @@ components:
       bearerFormat: JWT
       type: http
   schemas:
+    ApiResponseDto:
+      type: object
+      properties:
+        statusCode:
+          type: number
+          example: 200
+          description: Internal status code (mirrors HTTP status)
+        data:
+          type: object
+          description: Response payload, shape varies per endpoint
+        message:
+          type: string
+          example: Success
+          description: Human-readable message
+      required:
+        - statusCode
+        - data
+        - message
     AccountInResponseDto:
       type: object
       properties:
@@ -278,13 +630,6 @@ components:
         - accessToken
         - refreshToken
         - account
-    RefreshRequestDto:
-      type: object
-      properties:
-        refreshToken:
-          type: string
-      required:
-        - refreshToken
     RefreshResponseDto:
       type: object
       properties:
@@ -292,6 +637,13 @@ components:
           type: string
       required:
         - accessToken
+    RefreshRequestDto:
+      type: object
+      properties:
+        refreshToken:
+          type: string
+      required:
+        - refreshToken
     AccountProfileDto:
       type: object
       properties:
@@ -332,13 +684,6 @@ components:
             $ref: '#/components/schemas/GameEntryDto'
       required:
         - games
-    SendFriendRequestDto:
-      type: object
-      properties:
-        targetEmail:
-          type: string
-      required:
-        - targetEmail
     FriendRequestRecordDto:
       type: object
       properties:
@@ -362,6 +707,13 @@ components:
         - receiverId
         - status
         - createdAt
+    SendFriendRequestDto:
+      type: object
+      properties:
+        targetEmail:
+          type: string
+      required:
+        - targetEmail
     FriendRequestsResponseDto:
       type: object
       properties:
@@ -411,14 +763,6 @@ components:
             $ref: '#/components/schemas/FriendProfileDto'
       required:
         - friends
-    AssignGameAdminDto:
-      type: object
-      properties:
-        accountId:
-          type: string
-          format: uuid
-      required:
-        - accountId
     GameAdminRoleRecordDto:
       type: object
       properties:
@@ -433,3 +777,105 @@ components:
         - accountId
         - gameId
         - grantedAt
+    AssignGameAdminDto:
+      type: object
+      properties:
+        accountId:
+          type: string
+          format: uuid
+      required:
+        - accountId
+    NotificationEntryDto:
+      type: object
+      properties:
+        id:
+          type: string
+          example: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+        type:
+          type: string
+          example: friend-or-game-invite
+          enum:
+            - friend-or-game-invite
+            - tournament-event
+            - admin-warning
+            - trust-score-alert
+        content:
+          type: string
+          example: Alice sent you a friend request.
+        referenceId:
+          type: object
+          example: null
+          nullable: true
+        isRead:
+          type: boolean
+          example: false
+        createdAt:
+          type: string
+          example: '2026-06-29T10:00:00.000Z'
+      required:
+        - id
+        - type
+        - content
+        - referenceId
+        - isRead
+        - createdAt
+    NextCursorDto:
+      type: object
+      properties:
+        createdAt:
+          type: string
+          example: '2026-06-29T09:59:00.000Z'
+        id:
+          type: string
+          example: 4ab85f64-5717-4562-b3fc-2c963f66afa7
+      required:
+        - createdAt
+        - id
+    NotificationListResponseDto:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/NotificationEntryDto'
+        nextCursor:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/NextCursorDto'
+      required:
+        - items
+        - nextCursor
+    MarkReadResponseDto:
+      type: object
+      properties:
+        id:
+          type: string
+          example: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+        type:
+          type: string
+          example: friend-or-game-invite
+          enum:
+            - friend-or-game-invite
+            - tournament-event
+            - admin-warning
+            - trust-score-alert
+        content:
+          type: string
+          example: Alice sent you a friend request.
+        referenceId:
+          type: object
+          example: null
+          nullable: true
+        isRead:
+          type: boolean
+          example: true
+        createdAt:
+          type: string
+          example: '2026-06-29T10:00:00.000Z'
+      required:
+        - id
+        - type
+        - content
+        - referenceId
+        - isRead
+        - createdAt

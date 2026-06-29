@@ -11,6 +11,7 @@ import {
   EVENT_PUBLISHER_PORT,
   IEventPublisherPort,
 } from '@domain/ports/event-publisher.port';
+import { ACCOUNT_REPO, IAccountRepository } from '@domain/ports/account.repository.port';
 import { FriendRequest, FriendRequestStatus } from '@domain/entities/friend-request';
 import { FriendRequestResolvedEvent } from '@domain/events/friend-request-resolved.event';
 import {
@@ -25,6 +26,7 @@ export class ResolveFriendRequestUseCase {
     @Inject(FRIEND_REQUEST_REPO) private readonly friendRequestRepo: IFriendRequestRepository,
     @Inject(FRIENDSHIP_REPO) private readonly friendshipRepo: IFriendshipRepository,
     @Inject(EVENT_PUBLISHER_PORT) private readonly eventPublisher: IEventPublisherPort,
+    @Inject(ACCOUNT_REPO) private readonly accountRepo: IAccountRepository,
   ) {}
 
   async execute(
@@ -63,6 +65,20 @@ export class ResolveFriendRequestUseCase {
         resolvedAt,
       ),
     );
+
+    // Supplement: emit notification for the original sender
+    const receiver = await this.accountRepo.findById(request.receiverId);
+    const receiverUsername = receiver?.username ?? 'Someone';
+    const notificationContent =
+      action === 'accept'
+        ? `${receiverUsername} accepted your friend request.`
+        : `${receiverUsername} declined your friend request.`;
+
+    await this.eventPublisher.publish('notification.friend-or-game-invite', {
+      recipientId: request.senderId,
+      content: notificationContent,
+      referenceId: request.id,
+    });
 
     return updated;
   }

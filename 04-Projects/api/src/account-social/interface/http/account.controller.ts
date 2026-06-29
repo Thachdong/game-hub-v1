@@ -1,10 +1,6 @@
 import { Controller, Get, Req, UseGuards } from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiBearerAuth,
-} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiDataResponse, ApiErrorResponse } from '@common/decorators/api-response.decorator';
 import { JwtAuthGuard } from '@interface/guards/jwt-auth.guard';
 import { GetAccountProfileUseCase } from '@application/queries/get-account-profile.use-case';
 import { AccountProfileDto } from '@interface/dto/account/account-profile.dto';
@@ -19,8 +15,8 @@ export class AccountController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get authenticated account profile' })
-  @ApiResponse({ status: 200, type: AccountProfileDto })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiDataResponse(AccountProfileDto, { status: 200 })
+  @ApiErrorResponse(401, 'Unauthorized')
   async getMe(@Req() req: { user: AccessTokenPayload }): Promise<AccountProfileDto> {
     const account = await this.getAccountProfile.execute(req.user.sub);
     return {

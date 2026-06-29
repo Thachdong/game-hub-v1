@@ -11,12 +11,8 @@ import {
   HttpStatus,
   HttpException,
 } from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiBearerAuth,
-} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiDataResponse, ApiErrorResponse } from '@common/decorators/api-response.decorator';
 import { JwtAuthGuard } from '@interface/guards/jwt-auth.guard';
 import { SendFriendRequestUseCase } from '@application/commands/send-friend-request.use-case';
 import { ResolveFriendRequestUseCase } from '@application/commands/resolve-friend-request.use-case';
@@ -88,10 +84,10 @@ export class FriendsController {
   @Post('requests')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Send a friend request by target email' })
-  @ApiResponse({ status: 201, type: FriendRequestRecordDto })
-  @ApiResponse({ status: 400, description: 'Self-request' })
-  @ApiResponse({ status: 404, description: 'Account not found' })
-  @ApiResponse({ status: 409, description: 'Duplicate or already friends' })
+  @ApiDataResponse(FriendRequestRecordDto, { status: 201 })
+  @ApiErrorResponse(400, 'Self-request')
+  @ApiErrorResponse(404, 'Account not found')
+  @ApiErrorResponse(409, 'Duplicate or already friends')
   async sendRequest(
     @Req() req: { user: AccessTokenPayload },
     @Body() dto: SendFriendRequestDto,
@@ -106,7 +102,7 @@ export class FriendsController {
 
   @Get('requests')
   @ApiOperation({ summary: 'Get incoming and outgoing pending friend requests' })
-  @ApiResponse({ status: 200, type: FriendRequestsResponseDto })
+  @ApiDataResponse(FriendRequestsResponseDto, { status: 200 })
   async listRequests(
     @Req() req: { user: AccessTokenPayload },
   ): Promise<FriendRequestsResponseDto> {
@@ -119,10 +115,10 @@ export class FriendsController {
 
   @Patch('requests/:id')
   @ApiOperation({ summary: 'Accept or reject a friend request' })
-  @ApiResponse({ status: 200, type: FriendRequestRecordDto })
-  @ApiResponse({ status: 403, description: 'Forbidden' })
-  @ApiResponse({ status: 404, description: 'Request not found' })
-  @ApiResponse({ status: 409, description: 'Already friends' })
+  @ApiDataResponse(FriendRequestRecordDto, { status: 200 })
+  @ApiErrorResponse(403, 'Forbidden')
+  @ApiErrorResponse(404, 'Request not found')
+  @ApiErrorResponse(409, 'Already friends')
   async resolve(
     @Req() req: { user: AccessTokenPayload },
     @Param('id') id: string,
@@ -138,7 +134,7 @@ export class FriendsController {
 
   @Get()
   @ApiOperation({ summary: 'List friends' })
-  @ApiResponse({ status: 200, type: FriendsResponseDto })
+  @ApiDataResponse(FriendsResponseDto, { status: 200 })
   async list(@Req() req: { user: AccessTokenPayload }): Promise<FriendsResponseDto> {
     const accounts = await this.getFriends.execute(req.user.sub);
     return { friends: accounts.map(toFriendProfileDto) };
