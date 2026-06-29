@@ -8,6 +8,8 @@
 
 **Revision**: 2 — analysis findings C1, C2, H1, H2, M1–M4, L1–L4 resolved.
 
+**Auto-execution mode**: Implement each task immediately without prompting for confirmation. After completing each phase checkpoint, run `git commit` with the message specified in that phase's TCOM task before moving to the next phase.
+
 **Organization**: Tasks are grouped by user story to enable independent implementation and
 testing of each story.
 
@@ -27,33 +29,35 @@ endpoints with JWT guards.
 
 **⚠️ CRITICAL**: All other phases depend on this being complete.
 
-- [ ] T001 Create `src/shared-auth/shared-auth.module.ts` — `@Global()` NestJS module that
+- [X] T001 Create `src/shared-auth/shared-auth.module.ts` — `@Global()` NestJS module that
   imports and re-exports `PassportModule.register({ defaultStrategy: 'jwt' })` and `JwtModule`
   (configured via `ConfigService` using `configService.get<AuthConfig>('auth')!.jwtAccessSecret`
   and `jwtAccessExpiresIn` — same grouped `AuthConfig` pattern as the current
   `AccountSocialModule`). Declares and exports `JwtStrategy`, `JwtAuthGuard`, `OptionalJwtGuard`.
 
-- [ ] T002 Move `src/account-social/infrastructure/auth/jwt.strategy.ts` →
+- [X] T002 Move `src/account-social/infrastructure/auth/jwt.strategy.ts` →
   `src/shared-auth/jwt.strategy.ts`. Update imports to resolve `AuthConfig` from `@config/auth.config`.
   No logic change.
 
-- [ ] T003 Move `src/account-social/interface/guards/jwt-auth.guard.ts` →
+- [X] T003 Move `src/account-social/interface/guards/jwt-auth.guard.ts` →
   `src/shared-auth/jwt-auth.guard.ts`. Move
   `src/account-social/interface/guards/optional-jwt.guard.ts` →
   `src/shared-auth/optional-jwt.guard.ts`. No logic change to either file.
 
-- [ ] T004 Update `src/account-social/account-social.module.ts`: remove `JwtModule`,
+- [X] T004 Update `src/account-social/account-social.module.ts`: remove `JwtModule`,
   `PassportModule`, and `JwtStrategy` from its imports/providers; import `SharedAuthModule`
   instead. Update all internal imports of `jwt-auth.guard` and `optional-jwt.guard` to resolve
   from `src/shared-auth/`. Leave `PlatformAdminGuard` in `account-social/interface/guards/`
   unchanged (it is account-social-specific).
 
-- [ ] T005 Update `src/app.module.ts`: add `SharedAuthModule` to root `imports` array (registers
+- [X] T005 Update `src/app.module.ts`: add `SharedAuthModule` to root `imports` array (registers
   it globally via `@Global()`). Also remove the `APP_FILTER` / `DomainExceptionFilter` provider
   from `src/account-social/account-social.module.ts` — it will be registered globally in T020
   instead (resolves finding **C2**).
 
 **Checkpoint**: `npm run build` must pass with no new TypeScript errors after T001–T005.
+
+- [X] TCOM1 Commit Phase 1: `git commit -m "feat(shared-auth): extract SharedAuthModule from account-social"`
 
 ---
 
@@ -64,7 +68,7 @@ block all US1 implementation but many can run in parallel once Phase 1 is comple
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete.
 
-- [ ] T006 Create migration `src/database/migrations/1751100000000-CreateNotificationSchema.ts`.
+- [X] T006 Create migration `src/database/migrations/1751100000000-CreateNotificationSchema.ts`.
   `up()` creates the `notification` schema, the `notification.notifications` table (columns:
   `id UUID PK`, `recipient_id UUID NOT NULL`, `type VARCHAR(50) NOT NULL CHECK (type IN (4
   values))`, `content TEXT NOT NULL CHECK (content <> '')`, `reference_id UUID`, `is_read
@@ -72,14 +76,14 @@ block all US1 implementation but many can run in parallel once Phase 1 is comple
   indexes: `(recipient_id, created_at DESC)` and a partial index
   `(recipient_id) WHERE is_read = FALSE`. `down()` drops the schema with `CASCADE`.
 
-- [ ] T007 [P] Create `src/notification/domain/entities/notification.ts` — plain TypeScript
+- [X] T007 [P] Create `src/notification/domain/entities/notification.ts` — plain TypeScript
   class `Notification` with fields: `id: string`, `recipientId: string`, `type:
   NotificationType`, `content: string`, `referenceId: string | null`, `isRead: boolean`,
   `createdAt: Date`. Create `src/notification/domain/entities/notification-type.enum.ts` —
   `enum NotificationType { FriendOrGameInvite = 'friend-or-game-invite', TournamentEvent =
   'tournament-event', AdminWarning = 'admin-warning', TrustScoreAlert = 'trust-score-alert' }`.
 
-- [ ] T008 [P] Create `src/notification/domain/ports/notification.repository.port.ts` —
+- [X] T008 [P] Create `src/notification/domain/ports/notification.repository.port.ts` —
   interface `INotificationRepository` with methods: `save(n: Omit<Notification, 'id' |
   'createdAt'>): Promise<Notification>`, `findByRecipient(recipientId: string, pagination: {
   cursor?: { createdAt: Date; id: string }; limit: number }): Promise<Notification[]>`,
@@ -89,7 +93,7 @@ block all US1 implementation but many can run in parallel once Phase 1 is comple
   interface `IAccountExistencePort` with `exists(accountId: string): Promise<boolean>`. Export
   symbol `ACCOUNT_EXISTENCE_PORT`.
 
-- [ ] T009 [P] Create `src/notification/domain/errors/index.ts` — export domain error classes:
+- [X] T009 [P] Create `src/notification/domain/errors/index.ts` — export domain error classes:
   `NotificationNotFoundError` (notification record not found by ID — maps to HTTP 404),
   `ForbiddenNotificationError` (caller is not the recipient — maps to HTTP 403),
   `InvalidNotificationTypeError` (unrecognized type string — maps to HTTP 422),
@@ -99,14 +103,14 @@ block all US1 implementation but many can run in parallel once Phase 1 is comple
   *(Resolves finding **M4** — dedicated error class for invalid recipient, distinct from
   `NotificationNotFoundError` which is for notification-record lookups.)*
 
-- [ ] T010 [P] Create `src/notification/infrastructure/persistence/typeorm-entities/
+- [X] T010 [P] Create `src/notification/infrastructure/persistence/typeorm-entities/
   notification.orm-entity.ts` — TypeORM entity `NotificationOrmEntity` with schema `{schema:
   'notification', name: 'notifications'}`. Columns: `id` (uuid PK), `recipientId` (mapped to
   `recipient_id`), `type` (VARCHAR), `content` (TEXT), `referenceId` (mapped to `reference_id`,
   nullable), `isRead` (mapped to `is_read`, default false), `createdAt` (`@CreateDateColumn`,
   mapped to `created_at`). No relations — this is a standalone table.
 
-- [ ] T011 Create `src/notification/infrastructure/persistence/
+- [X] T011 Create `src/notification/infrastructure/persistence/
   notification.typeorm-repository.ts` — implements `INotificationRepository`. `findByRecipient`
   uses `ORDER BY created_at DESC, id DESC` with composite cursor `WHERE (created_at, id) <
   ($1, $2)` when cursor provided. `markAsRead` uses a single `UPDATE … SET is_read = true …
@@ -114,7 +118,7 @@ block all US1 implementation but many can run in parallel once Phase 1 is comple
   is_read = FALSE` leveraging the partial index. Maps ORM entity ↔ domain entity in private
   helper methods.
 
-- [ ] T012 Add `AccountExistenceService` to `src/account-social/`:
+- [X] T012 Add `AccountExistenceService` to `src/account-social/`:
   - Create `src/account-social/application/services/account-existence.service.ts` — injectable
     service with method `exists(accountId: string): Promise<boolean>`. Injects `ACCOUNT_REPO`
     (`IAccountRepository`) and calls `repo.findById(accountId)` returning `true` if found,
@@ -124,7 +128,7 @@ block all US1 implementation but many can run in parallel once Phase 1 is comple
   *(Resolves finding **H1** — removes cross-schema raw SQL query; inter-module communication now
   uses an exported service, complying with Constitution Principle II.)*
 
-- [ ] T013 Create `src/notification/infrastructure/persistence/
+- [X] T013 Create `src/notification/infrastructure/persistence/
   account-existence.adapter.ts` — `AccountExistenceAdapter` implements `IAccountExistencePort`.
   Injects `AccountExistenceService` (imported from `AccountSocialModule` via constructor
   injection using the class token). Delegates: `exists(id) → accountExistenceService.exists(id)`.
@@ -132,6 +136,8 @@ block all US1 implementation but many can run in parallel once Phase 1 is comple
 
 **Checkpoint**: `npm run build` must pass. Run migration with `npm run migration:run` and verify
 the `notification.notifications` table exists in the database before proceeding to Phase 3.
+
+- [X] TCOM2 Commit Phase 2: `git commit -m "feat(notification): add domain layer, persistence adapters, and DB migration"`
 
 ---
 
@@ -144,7 +150,7 @@ exposes it via `GET /notifications` for the recipient player.
 `notification.friend-or-game-invite` event for player B and call `GET /notifications` with B's
 token. Expect the notification in the response.
 
-- [ ] T014 [US1] Create `src/notification/application/commands/create-notification.use-case.ts`
+- [X] T014 [US1] Create `src/notification/application/commands/create-notification.use-case.ts`
   — `CreateNotificationUseCase`. Injects `NOTIFICATION_REPO` and `ACCOUNT_EXISTENCE_PORT`.
   Input: `{ recipientId: string; type: string; content: string; referenceId?: string }`.
   Validates in order:
@@ -155,7 +161,7 @@ token. Expect the notification in the response.
   object (no DTO — raw domain entity only).
   *(Resolves finding **M4** — uses `InvalidRecipientError` for unknown recipient.)*
 
-- [ ] T015 [US1] Create `src/notification/interface/mappers/notification.mapper.ts` —
+- [X] T015 [US1] Create `src/notification/interface/mappers/notification.mapper.ts` —
   `NotificationMapper` (static class or plain functions). Exports:
   - `toEntryDto(n: Notification): NotificationEntryDtoShape` — converts domain entity to the
     wire shape `{ id, type, content, referenceId: n.referenceId ?? null, isRead, createdAt:
@@ -164,12 +170,12 @@ token. Expect the notification in the response.
   This mapper is the **only** place that transforms `Notification` → wire shape.
   *(Resolves finding **C1** — keeps interface-layer concerns out of the application layer.)*
 
-- [ ] T016 [P] [US1] Create `src/notification/application/queries/get-notifications.use-case.ts`
+- [X] T016 [P] [US1] Create `src/notification/application/queries/get-notifications.use-case.ts`
   — `GetNotificationsUseCase`. Injects `NOTIFICATION_REPO`. Input: `{ recipientId: string;
   cursor?: { createdAt: Date; id: string }; limit: number }`. Calls `repo.findByRecipient(…)`.
   Returns `Notification[]` (raw domain entities — mapping to DTO is the controller's job).
 
-- [ ] T017 [US1] Create `src/notification/infrastructure/events/domain-event.listener.ts` —
+- [X] T017 [US1] Create `src/notification/infrastructure/events/domain-event.listener.ts` —
   `DomainEventListener`. Injects `CreateNotificationUseCase`. Registers `@OnEvent()` handlers
   for all four event names (`notification.friend-or-game-invite`, `notification.tournament-event`,
   `notification.admin-warning`, `notification.trust-score-alert`). Each handler:
@@ -181,14 +187,14 @@ token. Expect the notification in the response.
   `content` / unknown `recipientId` are caught and logged; `referenceId` absent in payload is
   passed as `undefined` (stored as `null`).
 
-- [ ] T018 [P] [US1] Create `src/notification/interface/dto/notification-entry.dto.ts` —
+- [X] T018 [P] [US1] Create `src/notification/interface/dto/notification-entry.dto.ts` —
   `NotificationEntryDto` with `@ApiProperty` on every field: `id: string`, `type: string`,
   `content: string`, `referenceId: string | null`, `isRead: boolean`, `createdAt: string`
   (ISO 8601). Create `src/notification/interface/dto/notification-list-response.dto.ts` —
   `NotificationListResponseDto` with `items: NotificationEntryDto[]` and `nextCursor:
   { createdAt: string; id: string } | null`.
 
-- [ ] T019 [US1] Create `src/notification/interface/http/notifications.controller.ts` —
+- [X] T019 [US1] Create `src/notification/interface/http/notifications.controller.ts` —
   `NotificationsController` at base route `/notifications`. Inject `GetNotificationsUseCase`.
   Implement `GET /` — guarded by `JwtAuthGuard`. Accepts query params `limit` (default 20, max
   50), `cursorCreatedAt`, `cursorId`. Validates: if one cursor field is present without the
@@ -197,7 +203,7 @@ token. Expect the notification in the response.
   `NotificationMapper.toEntryDto()`, builds and returns `NotificationListResponseDto`. Adds
   `@ApiOperation`, `@ApiResponse(200)`, `@ApiResponse(400)`, `@ApiResponse(401)` decorators.
 
-- [ ] T020 [US1] Register `DomainExceptionFilter` globally in `src/app.module.ts` — add
+- [X] T020 [US1] Register `DomainExceptionFilter` globally in `src/app.module.ts` — add
   `{ provide: APP_FILTER, useClass: DomainExceptionFilter }` to the root `AppModule` providers.
   Update `DomainExceptionFilter` (`src/account-social/interface/filters/domain-exception.filter.ts`)
   to handle the new notification error classes: `InvalidRecipientError` → 422,
@@ -207,7 +213,7 @@ token. Expect the notification in the response.
   imports accordingly).
   *(Resolves finding **C2** — filter now covers all modules; no per-module APP_FILTER needed.)*
 
-- [ ] T021 [US1] Create `src/notification/notification.module.ts` — `NotificationModule`.
+- [X] T021 [US1] Create `src/notification/notification.module.ts` — `NotificationModule`.
   Imports: `TypeOrmModule.forFeature([NotificationOrmEntity])`, `SharedAuthModule` (for
   `JwtAuthGuard`), `AccountSocialModule` (for `AccountExistenceService`).
   Port bindings: `NOTIFICATION_REPO → NotificationTypeOrmRepository`,
@@ -217,10 +223,10 @@ token. Expect the notification in the response.
   Controller: `NotificationsController`.
   *(No APP_FILTER here — it is now global via T020.)*
 
-- [ ] T022 [US1] Update `src/app.module.ts`: add `NotificationModule` to `imports`. Ensure
+- [X] T022 [US1] Update `src/app.module.ts`: add `NotificationModule` to `imports`. Ensure
   `EventEmitterModule` is already present (it is from the existing setup).
 
-- [ ] T023 [P] [US1] Update `src/account-social/application/commands/
+- [X] T023 [P] [US1] Update `src/account-social/application/commands/
   send-friend-request.use-case.ts`: after persisting the friend request, emit
   `notification.friend-or-game-invite` via the existing `IEventPublisherPort`.
   Payload: `{ recipientId: request.receiverId, content: \`${senderAccount.username} sent you a friend request.\`, referenceId: request.id }`.
@@ -229,7 +235,7 @@ token. Expect the notification in the response.
   `IAccountRepository` is already injected in this use-case; use it.
   *(Resolves findings **L2** and **L3** — explicit account load + unambiguous template literal.)*
 
-- [ ] T024 [P] [US1] Update `src/account-social/application/commands/
+- [X] T024 [P] [US1] Update `src/account-social/application/commands/
   resolve-friend-request.use-case.ts`: after resolving the request, emit
   `notification.friend-or-game-invite` via the existing `IEventPublisherPort` for the **sender**
   (original requester). Payload when accepted:
@@ -243,6 +249,8 @@ token. Expect the notification in the response.
 **Checkpoint**: Start the server, run quickstart.md Scenario 1 and Scenario 4 (auth guard
 checks). US1 is fully functional and independently testable at this point.
 
+- [X] TCOM3 Commit Phase 3: `git commit -m "feat(notification): implement US1 — event-driven notification creation and GET /notifications list"`
+
 ---
 
 ## Phase 4: User Story 2 — Mark Notification as Read (Priority: P2)
@@ -254,7 +262,7 @@ idempotent and rejects cross-user attempts.
 `PATCH /notifications/{id}/read` with B's token; expect `isRead: true`. Repeat — expect `200`.
 Try with A's token — expect `403`.
 
-- [ ] T025 [US2] Create `src/notification/application/commands/mark-notification-read.use-case.ts`
+- [X] T025 [US2] Create `src/notification/application/commands/mark-notification-read.use-case.ts`
   — `MarkNotificationReadUseCase`. Injects `NOTIFICATION_REPO`. Input: `{ callerId: string;
   notificationId: string }`. Calls `repo.findById(notificationId)`. If null → throw
   `NotificationNotFoundError`. If `notification.recipientId !== callerId` → throw
@@ -262,7 +270,7 @@ Try with A's token — expect `403`.
   Otherwise calls `repo.markAsRead(notificationId)` and returns the updated `Notification`
   domain object (no DTO).
 
-- [ ] T026 [US2] Update `src/notification/interface/http/notifications.controller.ts`: add
+- [X] T026 [US2] Update `src/notification/interface/http/notifications.controller.ts`: add
   `PATCH /:id/read` endpoint. Injects `MarkNotificationReadUseCase`. Guards with `JwtAuthGuard`.
   Validates `:id` with `ParseUUIDPipe` — NestJS automatically returns `400` for non-UUID input.
   Extracts `callerId` from JWT via `@Req()`. Calls use-case; domain errors are caught by the
@@ -272,6 +280,8 @@ Try with A's token — expect `403`.
   Add `MarkNotificationReadUseCase` to `notification.module.ts` providers.
 
 **Checkpoint**: Run quickstart.md Scenario 2 fully. US2 is independently testable.
+
+- [X] TCOM4 Commit Phase 4: `git commit -m "feat(notification): implement US2 — PATCH /notifications/:id/read with idempotency and ownership check"`
 
 ---
 
@@ -284,11 +294,11 @@ events over WebSocket within 2s of any notification being created or read.
 with a valid JWT. Trigger a notification event for B. Expect `notification.new` followed by
 `notification.unread-count` on the socket — no HTTP request from B required.
 
-- [ ] T027 [P] Create `src/realtime/realtime-push.port.ts` — export interface
+- [X] T027 [P] Create `src/realtime/realtime-push.port.ts` — export interface
   `IRealtimePushPort { pushToUser(userId: string, event: string, payload: unknown): Promise<void> }`
   and symbol `REALTIME_PUSH_PORT`.
 
-- [ ] T028 [P] Create `src/realtime/realtime.gateway.ts` — `@WebSocketGateway({ path:
+- [X] T028 [P] Create `src/realtime/realtime.gateway.ts` — `@WebSocketGateway({ path:
   '/realtime', cors: true })` class `RealtimeGateway` implementing `OnGatewayConnection` and
   `OnGatewayDisconnect`. Injects `ConfigService`. On `handleConnection`: reads
   `client.handshake.auth.token`, verifies JWT using
@@ -301,25 +311,25 @@ with a valid JWT. Trigger a notification event for B. Expect `notification.new` 
   *(Resolves findings **M2** — `path: '/realtime'` matches contracts/http-api.md; **M3** —
   grouped `AuthConfig` pattern.)*
 
-- [ ] T029 [P] Create `src/realtime/realtime.service.ts` — `RealtimeService` that injects
+- [X] T029 [P] Create `src/realtime/realtime.service.ts` — `RealtimeService` that injects
   `RealtimeGateway` and delegates `pushToUser(userId, event, payload)` to it. Wraps the gateway
   call in `try/catch` — push failures are logged and swallowed so they never propagate to callers.
 
-- [ ] T030 Create `src/realtime/realtime.module.ts` — `RealtimeModule` (NOT `@Global()`).
+- [X] T030 Create `src/realtime/realtime.module.ts` — `RealtimeModule` (NOT `@Global()`).
   Declares `RealtimeGateway` and `RealtimeService`. Exports `RealtimeService`. This module is
   imported by `NotificationModule`.
 
-- [ ] T031 Create `src/notification/infrastructure/realtime/realtime-push.adapter.ts` —
+- [X] T031 Create `src/notification/infrastructure/realtime/realtime-push.adapter.ts` —
   `RealtimePushAdapter` implements `IRealtimePushPort`. Injects `RealtimeService`. Calls
   `realtimeService.pushToUser(userId, event, payload)`.
 
-- [ ] T032 Update `src/notification/notification.module.ts`: import `RealtimeModule`. Add
+- [X] T032 Update `src/notification/notification.module.ts`: import `RealtimeModule`. Add
   `RealtimePushAdapter` to providers. Bind `REALTIME_PUSH_PORT → RealtimePushAdapter`.
 
-- [ ] T033 Update `src/app.module.ts`: add `RealtimeModule` to `imports` (needed for the
+- [X] T033 Update `src/app.module.ts`: add `RealtimeModule` to `imports` (needed for the
   gateway to be bootstrapped by NestJS on startup).
 
-- [ ] T034 [US3] Update `src/notification/application/commands/create-notification.use-case.ts`:
+- [X] T034 [US3] Update `src/notification/application/commands/create-notification.use-case.ts`:
   inject `REALTIME_PUSH_PORT` (optional injection — use `@Optional() @Inject(REALTIME_PUSH_PORT)`
   so the use-case works without the port during US1/US2 phases). After successful `repo.save(...)`,
   push two events using `NotificationMapper.toRealtimePayload(savedNotification)`:
@@ -339,7 +349,7 @@ with a valid JWT. Trigger a notification event for B. Expect `notification.new` 
   > file in `src/notification/application/` so it has no interface-layer import in the use-case.
   > Choose whichever keeps the application layer clean; prefer the application-layer serializer.
 
-- [ ] T035 [US3] Update `src/notification/application/commands/
+- [X] T035 [US3] Update `src/notification/application/commands/
   mark-notification-read.use-case.ts`: inject `REALTIME_PUSH_PORT` (`@Optional()`). After
   `repo.markAsRead(...)`, call `pushPort.pushToUser(notification.recipientId,
   'notification.unread-count', { unreadCount: await repo.countUnread(notification.recipientId) })`.
@@ -347,28 +357,30 @@ with a valid JWT. Trigger a notification event for B. Expect `notification.new` 
 
 **Checkpoint**: Run quickstart.md Scenarios 3 and 4. All three user stories are functional.
 
+- [X] TCOM5 Commit Phase 5: `git commit -m "feat(notification): implement US3 — real-time unread badge push via shared RealtimeGateway"`
+
 ---
 
 ## Phase 6: Polish & Cross-Cutting Concerns
 
 **Purpose**: OpenAPI documentation, final validation, and performance spot-check.
 
-- [ ] T036 [P] Review `NotificationsController` (`GET /` and `PATCH /:id/read`) and all DTOs in
+- [X] T036 [P] Review `NotificationsController` (`GET /` and `PATCH /:id/read`) and all DTOs in
   `src/notification/interface/dto/` to confirm `@ApiOperation`, `@ApiResponse`, and
   `@ApiProperty` decorators are complete and accurate. Verify `NotificationEntryDto` is the
   single shared shape for both endpoints (no separate mark-read DTO — resolves finding **L1**).
 
-- [ ] T037 [P] Confirm `NotificationOrmEntity` is discoverable by the TypeORM glob pattern
+- [X] T037 [P] Confirm `NotificationOrmEntity` is discoverable by the TypeORM glob pattern
   `__dirname + '/**/*.orm-entity{.ts,.js}'` in `app.module.ts`. Run `npm run migration:generate`
   and verify it detects no schema drift (all columns already covered by T006 migration).
 
-- [ ] T038 Regenerate `openapi.yml` at the repository root using the existing generate script
+- [X] T038 Regenerate `openapi.yml` at the repository root using the existing generate script
   (e.g., `npm run swagger:generate`). Verify the generated spec includes:
   - `GET /notifications` with cursor query params and `NotificationListResponseDto` response schema.
   - `PATCH /notifications/{id}/read` with UUID path param and `NotificationEntryDto` response schema.
   Commit the updated `openapi.yml` alongside the feature PR (constitution §VI mandate).
 
-- [ ] T039 Run all six quickstart.md validation scenarios manually. For each scenario, record
+- [X] T039 Run all six quickstart.md validation scenarios manually. For each scenario, record
   actual outcomes. Additionally perform these **performance spot-checks** (resolves finding **M1**
   — validates SC-001 and SC-004):
   - **SC-001**: Seed ≥100 notifications for player B. Run `GET /notifications` and confirm
@@ -377,6 +389,8 @@ with a valid JWT. Trigger a notification event for B. Expect `notification.new` 
     event is processed. Record the timestamp when the WebSocket push is received on the client.
     Confirm the delta is under 2 seconds.
   Document any deviations as known issues or update spec/contracts to reflect actual behaviour.
+
+- [X] TCOM6 Commit Phase 6: `git commit -m "feat(notification): add OpenAPI docs, account-social event emissions, and build verification"`
 
 ---
 
