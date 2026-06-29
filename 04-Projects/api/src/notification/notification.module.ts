@@ -7,6 +7,7 @@ import { ACCOUNT_EXISTENCE_PORT } from './domain/ports/account-existence.port';
 import { NotificationTypeOrmRepository } from './infrastructure/persistence/notification.typeorm-repository';
 import { AccountExistenceAdapter } from './infrastructure/persistence/account-existence.adapter';
 import { CreateNotificationUseCase } from './application/commands/create-notification.use-case';
+import { MarkNotificationReadUseCase } from './application/commands/mark-notification-read.use-case';
 import { GetNotificationsUseCase } from './application/queries/get-notifications.use-case';
 import { DomainEventListener } from './infrastructure/events/domain-event.listener';
 import { NotificationsController } from './interface/http/notifications.controller';
@@ -22,6 +23,7 @@ import { NotificationsController } from './interface/http/notifications.controll
     NotificationTypeOrmRepository,
     AccountExistenceAdapter,
     CreateNotificationUseCase,
+    MarkNotificationReadUseCase,
     GetNotificationsUseCase,
     DomainEventListener,
   ],
