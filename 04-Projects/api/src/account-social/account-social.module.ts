@@ -43,6 +43,9 @@ import { ResolveFriendRequestUseCase } from './application/commands/resolve-frie
 import { AssignGameAdminUseCase } from './application/commands/assign-game-admin.use-case';
 import { RevokeGameAdminUseCase } from './application/commands/revoke-game-admin.use-case';
 
+// Application Services
+import { AccountExistenceService } from './application/services/account-existence.service';
+
 // Application Queries
 import { GetAccountProfileUseCase } from './application/queries/get-account-profile.use-case';
 import { GetGameListUseCase } from './application/queries/get-game-list.use-case';
@@ -89,6 +92,9 @@ import { AdminController } from './interface/http/admin.controller';
     GoogleOAuthAdapter,
     GameProfileCreatedListener,
 
+    // Services
+    AccountExistenceService,
+
     // Commands
     LoginWithGoogleUseCase,
     RefreshAccessTokenUseCase,
@@ -104,6 +110,7 @@ import { AdminController } from './interface/http/admin.controller';
     GetFriendRequestsUseCase,
 
   ],
+  exports: [AccountExistenceService],
   controllers: [
     AuthController,
     AccountController,
