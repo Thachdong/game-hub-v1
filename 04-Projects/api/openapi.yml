@@ -1,0 +1,435 @@
+openapi: 3.0.0
+paths:
+  /api/auth/google:
+    get:
+      operationId: AuthController_googleLogin
+      summary: Initiate Google OAuth login
+      parameters: []
+      responses:
+        '302':
+          description: Redirect to Google consent page
+      tags:
+        - Auth
+  /api/auth/google/callback:
+    get:
+      operationId: AuthController_googleCallback
+      summary: Google OAuth callback
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponseDto'
+        '503':
+          description: Google OAuth unavailable
+      tags:
+        - Auth
+  /api/auth/refresh:
+    post:
+      operationId: AuthController_refresh
+      summary: Refresh access token
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshRequestDto'
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RefreshResponseDto'
+        '400':
+          description: Missing refresh token
+        '401':
+          description: Invalid or expired refresh token
+      tags:
+        - Auth
+      security:
+        - bearer: []
+  /api/accounts/me:
+    get:
+      operationId: AccountController_getMe
+      summary: Get authenticated account profile
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountProfileDto'
+        '401':
+          description: Unauthorized
+      tags:
+        - Account
+      security:
+        - bearer: []
+  /api/games:
+    get:
+      operationId: GamesController_list
+      summary: List all games, with hasProfile flag when authenticated
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GameListResponseDto'
+      tags:
+        - Games
+      security:
+        - bearer: []
+  /api/friends/requests:
+    post:
+      operationId: FriendsController_sendRequest
+      summary: Send a friend request by target email
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendFriendRequestDto'
+      responses:
+        '201':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FriendRequestRecordDto'
+        '400':
+          description: Self-request
+        '404':
+          description: Account not found
+        '409':
+          description: Duplicate or already friends
+      tags:
+        - Friends
+      security:
+        - bearer: []
+    get:
+      operationId: FriendsController_listRequests
+      summary: Get incoming and outgoing pending friend requests
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FriendRequestsResponseDto'
+      tags:
+        - Friends
+      security:
+        - bearer: []
+  /api/friends/requests/{id}:
+    patch:
+      operationId: FriendsController_resolve
+      summary: Accept or reject a friend request
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResolveFriendRequestDto'
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FriendRequestRecordDto'
+        '403':
+          description: Forbidden
+        '404':
+          description: Request not found
+        '409':
+          description: Already friends
+      tags:
+        - Friends
+      security:
+        - bearer: []
+  /api/friends:
+    get:
+      operationId: FriendsController_list
+      summary: List friends
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FriendsResponseDto'
+      tags:
+        - Friends
+      security:
+        - bearer: []
+  /api/admin/games/{gameId}/admins:
+    post:
+      operationId: AdminController_assign
+      summary: Assign Game Admin role
+      parameters:
+        - name: gameId
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssignGameAdminDto'
+      responses:
+        '201':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GameAdminRoleRecordDto'
+        '403':
+          description: Requires Platform Admin
+        '404':
+          description: Account or game not found
+      tags:
+        - Admin
+      security:
+        - bearer: []
+  /api/admin/games/{gameId}/admins/{accountId}:
+    delete:
+      operationId: AdminController_revoke
+      summary: Revoke Game Admin role
+      parameters:
+        - name: gameId
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: accountId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Role revoked
+        '403':
+          description: Requires Platform Admin
+        '404':
+          description: Role not found
+      tags:
+        - Admin
+      security:
+        - bearer: []
+info:
+  title: Game Hub API
+  description: Account & Social Module
+  version: 1.0.0
+  contact: {}
+tags: []
+servers: []
+components:
+  securitySchemes:
+    bearer:
+      scheme: bearer
+      bearerFormat: JWT
+      type: http
+  schemas:
+    AccountInResponseDto:
+      type: object
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+        username:
+          type: string
+        avatarUrl:
+          type: string
+      required:
+        - id
+        - email
+        - username
+        - avatarUrl
+    LoginResponseDto:
+      type: object
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+        account:
+          $ref: '#/components/schemas/AccountInResponseDto'
+      required:
+        - accessToken
+        - refreshToken
+        - account
+    RefreshRequestDto:
+      type: object
+      properties:
+        refreshToken:
+          type: string
+      required:
+        - refreshToken
+    RefreshResponseDto:
+      type: object
+      properties:
+        accessToken:
+          type: string
+      required:
+        - accessToken
+    AccountProfileDto:
+      type: object
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+        username:
+          type: string
+        avatarUrl:
+          type: string
+      required:
+        - id
+        - email
+        - username
+        - avatarUrl
+    GameEntryDto:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        slug:
+          type: string
+        hasProfile:
+          type: boolean
+      required:
+        - id
+        - name
+        - slug
+    GameListResponseDto:
+      type: object
+      properties:
+        games:
+          type: array
+          items:
+            $ref: '#/components/schemas/GameEntryDto'
+      required:
+        - games
+    SendFriendRequestDto:
+      type: object
+      properties:
+        targetEmail:
+          type: string
+      required:
+        - targetEmail
+    FriendRequestRecordDto:
+      type: object
+      properties:
+        id:
+          type: string
+        senderId:
+          type: string
+        receiverId:
+          type: string
+        status:
+          type: string
+        createdAt:
+          format: date-time
+          type: string
+        resolvedAt:
+          type: object
+          nullable: true
+      required:
+        - id
+        - senderId
+        - receiverId
+        - status
+        - createdAt
+    FriendRequestsResponseDto:
+      type: object
+      properties:
+        incoming:
+          type: array
+          items:
+            $ref: '#/components/schemas/FriendRequestRecordDto'
+        outgoing:
+          type: array
+          items:
+            $ref: '#/components/schemas/FriendRequestRecordDto'
+      required:
+        - incoming
+        - outgoing
+    ResolveFriendRequestDto:
+      type: object
+      properties:
+        action:
+          type: string
+          enum:
+            - accept
+            - reject
+      required:
+        - action
+    FriendProfileDto:
+      type: object
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+        username:
+          type: string
+        avatarUrl:
+          type: string
+      required:
+        - id
+        - email
+        - username
+        - avatarUrl
+    FriendsResponseDto:
+      type: object
+      properties:
+        friends:
+          type: array
+          items:
+            $ref: '#/components/schemas/FriendProfileDto'
+      required:
+        - friends
+    AssignGameAdminDto:
+      type: object
+      properties:
+        accountId:
+          type: string
+          format: uuid
+      required:
+        - accountId
+    GameAdminRoleRecordDto:
+      type: object
+      properties:
+        accountId:
+          type: string
+        gameId:
+          type: string
+        grantedAt:
+          format: date-time
+          type: string
+      required:
+        - accountId
+        - gameId
+        - grantedAt

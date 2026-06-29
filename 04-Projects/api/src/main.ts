@@ -1,10 +1,10 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { ConfigService } from '@nestjs/config';
 import * as fs from 'fs';
 import * as yaml from 'js-yaml';
 import { AppModule } from './app.module';
-import { AppConfig } from './config/app.config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -32,8 +32,9 @@ async function bootstrap() {
   // Write generated OpenAPI spec to file for tooling
   fs.writeFileSync('openapi.yml', yaml.dump(document, { noRefs: true }));
 
-  const appCfg = app.get<AppConfig>('app');
-  await app.listen(appCfg.port ?? 3000);
+  const configService = app.get(ConfigService);
+  const port = configService.get<number>('app.port') ?? 3000;
+  await app.listen(port);
 }
 
 bootstrap();

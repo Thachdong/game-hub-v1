@@ -1,4 +1,5 @@
 import 'reflect-metadata';
+import 'dotenv/config';
 import { DataSource } from 'typeorm';
 
 // Used exclusively by the TypeORM CLI (migration:run, migration:revert, migration:generate).

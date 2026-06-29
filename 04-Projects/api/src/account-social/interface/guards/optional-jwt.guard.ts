@@ -1,4 +1,4 @@
-import { Injectable, ExecutionContext, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 
 @Injectable()
@@ -8,8 +8,6 @@ export class OptionalJwtGuard extends AuthGuard('jwt') {
   handleRequest<T>(err: Error | null, user: T, info: { name?: string } | null): T {
     if (err) throw err;
 
-    const noTokenProvided =
-      !info || info.name === 'JsonWebTokenError' === false;
     const isNoAuthHeader = info && (info as { message?: string }).message === 'No auth token';
 
     if (!user && isNoAuthHeader) {
