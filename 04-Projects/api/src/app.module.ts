@@ -9,6 +9,7 @@ import { appConfig, validationSchema } from '@config/app.config';
 import { AccountSocialModule } from './account-social/account-social.module';
 import { SharedAuthModule } from './shared-auth/shared-auth.module';
 import { NotificationModule } from './notification/notification.module';
+import { RealtimeModule } from './realtime/realtime.module';
 import { DomainExceptionFilter } from './account-social/interface/filters/domain-exception.filter';
 
 @Module({
@@ -34,6 +35,7 @@ import { DomainExceptionFilter } from './account-social/interface/filters/domain
     EventEmitterModule.forRoot({ wildcard: false }),
     SharedAuthModule,
     AccountSocialModule,
+    RealtimeModule,
     NotificationModule,
   ],
   providers: [
