@@ -2,10 +2,13 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { APP_FILTER } from '@nestjs/core';
 import { authConfig } from '@config/auth.config';
 import { googleOAuthConfig } from '@config/google-oauth.config';
 import { appConfig, validationSchema } from '@config/app.config';
 import { AccountSocialModule } from './account-social/account-social.module';
+import { SharedAuthModule } from './shared-auth/shared-auth.module';
+import { DomainExceptionFilter } from './account-social/interface/filters/domain-exception.filter';
 
 @Module({
   imports: [
@@ -28,7 +31,11 @@ import { AccountSocialModule } from './account-social/account-social.module';
       inject: [ConfigService],
     }),
     EventEmitterModule.forRoot({ wildcard: false }),
+    SharedAuthModule,
     AccountSocialModule,
+  ],
+  providers: [
+    { provide: APP_FILTER, useClass: DomainExceptionFilter },
   ],
 })
 export class AppModule {}
