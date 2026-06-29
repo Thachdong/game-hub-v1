@@ -9,12 +9,8 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiBearerAuth,
-} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiDataResponse, ApiErrorResponse } from '@common/decorators/api-response.decorator';
 import { LoginWithGoogleUseCase } from '@application/commands/login-with-google.use-case';
 import { RefreshAccessTokenUseCase } from '@application/commands/refresh-access-token.use-case';
 import { GoogleUserInfo } from '@domain/ports/google-oauth.port';
@@ -42,8 +38,8 @@ export class AuthController {
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
   @ApiOperation({ summary: 'Google OAuth callback' })
-  @ApiResponse({ status: 200, type: LoginResponseDto })
-  @ApiResponse({ status: 503, description: 'Google OAuth unavailable' })
+  @ApiDataResponse(LoginResponseDto, { status: 200 })
+  @ApiErrorResponse(503, 'Google OAuth unavailable')
   async googleCallback(
     @Req() req: { user: GoogleUserInfo },
   ): Promise<LoginResponseDto> {
@@ -73,9 +69,9 @@ export class AuthController {
   @Post('refresh')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Refresh access token' })
-  @ApiResponse({ status: 200, type: RefreshResponseDto })
-  @ApiResponse({ status: 400, description: 'Missing refresh token' })
-  @ApiResponse({ status: 401, description: 'Invalid or expired refresh token' })
+  @ApiDataResponse(RefreshResponseDto, { status: 200 })
+  @ApiErrorResponse(400, 'Missing refresh token')
+  @ApiErrorResponse(401, 'Invalid or expired refresh token')
   async refresh(@Body() dto: RefreshRequestDto): Promise<RefreshResponseDto> {
     try {
       const result = await this.refreshAccessToken.execute(dto.refreshToken);

@@ -25,7 +25,8 @@
       "@infrastructure/*": ["./src/account-social/infrastructure/*"],
       "@interface/*": ["./src/account-social/interface/*"],
       "@config/*": ["./src/config/*"],
-      "@database/*": ["./src/database/*"]
+      "@database/*": ["./src/database/*"],
+      "@common/*": ["./src/common/*"]
     }
   },
   "exclude": ["node_modules", "dist"]

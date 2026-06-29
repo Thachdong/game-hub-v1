@@ -9,12 +9,8 @@ import {
   BadRequestException,
   ParseUUIDPipe,
 } from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiBearerAuth,
-} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiDataResponse, ApiErrorResponse } from '@common/decorators/api-response.decorator';
 import { JwtAuthGuard } from '../../../shared-auth/jwt-auth.guard';
 import { GetNotificationsUseCase } from '../../application/queries/get-notifications.use-case';
 import { MarkNotificationReadUseCase } from '../../application/commands/mark-notification-read.use-case';
@@ -36,9 +32,9 @@ export class NotificationsController {
 
   @Get()
   @ApiOperation({ summary: 'Get authenticated player notification list (newest first)' })
-  @ApiResponse({ status: 200, type: NotificationListResponseDto })
-  @ApiResponse({ status: 400, description: 'Invalid query parameters' })
-  @ApiResponse({ status: 401, description: 'Missing or invalid JWT' })
+  @ApiDataResponse(NotificationListResponseDto, { status: 200 })
+  @ApiErrorResponse(400, 'Invalid query parameters')
+  @ApiErrorResponse(401, 'Missing or invalid JWT')
   async list(
     @Req() req: { user: AccessTokenPayload },
     @Query() query: GetNotificationsQueryDto,
@@ -70,11 +66,11 @@ export class NotificationsController {
 
   @Patch(':id/read')
   @ApiOperation({ summary: 'Mark a notification as read (idempotent)' })
-  @ApiResponse({ status: 200, type: MarkReadResponseDto })
-  @ApiResponse({ status: 400, description: 'Invalid UUID format' })
-  @ApiResponse({ status: 401, description: 'Missing or invalid JWT' })
-  @ApiResponse({ status: 403, description: 'Notification belongs to a different user' })
-  @ApiResponse({ status: 404, description: 'Notification not found' })
+  @ApiDataResponse(MarkReadResponseDto, { status: 200 })
+  @ApiErrorResponse(400, 'Invalid UUID format')
+  @ApiErrorResponse(401, 'Missing or invalid JWT')
+  @ApiErrorResponse(403, 'Notification belongs to a different user')
+  @ApiErrorResponse(404, 'Notification not found')
   async markRead(
     @Req() req: { user: AccessTokenPayload },
     @Param('id', ParseUUIDPipe) id: string,

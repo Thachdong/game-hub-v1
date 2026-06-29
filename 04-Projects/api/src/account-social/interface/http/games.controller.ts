@@ -1,10 +1,6 @@
 import { Controller, Get, Req, UseGuards } from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiBearerAuth,
-} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiDataResponse } from '@common/decorators/api-response.decorator';
 import { OptionalJwtGuard } from '@interface/guards/optional-jwt.guard';
 import { GetGameListUseCase } from '@application/queries/get-game-list.use-case';
 import { GameListResponseDto } from '@interface/dto/games/game-list-response.dto';
@@ -19,7 +15,7 @@ export class GamesController {
   @UseGuards(OptionalJwtGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'List all games, with hasProfile flag when authenticated' })
-  @ApiResponse({ status: 200, type: GameListResponseDto })
+  @ApiDataResponse(GameListResponseDto, { status: 200 })
   async list(
     @Req() req: { user?: AccessTokenPayload | null },
   ): Promise<GameListResponseDto> {

@@ -2,15 +2,16 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { EventEmitterModule } from '@nestjs/event-emitter';
-import { APP_FILTER } from '@nestjs/core';
+import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { authConfig } from '@config/auth.config';
 import { googleOAuthConfig } from '@config/google-oauth.config';
 import { appConfig, validationSchema } from '@config/app.config';
+import { GlobalExceptionFilter } from '@common/filters/global-exception.filter';
+import { ResponseInterceptor } from '@common/interceptors/response.interceptor';
 import { AccountSocialModule } from './account-social/account-social.module';
 import { SharedAuthModule } from './shared-auth/shared-auth.module';
 import { NotificationModule } from './notification/notification.module';
 import { RealtimeModule } from './realtime/realtime.module';
-import { DomainExceptionFilter } from './account-social/interface/filters/domain-exception.filter';
 
 @Module({
   imports: [
@@ -39,7 +40,8 @@ import { DomainExceptionFilter } from './account-social/interface/filters/domain
     NotificationModule,
   ],
   providers: [
-    { provide: APP_FILTER, useClass: DomainExceptionFilter },
+    { provide: APP_FILTER, useClass: GlobalExceptionFilter },
+    { provide: APP_INTERCEPTOR, useClass: ResponseInterceptor },
   ],
 })
 export class AppModule {}

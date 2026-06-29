@@ -9,12 +9,8 @@ import {
   HttpStatus,
   HttpException,
 } from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiBearerAuth,
-} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiDataResponse, ApiErrorResponse } from '@common/decorators/api-response.decorator';
 import { JwtAuthGuard } from '@interface/guards/jwt-auth.guard';
 import { PlatformAdminGuard } from '@interface/guards/platform-admin.guard';
 import { AssignGameAdminUseCase } from '@application/commands/assign-game-admin.use-case';
@@ -40,9 +36,9 @@ export class AdminController {
   @Post('games/:gameId/admins')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Assign Game Admin role' })
-  @ApiResponse({ status: 201, type: GameAdminRoleRecordDto })
-  @ApiResponse({ status: 403, description: 'Requires Platform Admin' })
-  @ApiResponse({ status: 404, description: 'Account or game not found' })
+  @ApiDataResponse(GameAdminRoleRecordDto, { status: 201 })
+  @ApiErrorResponse(403, 'Requires Platform Admin')
+  @ApiErrorResponse(404, 'Account or game not found')
   async assign(
     @Param('gameId') gameId: string,
     @Body() dto: AssignGameAdminDto,
@@ -62,9 +58,9 @@ export class AdminController {
   @Delete('games/:gameId/admins/:accountId')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Revoke Game Admin role' })
-  @ApiResponse({ status: 204, description: 'Role revoked' })
-  @ApiResponse({ status: 403, description: 'Requires Platform Admin' })
-  @ApiResponse({ status: 404, description: 'Role not found' })
+  @ApiResponse({ status: 204, description: 'Role revoked (no body)' })
+  @ApiErrorResponse(403, 'Requires Platform Admin')
+  @ApiErrorResponse(404, 'Role not found')
   async revoke(
     @Param('gameId') gameId: string,
     @Param('accountId') accountId: string,
