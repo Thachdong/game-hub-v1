@@ -6,8 +6,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_FILTER } from '@nestjs/core';
 
 // Config
-import { APP_CONFIG, AppConfig } from '../config/app.config';
-import { AuthConfig } from '../config/auth.config';
+import { APP_CONFIG, AppConfig } from '@config/app.config';
+import { AuthConfig } from '@config/auth.config';
 
 // ORM Entities
 import { AccountOrmEntity } from './infrastructure/persistence/typeorm-entities/account.orm-entity';

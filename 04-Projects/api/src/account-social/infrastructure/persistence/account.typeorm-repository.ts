@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { AccountOrmEntity } from './typeorm-entities/account.orm-entity';
-import { IAccountRepository } from '../../domain/ports/account.repository.port';
-import { Account } from '../../domain/entities/account';
+import { IAccountRepository } from '@domain/ports/account.repository.port';
+import { Account } from '@domain/entities/account';
 import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()

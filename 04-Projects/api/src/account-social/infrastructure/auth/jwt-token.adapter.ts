@@ -5,8 +5,8 @@ import {
   ITokenService,
   AccessTokenPayload,
   RefreshTokenPayload,
-} from '../../domain/ports/token.service.port';
-import { AuthConfig } from '../../../config/auth.config';
+} from '@domain/ports/token.service.port';
+import { AuthConfig } from '@config/auth.config';
 
 @Injectable()
 export class JwtTokenAdapter implements ITokenService {

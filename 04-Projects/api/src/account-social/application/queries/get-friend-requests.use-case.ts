@@ -2,8 +2,8 @@ import { Inject, Injectable } from '@nestjs/common';
 import {
   FRIEND_REQUEST_REPO,
   IFriendRequestRepository,
-} from '../../domain/ports/friend-request.repository.port';
-import { FriendRequest } from '../../domain/entities/friend-request';
+} from '@domain/ports/friend-request.repository.port';
+import { FriendRequest } from '@domain/entities/friend-request';
 
 export interface FriendRequestsResult {
   incoming: FriendRequest[];

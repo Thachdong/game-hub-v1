@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
-import { IGameAdminRoleRepository } from '../../domain/ports/game-admin-role.repository.port';
-import { GameAdminRole } from '../../domain/entities/game-admin-role';
+import { IGameAdminRoleRepository } from '@domain/ports/game-admin-role.repository.port';
+import { GameAdminRole } from '@domain/entities/game-admin-role';
 import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()

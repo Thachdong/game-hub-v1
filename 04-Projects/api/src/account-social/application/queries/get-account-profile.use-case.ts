@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { ACCOUNT_REPO, IAccountRepository } from '../../domain/ports/account.repository.port';
-import { Account } from '../../domain/entities/account';
-import { AccountNotFoundError } from '../../domain/errors';
+import { ACCOUNT_REPO, IAccountRepository } from '@domain/ports/account.repository.port';
+import { Account } from '@domain/entities/account';
+import { AccountNotFoundError } from '@domain/errors';
 
 @Injectable()
 export class GetAccountProfileUseCase {

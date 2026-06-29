@@ -2,9 +2,9 @@ import { Inject, Injectable } from '@nestjs/common';
 import {
   FRIENDSHIP_REPO,
   IFriendshipRepository,
-} from '../../domain/ports/friendship.repository.port';
-import { ACCOUNT_REPO, IAccountRepository } from '../../domain/ports/account.repository.port';
-import { Account } from '../../domain/entities/account';
+} from '@domain/ports/friendship.repository.port';
+import { ACCOUNT_REPO, IAccountRepository } from '@domain/ports/account.repository.port';
+import { Account } from '@domain/entities/account';
 
 @Injectable()
 export class GetFriendsUseCase {

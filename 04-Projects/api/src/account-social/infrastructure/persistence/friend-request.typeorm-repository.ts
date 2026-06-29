@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
-import { IFriendRequestRepository } from '../../domain/ports/friend-request.repository.port';
-import { FriendRequest, FriendRequestStatus } from '../../domain/entities/friend-request';
+import { IFriendRequestRepository } from '@domain/ports/friend-request.repository.port';
+import { FriendRequest, FriendRequestStatus } from '@domain/entities/friend-request';
 import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()

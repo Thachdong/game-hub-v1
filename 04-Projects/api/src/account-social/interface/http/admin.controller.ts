@@ -15,17 +15,17 @@ import {
   ApiResponse,
   ApiBearerAuth,
 } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../guards/jwt-auth.guard';
-import { PlatformAdminGuard } from '../guards/platform-admin.guard';
-import { AssignGameAdminUseCase } from '../../application/commands/assign-game-admin.use-case';
-import { RevokeGameAdminUseCase } from '../../application/commands/revoke-game-admin.use-case';
-import { AssignGameAdminDto } from '../dto/admin/assign-game-admin.dto';
-import { GameAdminRoleRecordDto } from '../dto/admin/game-admin-role-record.dto';
+import { JwtAuthGuard } from '@interface/guards/jwt-auth.guard';
+import { PlatformAdminGuard } from '@interface/guards/platform-admin.guard';
+import { AssignGameAdminUseCase } from '@application/commands/assign-game-admin.use-case';
+import { RevokeGameAdminUseCase } from '@application/commands/revoke-game-admin.use-case';
+import { AssignGameAdminDto } from '@interface/dto/admin/assign-game-admin.dto';
+import { GameAdminRoleRecordDto } from '@interface/dto/admin/game-admin-role-record.dto';
 import {
   AccountNotFoundError,
   GameNotFoundError,
   GameAdminRoleNotFoundError,
-} from '../../domain/errors';
+} from '@domain/errors';
 
 @ApiTags('Admin')
 @Controller('admin')

@@ -15,13 +15,13 @@ import {
   ApiResponse,
   ApiBearerAuth,
 } from '@nestjs/swagger';
-import { LoginWithGoogleUseCase } from '../../application/commands/login-with-google.use-case';
-import { RefreshAccessTokenUseCase } from '../../application/commands/refresh-access-token.use-case';
-import { GoogleUserInfo } from '../../domain/ports/google-oauth.port';
-import { GoogleOAuthUnavailableError, InvalidRefreshTokenError } from '../../domain/errors';
-import { LoginResponseDto } from '../dto/auth/login-response.dto';
-import { RefreshRequestDto } from '../dto/auth/refresh-request.dto';
-import { RefreshResponseDto } from '../dto/auth/refresh-response.dto';
+import { LoginWithGoogleUseCase } from '@application/commands/login-with-google.use-case';
+import { RefreshAccessTokenUseCase } from '@application/commands/refresh-access-token.use-case';
+import { GoogleUserInfo } from '@domain/ports/google-oauth.port';
+import { GoogleOAuthUnavailableError, InvalidRefreshTokenError } from '@domain/errors';
+import { LoginResponseDto } from '@interface/dto/auth/login-response.dto';
+import { RefreshRequestDto } from '@interface/dto/auth/refresh-request.dto';
+import { RefreshResponseDto } from '@interface/dto/auth/refresh-response.dto';
 
 @ApiTags('Auth')
 @Controller('auth')

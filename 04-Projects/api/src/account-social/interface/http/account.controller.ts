@@ -5,10 +5,10 @@ import {
   ApiResponse,
   ApiBearerAuth,
 } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../guards/jwt-auth.guard';
-import { GetAccountProfileUseCase } from '../../application/queries/get-account-profile.use-case';
-import { AccountProfileDto } from '../dto/account/account-profile.dto';
-import { AccessTokenPayload } from '../../domain/ports/token.service.port';
+import { JwtAuthGuard } from '@interface/guards/jwt-auth.guard';
+import { GetAccountProfileUseCase } from '@application/queries/get-account-profile.use-case';
+import { AccountProfileDto } from '@interface/dto/account/account-profile.dto';
+import { AccessTokenPayload } from '@domain/ports/token.service.port';
 
 @ApiTags('Account')
 @Controller('accounts')

@@ -2,22 +2,22 @@ import { Inject, Injectable } from '@nestjs/common';
 import {
   FRIEND_REQUEST_REPO,
   IFriendRequestRepository,
-} from '../../domain/ports/friend-request.repository.port';
+} from '@domain/ports/friend-request.repository.port';
 import {
   FRIENDSHIP_REPO,
   IFriendshipRepository,
-} from '../../domain/ports/friendship.repository.port';
+} from '@domain/ports/friendship.repository.port';
 import {
   EVENT_PUBLISHER_PORT,
   IEventPublisherPort,
-} from '../../domain/ports/event-publisher.port';
-import { FriendRequest, FriendRequestStatus } from '../../domain/entities/friend-request';
-import { FriendRequestResolvedEvent } from '../../domain/events/friend-request-resolved.event';
+} from '@domain/ports/event-publisher.port';
+import { FriendRequest, FriendRequestStatus } from '@domain/entities/friend-request';
+import { FriendRequestResolvedEvent } from '@domain/events/friend-request-resolved.event';
 import {
   FriendRequestNotFoundError,
   ForbiddenDomainError,
   AlreadyFriendsError,
-} from '../../domain/errors';
+} from '@domain/errors';
 
 @Injectable()
 export class ResolveFriendRequestUseCase {

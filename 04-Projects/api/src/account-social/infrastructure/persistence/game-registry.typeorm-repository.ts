@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
-import { IGameRegistryPort, GameRef } from '../../domain/ports/game-registry.port';
+import { IGameRegistryPort, GameRef } from '@domain/ports/game-registry.port';
 
 @Injectable()
 export class GameRegistryTypeOrmRepository implements IGameRegistryPort {

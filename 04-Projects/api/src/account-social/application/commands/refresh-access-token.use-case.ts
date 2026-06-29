@@ -1,13 +1,13 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { ACCOUNT_REPO, IAccountRepository } from '../../domain/ports/account.repository.port';
+import { ACCOUNT_REPO, IAccountRepository } from '@domain/ports/account.repository.port';
 import {
   GAME_ADMIN_ROLE_REPO,
   IGameAdminRoleRepository,
-} from '../../domain/ports/game-admin-role.repository.port';
-import { TOKEN_SERVICE, ITokenService } from '../../domain/ports/token.service.port';
-import { APP_CONFIG, AppConfig } from '../../../config/app.config';
-import { InvalidRefreshTokenError } from '../../domain/errors';
-import { AccountNotFoundError } from '../../domain/errors';
+} from '@domain/ports/game-admin-role.repository.port';
+import { TOKEN_SERVICE, ITokenService } from '@domain/ports/token.service.port';
+import { APP_CONFIG, AppConfig } from '@config/app.config';
+import { InvalidRefreshTokenError } from '@domain/errors';
+import { AccountNotFoundError } from '@domain/errors';
 
 export interface RefreshAccessTokenResult {
   accessToken: string;

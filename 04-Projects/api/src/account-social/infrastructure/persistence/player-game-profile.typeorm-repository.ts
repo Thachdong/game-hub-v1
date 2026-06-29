@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
-import { IPlayerGameProfileRepository } from '../../domain/ports/player-game-profile.repository.port';
+import { IPlayerGameProfileRepository } from '@domain/ports/player-game-profile.repository.port';
 import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()

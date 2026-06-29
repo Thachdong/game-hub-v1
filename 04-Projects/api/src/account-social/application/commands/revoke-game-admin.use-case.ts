@@ -2,8 +2,8 @@ import { Inject, Injectable } from '@nestjs/common';
 import {
   GAME_ADMIN_ROLE_REPO,
   IGameAdminRoleRepository,
-} from '../../domain/ports/game-admin-role.repository.port';
-import { GameAdminRoleNotFoundError } from '../../domain/errors';
+} from '@domain/ports/game-admin-role.repository.port';
+import { GameAdminRoleNotFoundError } from '@domain/errors';
 
 @Injectable()
 export class RevokeGameAdminUseCase {

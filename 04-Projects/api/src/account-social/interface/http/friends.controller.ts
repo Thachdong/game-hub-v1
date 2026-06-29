@@ -17,19 +17,19 @@ import {
   ApiResponse,
   ApiBearerAuth,
 } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../guards/jwt-auth.guard';
-import { SendFriendRequestUseCase } from '../../application/commands/send-friend-request.use-case';
-import { ResolveFriendRequestUseCase } from '../../application/commands/resolve-friend-request.use-case';
-import { GetFriendsUseCase } from '../../application/queries/get-friends.use-case';
-import { GetFriendRequestsUseCase } from '../../application/queries/get-friend-requests.use-case';
-import { SendFriendRequestDto } from '../dto/friends/send-friend-request.dto';
-import { ResolveFriendRequestDto } from '../dto/friends/resolve-friend-request.dto';
-import { FriendRequestRecordDto } from '../dto/friends/friend-request-record.dto';
+import { JwtAuthGuard } from '@interface/guards/jwt-auth.guard';
+import { SendFriendRequestUseCase } from '@application/commands/send-friend-request.use-case';
+import { ResolveFriendRequestUseCase } from '@application/commands/resolve-friend-request.use-case';
+import { GetFriendsUseCase } from '@application/queries/get-friends.use-case';
+import { GetFriendRequestsUseCase } from '@application/queries/get-friend-requests.use-case';
+import { SendFriendRequestDto } from '@interface/dto/friends/send-friend-request.dto';
+import { ResolveFriendRequestDto } from '@interface/dto/friends/resolve-friend-request.dto';
+import { FriendRequestRecordDto } from '@interface/dto/friends/friend-request-record.dto';
 import {
   FriendsResponseDto,
   FriendRequestsResponseDto,
   FriendProfileDto,
-} from '../dto/friends/friends-response.dto';
+} from '@interface/dto/friends/friends-response.dto';
 import {
   AccountNotFoundError,
   SelfFriendRequestError,
@@ -37,10 +37,10 @@ import {
   AlreadyFriendsError,
   FriendRequestNotFoundError,
   ForbiddenDomainError,
-} from '../../domain/errors';
-import { AccessTokenPayload } from '../../domain/ports/token.service.port';
-import { FriendRequest } from '../../domain/entities/friend-request';
-import { Account } from '../../domain/entities/account';
+} from '@domain/errors';
+import { AccessTokenPayload } from '@domain/ports/token.service.port';
+import { FriendRequest } from '@domain/entities/friend-request';
+import { Account } from '@domain/entities/account';
 
 function toFriendRequestDto(r: FriendRequest): FriendRequestRecordDto {
   return {

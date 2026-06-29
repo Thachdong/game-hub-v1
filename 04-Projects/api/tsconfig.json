@@ -23,7 +23,9 @@
       "@domain/*": ["./src/account-social/domain/*"],
       "@application/*": ["./src/account-social/application/*"],
       "@infrastructure/*": ["./src/account-social/infrastructure/*"],
-      "@interface/*": ["./src/account-social/interface/*"]
+      "@interface/*": ["./src/account-social/interface/*"],
+      "@config/*": ["./src/config/*"],
+      "@database/*": ["./src/database/*"]
     }
   },
   "exclude": ["node_modules", "dist"]

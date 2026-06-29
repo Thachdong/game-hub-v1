@@ -9,6 +9,13 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  const configService = app.get(ConfigService);
+
+  app.enableCors({
+    origin: configService.get<string[]>('app.corsOrigins'),
+    credentials: true,
+  });
+
   app.setGlobalPrefix('api');
 
   app.useGlobalPipes(
@@ -32,7 +39,6 @@ async function bootstrap() {
   // Write generated OpenAPI spec to file for tooling
   fs.writeFileSync('openapi.yml', yaml.dump(document, { noRefs: true }));
 
-  const configService = app.get(ConfigService);
   const port = configService.get<number>('app.port') ?? 3000;
   await app.listen(port);
 }

@@ -5,10 +5,10 @@ import {
   ApiResponse,
   ApiBearerAuth,
 } from '@nestjs/swagger';
-import { OptionalJwtGuard } from '../guards/optional-jwt.guard';
-import { GetGameListUseCase } from '../../application/queries/get-game-list.use-case';
-import { GameListResponseDto } from '../dto/games/game-list-response.dto';
-import { AccessTokenPayload } from '../../domain/ports/token.service.port';
+import { OptionalJwtGuard } from '@interface/guards/optional-jwt.guard';
+import { GetGameListUseCase } from '@application/queries/get-game-list.use-case';
+import { GameListResponseDto } from '@interface/dto/games/game-list-response.dto';
+import { AccessTokenPayload } from '@domain/ports/token.service.port';
 
 @ApiTags('Games')
 @Controller('games')

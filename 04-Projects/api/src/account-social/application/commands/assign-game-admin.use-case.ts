@@ -2,14 +2,14 @@ import { Inject, Injectable } from '@nestjs/common';
 import {
   GAME_ADMIN_ROLE_REPO,
   IGameAdminRoleRepository,
-} from '../../domain/ports/game-admin-role.repository.port';
+} from '@domain/ports/game-admin-role.repository.port';
 import {
   GAME_REGISTRY_PORT,
   IGameRegistryPort,
-} from '../../domain/ports/game-registry.port';
-import { ACCOUNT_REPO, IAccountRepository } from '../../domain/ports/account.repository.port';
-import { GameAdminRole } from '../../domain/entities/game-admin-role';
-import { AccountNotFoundError, GameNotFoundError } from '../../domain/errors';
+} from '@domain/ports/game-registry.port';
+import { ACCOUNT_REPO, IAccountRepository } from '@domain/ports/account.repository.port';
+import { GameAdminRole } from '@domain/entities/game-admin-role';
+import { AccountNotFoundError, GameNotFoundError } from '@domain/errors';
 
 @Injectable()
 export class AssignGameAdminUseCase {

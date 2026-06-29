@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, Profile } from 'passport-google-oauth20';
 import { ConfigService } from '@nestjs/config';
-import { GoogleOAuthConfig } from '../../../config/google-oauth.config';
-import { GoogleUserInfo } from '../../domain/ports/google-oauth.port';
+import { GoogleOAuthConfig } from '@config/google-oauth.config';
+import { GoogleUserInfo } from '@domain/ports/google-oauth.port';
 
 @Injectable()
 export class GoogleOAuthAdapter extends PassportStrategy(Strategy, 'google') {

@@ -1,10 +1,10 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
-import { GameProfileCreatedEvent } from '../../domain/events/game-profile-created.event';
+import { GameProfileCreatedEvent } from '@domain/events/game-profile-created.event';
 import {
   PLAYER_GAME_PROFILE_REPO,
   IPlayerGameProfileRepository,
-} from '../../domain/ports/player-game-profile.repository.port';
+} from '@domain/ports/player-game-profile.repository.port';
 
 @Injectable()
 export class GameProfileCreatedListener {

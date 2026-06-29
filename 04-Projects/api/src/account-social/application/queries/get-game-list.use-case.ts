@@ -3,11 +3,11 @@ import {
   GAME_REGISTRY_PORT,
   IGameRegistryPort,
   GameRef,
-} from '../../domain/ports/game-registry.port';
+} from '@domain/ports/game-registry.port';
 import {
   PLAYER_GAME_PROFILE_REPO,
   IPlayerGameProfileRepository,
-} from '../../domain/ports/player-game-profile.repository.port';
+} from '@domain/ports/player-game-profile.repository.port';
 
 export type GameListEntry = GameRef & { hasProfile?: boolean };
 

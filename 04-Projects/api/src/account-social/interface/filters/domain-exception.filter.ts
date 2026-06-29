@@ -11,7 +11,7 @@ import {
   GameAdminRoleNotFoundError,
   ForbiddenDomainError,
   GoogleOAuthUnavailableError,
-} from '../../domain/errors';
+} from '@domain/errors';
 
 const DOMAIN_ERROR_MAP = new Map<new () => DomainError, [HttpStatus, string]>([
   [AccountNotFoundError, [HttpStatus.NOT_FOUND, 'ACCOUNT_NOT_FOUND']],

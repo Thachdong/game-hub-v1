@@ -1,13 +1,13 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { ACCOUNT_REPO, IAccountRepository } from '../../domain/ports/account.repository.port';
+import { ACCOUNT_REPO, IAccountRepository } from '@domain/ports/account.repository.port';
 import {
   GAME_ADMIN_ROLE_REPO,
   IGameAdminRoleRepository,
-} from '../../domain/ports/game-admin-role.repository.port';
-import { TOKEN_SERVICE, ITokenService } from '../../domain/ports/token.service.port';
-import { APP_CONFIG, AppConfig } from '../../../config/app.config';
-import { GoogleUserInfo } from '../../domain/ports/google-oauth.port';
-import { Account } from '../../domain/entities/account';
+} from '@domain/ports/game-admin-role.repository.port';
+import { TOKEN_SERVICE, ITokenService } from '@domain/ports/token.service.port';
+import { APP_CONFIG, AppConfig } from '@config/app.config';
+import { GoogleUserInfo } from '@domain/ports/google-oauth.port';
+import { Account } from '@domain/entities/account';
 
 export interface LoginWithGoogleResult {
   accessToken: string;

@@ -5,7 +5,7 @@ import {
   CreateDateColumn,
   Unique,
 } from 'typeorm';
-import { FriendRequestStatus } from '../../../domain/entities/friend-request';
+import { FriendRequestStatus } from '@domain/entities/friend-request';
 
 @Entity({ schema: 'account_social', name: 'friend_requests' })
 @Unique(['senderId', 'receiverId'])

@@ -1,20 +1,20 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { ACCOUNT_REPO, IAccountRepository } from '../../domain/ports/account.repository.port';
+import { ACCOUNT_REPO, IAccountRepository } from '@domain/ports/account.repository.port';
 import {
   FRIEND_REQUEST_REPO,
   IFriendRequestRepository,
-} from '../../domain/ports/friend-request.repository.port';
+} from '@domain/ports/friend-request.repository.port';
 import {
   FRIENDSHIP_REPO,
   IFriendshipRepository,
-} from '../../domain/ports/friendship.repository.port';
-import { FriendRequest } from '../../domain/entities/friend-request';
+} from '@domain/ports/friendship.repository.port';
+import { FriendRequest } from '@domain/entities/friend-request';
 import {
   AccountNotFoundError,
   SelfFriendRequestError,
   AlreadyFriendsError,
   FriendRequestDuplicateError,
-} from '../../domain/errors';
+} from '@domain/errors';
 
 @Injectable()
 export class SendFriendRequestUseCase {

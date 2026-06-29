@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { IEventPublisherPort } from '../../domain/ports/event-publisher.port';
+import { IEventPublisherPort } from '@domain/ports/event-publisher.port';
 
 @Injectable()
 export class EventPublisherAdapter implements IEventPublisherPort {
