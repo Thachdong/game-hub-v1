@@ -36,6 +36,9 @@ import { UpdateReportTypeUseCase } from './application/commands/update-report-ty
 import { DeactivateReportTypeUseCase } from './application/commands/deactivate-report-type.use-case';
 import { ListAllReportTypesUseCase } from './application/queries/list-all-report-types.use-case';
 
+// Application (US4)
+import { GetTrustScoreUseCase } from './application/queries/get-trust-score.use-case';
+
 // Controllers (US1)
 import { ReportTypesController } from './interface/http/report-types.controller';
 import { ReportsController } from './interface/http/reports.controller';
@@ -45,6 +48,9 @@ import { AdminReportsController } from './interface/http/admin/admin-reports.con
 
 // Controllers (US3)
 import { AdminReportTypesController } from './interface/http/admin/admin-report-types.controller';
+
+// Controllers (US4)
+import { TrustScoreController } from './interface/http/trust-score.controller';
 
 @Module({
   imports: [
@@ -73,12 +79,16 @@ import { AdminReportTypesController } from './interface/http/admin/admin-report-
     UpdateReportTypeUseCase,
     DeactivateReportTypeUseCase,
     ListAllReportTypesUseCase,
+
+    // Use cases (US4)
+    GetTrustScoreUseCase,
   ],
   controllers: [
     ReportTypesController,
     ReportsController,
     AdminReportsController,
     AdminReportTypesController,
+    TrustScoreController,
   ],
   exports: [],
 })

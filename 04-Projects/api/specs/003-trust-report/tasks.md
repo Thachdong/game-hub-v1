@@ -398,24 +398,24 @@ exposes the score to the player via `GET /trust-score/me`.
 
 ### Implementation for User Story 4
 
-- [ ] T039 [P] [US4] Create `GetTrustScoreUseCase` in
+- [x] T039 [P] [US4] Create `GetTrustScoreUseCase` in
   `src/trust-report/application/queries/get-trust-score.use-case.ts` — calls
   `ITrustScoreRepositoryPort.findByAccountId(accountId)`; if row is null (missing initialization
   event edge case) returns `{ score: 100, gameLockedUntil: null, lastRecoveryDate: null }` as
   safe default (per `contracts/http-api.md §GET /trust-score/me`); computes
   `locked = gameLockedUntil !== null && gameLockedUntil > new Date()`.
 
-- [ ] T040 [P] [US4] Write `TrustScoreResponseDto` in
+- [x] T040 [P] [US4] Write `TrustScoreResponseDto` in
   `src/trust-report/interface/dto/trust-score-response.dto.ts` —
   `{ score: number; locked: boolean; lockedUntil: Date | null }`.
 
-- [ ] T041 [US4] Create `TrustScoreController` in
+- [x] T041 [US4] Create `TrustScoreController` in
   `src/trust-report/interface/http/trust-score.controller.ts` —
   `@Controller('trust-score')`, `@UseGuards(JwtAuthGuard)`:
   single `GET /me` handler — extract `accountId` from `request.user.sub`, call
   `GetTrustScoreUseCase`, return `TrustScoreResponseDto` with `200 OK`.
 
-- [ ] T042 [US4] Register US4 providers in `src/trust-report/trust-report.module.ts`:
+- [x] T042 [US4] Register US4 providers in `src/trust-report/trust-report.module.ts`:
   add `TrustScoreController` to `controllers`; add `GetTrustScoreUseCase` to `providers`.
 
 **Checkpoint**: US1 + US2 + US3 + US4 all independently functional.
