@@ -569,6 +569,261 @@ paths:
         - Notifications
       security:
         - bearer: []
+  /api/report-types:
+    get:
+      operationId: ReportTypesController_list
+      summary: List active report types available for submission
+      parameters: []
+      responses:
+        '200':
+          description: Active report types
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlayerReportTypeListDto'
+        '401':
+          description: Unauthorized
+      tags:
+        - Report Types
+      security:
+        - bearer: []
+  /api/reports:
+    post:
+      operationId: ReportsController_submit
+      summary: Submit a report against another user
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubmitReportDto'
+      responses:
+        '201':
+          description: Report created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubmitReportResponseDto'
+        '400':
+          description: Self-report or validation error
+        '401':
+          description: Unauthorized
+        '404':
+          description: Account or report type not found
+        '422':
+          description: Report type is inactive
+      tags:
+        - Reports
+      security:
+        - bearer: []
+  /api/admin/reports:
+    get:
+      operationId: AdminReportsController_list
+      summary: List reports (admin view, cursor-paginated)
+      parameters:
+        - name: status
+          required: false
+          in: query
+          schema:
+            enum:
+              - pending
+              - valid
+              - invalid
+            type: string
+        - name: limit
+          required: false
+          in: query
+          schema:
+            type: number
+        - name: cursorSubmittedAt
+          required: false
+          in: query
+          schema:
+            type: string
+        - name: cursorId
+          required: false
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminListReportsResponseDto'
+        '400':
+          description: Partial cursor provided
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden — not a Platform Admin
+      tags:
+        - Admin — Reports
+      security:
+        - bearer: []
+  /api/admin/reports/{id}/confirm:
+    patch:
+      operationId: AdminReportsController_confirm
+      summary: Confirm a pending report as valid or invalid
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReviewReportDto'
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfirmReportResponseDto'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden — not a Platform Admin
+        '404':
+          description: Report not found
+        '409':
+          description: Report already resolved
+      tags:
+        - Admin — Reports
+      security:
+        - bearer: []
+  /api/admin/report-types:
+    get:
+      operationId: AdminReportTypesController_list
+      summary: List all report types including inactive (admin view)
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminListReportTypesResponseDto'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden — not a Platform Admin
+      tags:
+        - Admin — Report Types
+      security:
+        - bearer: []
+    post:
+      operationId: AdminReportTypesController_create
+      summary: Create a new report type
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateReportTypeDto'
+      responses:
+        '201':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminReportTypeEntryDto'
+        '400':
+          description: Invalid deduction points
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden — not a Platform Admin
+        '409':
+          description: Name already taken
+      tags:
+        - Admin — Report Types
+      security:
+        - bearer: []
+  /api/admin/report-types/{id}:
+    patch:
+      operationId: AdminReportTypesController_update
+      summary: Update a report type (name, deductionPoints, active)
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateReportTypeDto'
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminReportTypeEntryDto'
+        '400':
+          description: Empty update or invalid points
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden — not a Platform Admin
+        '404':
+          description: Report type not found
+        '409':
+          description: Name already taken
+      tags:
+        - Admin — Report Types
+      security:
+        - bearer: []
+    delete:
+      operationId: AdminReportTypesController_deactivate
+      summary: Deactivate a report type (idempotent soft-delete)
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Deactivated or already inactive
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden — not a Platform Admin
+        '404':
+          description: Report type not found
+      tags:
+        - Admin — Report Types
+      security:
+        - bearer: []
+  /api/trust-score/me:
+    get:
+      operationId: TrustScoreController_getMyScore
+      summary: Get my trust score and lock status
+      parameters: []
+      responses:
+        '200':
+          description: Trust score
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrustScoreResponseDto'
+        '401':
+          description: Unauthorized
+      tags:
+        - Trust Score
+      security:
+        - bearer: []
 info:
   title: Game Hub API
   description: Account & Social Module
@@ -879,3 +1134,283 @@ components:
         - referenceId
         - isRead
         - createdAt
+    PlayerReportTypeDto:
+      type: object
+      properties:
+        id:
+          type: string
+          example: 9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d
+        name:
+          type: string
+          example: cheating
+      required:
+        - id
+        - name
+    PlayerReportTypeListDto:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlayerReportTypeDto'
+      required:
+        - items
+    SubmitReportDto:
+      type: object
+      properties:
+        reportedUserId:
+          type: string
+          example: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+        reportTypeId:
+          type: string
+          example: 9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d
+        context:
+          type: string
+          example: 'Used an aim-assist tool during ranked match #4821.'
+          minLength: 1
+          maxLength: 2000
+      required:
+        - reportedUserId
+        - reportTypeId
+        - context
+    SubmitReportResponseDto:
+      type: object
+      properties:
+        id:
+          type: string
+          example: 5e2c1a0e-2f1e-4d3b-9a8b-1c2d3e4f5a6b
+        reportedUserId:
+          type: string
+          example: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+        reportTypeId:
+          type: string
+          example: 9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d
+        context:
+          type: string
+          example: 'Used an aim-assist tool during ranked match #4821.'
+        status:
+          type: string
+          example: pending
+        submittedAt:
+          format: date-time
+          type: string
+          example: '2026-06-30T10:00:00.000Z'
+      required:
+        - id
+        - reportedUserId
+        - reportTypeId
+        - context
+        - status
+        - submittedAt
+    AdminReportEntryDto:
+      type: object
+      properties:
+        id:
+          type: string
+          example: 5e2c1a0e-2f1e-4d3b-9a8b-1c2d3e4f5a6b
+        reporterId:
+          type: string
+          example: 11111111-1111-1111-1111-111111111111
+        reportedUserId:
+          type: string
+          example: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+        reportTypeId:
+          type: string
+          example: 9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d
+        context:
+          type: string
+          example: 'Used an aim-assist tool during ranked match #4821.'
+        status:
+          type: string
+          example: pending
+          enum:
+            - pending
+            - valid
+            - invalid
+        appliedPoints:
+          type: object
+          example: 20
+          nullable: true
+        submittedAt:
+          format: date-time
+          type: string
+          example: '2026-06-30T10:00:00.000Z'
+        resolvedAt:
+          type: object
+          example: '2026-06-30T11:00:00.000Z'
+          nullable: true
+        resolvedBy:
+          type: object
+          example: 22222222-2222-2222-2222-222222222222
+          nullable: true
+      required:
+        - id
+        - reporterId
+        - reportedUserId
+        - reportTypeId
+        - context
+        - status
+        - submittedAt
+    AdminListReportsResponseDto:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminReportEntryDto'
+        nextCursor:
+          type: object
+          nullable: true
+      required:
+        - items
+    ReviewReportDto:
+      type: object
+      properties:
+        decision:
+          type: string
+          enum:
+            - valid
+            - invalid
+          example: valid
+      required:
+        - decision
+    TrustScoreSnapshotDto:
+      type: object
+      properties:
+        score:
+          type: number
+          example: 45
+        locked:
+          type: boolean
+          example: false
+        lockedUntil:
+          type: object
+          example: null
+          nullable: true
+      required:
+        - score
+        - locked
+    ConfirmReportResponseDto:
+      type: object
+      properties:
+        id:
+          type: string
+          example: 5e2c1a0e-2f1e-4d3b-9a8b-1c2d3e4f5a6b
+        status:
+          type: string
+          enum:
+            - valid
+            - invalid
+        appliedPoints:
+          type: object
+          example: 20
+          nullable: true
+        resolvedAt:
+          format: date-time
+          type: string
+          example: '2026-06-30T11:00:00.000Z'
+        resolvedBy:
+          type: string
+          example: 22222222-2222-2222-2222-222222222222
+        reportedUserTrustScore:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/TrustScoreSnapshotDto'
+      required:
+        - id
+        - status
+        - resolvedAt
+        - resolvedBy
+    AdminReportTypeEntryDto:
+      type: object
+      properties:
+        id:
+          type: string
+          example: 9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d
+        name:
+          type: string
+          example: cheating
+        deductionPoints:
+          type: number
+          example: 20
+        active:
+          type: boolean
+          example: true
+        createdAt:
+          format: date-time
+          type: string
+          example: '2026-06-01T00:00:00.000Z'
+        updatedAt:
+          format: date-time
+          type: string
+          example: '2026-06-30T10:00:00.000Z'
+      required:
+        - id
+        - name
+        - deductionPoints
+        - active
+        - createdAt
+        - updatedAt
+    AdminListReportTypesResponseDto:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminReportTypeEntryDto'
+      required:
+        - items
+    CreateReportTypeDto:
+      type: object
+      properties:
+        name:
+          type: string
+          example: griefing
+          minLength: 1
+        deductionPoints:
+          type: number
+          example: 15
+          minimum: 1
+          maximum: 100
+      required:
+        - name
+        - deductionPoints
+    UpdateReportTypeDto:
+      type: object
+      properties:
+        name:
+          type: string
+          example: griefing-v2
+        deductionPoints:
+          type: number
+          example: 15
+          minimum: 1
+          maximum: 100
+        active:
+          type: boolean
+          example: true
+    TrustScoreResponseDto:
+      type: object
+      properties:
+        score:
+          type: number
+          example: 80
+        gameLocked:
+          type: boolean
+          example: false
+        gameLockedUntil:
+          type: object
+          example: null
+          nullable: true
+        lastRecoveryDate:
+          type: object
+          example: '2026-06-29'
+          nullable: true
+        updatedAt:
+          format: date-time
+          type: string
+          example: '2026-06-30T10:00:00.000Z'
+      required:
+        - score
+        - gameLocked
+        - updatedAt
