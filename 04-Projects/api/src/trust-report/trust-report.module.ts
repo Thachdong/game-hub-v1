@@ -11,20 +11,31 @@ import { TrustScoreOrmEntity } from './infrastructure/persistence/typeorm-entiti
 // Port Tokens
 import { REPORT_REPOSITORY_PORT } from './domain/ports/report.repository.port';
 import { REPORT_TYPE_REPOSITORY_PORT } from './domain/ports/report-type.repository.port';
+import { TRUST_SCORE_REPOSITORY_PORT } from './domain/ports/trust-score.repository.port';
 import { ACCOUNT_EXISTENCE_PORT } from './domain/ports/account-existence.port';
+import { EVENT_PUBLISHER_PORT } from './domain/ports/event-publisher.port';
 
-// Infrastructure Adapters (US1)
+// Infrastructure Adapters
 import { ReportOrmRepository } from './infrastructure/persistence/report.typeorm-repository';
 import { ReportTypeOrmRepository } from './infrastructure/persistence/report-type.typeorm-repository';
+import { TrustScoreOrmRepository } from './infrastructure/persistence/trust-score.typeorm-repository';
 import { AccountExistenceAdapter } from './infrastructure/persistence/account-existence.adapter';
+import { TrustReportEventPublisherAdapter } from './infrastructure/events/event-publisher.adapter';
 
 // Application (US1)
 import { ListReportTypesUseCase } from './application/queries/list-report-types.use-case';
 import { SubmitReportUseCase } from './application/commands/submit-report.use-case';
 
+// Application (US2)
+import { ReviewReportUseCase } from './application/commands/review-report.use-case';
+import { ListReportsUseCase } from './application/queries/list-reports.use-case';
+
 // Controllers (US1)
 import { ReportTypesController } from './interface/http/report-types.controller';
 import { ReportsController } from './interface/http/reports.controller';
+
+// Controllers (US2)
+import { AdminReportsController } from './interface/http/admin/admin-reports.controller';
 
 @Module({
   imports: [
@@ -36,13 +47,19 @@ import { ReportsController } from './interface/http/reports.controller';
     // Repository bindings
     { provide: REPORT_REPOSITORY_PORT, useClass: ReportOrmRepository },
     { provide: REPORT_TYPE_REPOSITORY_PORT, useClass: ReportTypeOrmRepository },
+    { provide: TRUST_SCORE_REPOSITORY_PORT, useClass: TrustScoreOrmRepository },
     { provide: ACCOUNT_EXISTENCE_PORT, useClass: AccountExistenceAdapter },
+    { provide: EVENT_PUBLISHER_PORT, useClass: TrustReportEventPublisherAdapter },
 
     // Use cases (US1)
     ListReportTypesUseCase,
     SubmitReportUseCase,
+
+    // Use cases (US2)
+    ReviewReportUseCase,
+    ListReportsUseCase,
   ],
-  controllers: [ReportTypesController, ReportsController],
+  controllers: [ReportTypesController, ReportsController, AdminReportsController],
   exports: [],
 })
 export class TrustReportModule {}

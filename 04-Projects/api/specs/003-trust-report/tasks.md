@@ -223,7 +223,7 @@ cannot be re-reviewed.
 
 ### Implementation for User Story 2
 
-- [ ] T023 [P] [US2] Create `TrustScoreOrmRepository` implementing `ITrustScoreRepositoryPort` in
+- [x] T023 [P] [US2] Create `TrustScoreOrmRepository` implementing `ITrustScoreRepositoryPort` in
   `src/trust-report/infrastructure/persistence/trust-score.typeorm-repository.ts` — implement:
   - `applyDeduction(accountId, points)`: execute the CTE atomic SQL from `data-model.md §1`
     (WITH prev AS (SELECT score …) UPDATE … SET score = GREATEST(0, score - $2), game_locked_until =
@@ -234,7 +234,7 @@ cannot be re-reviewed.
     TrustScore domain entity or null
   - Leave `initByAccountId` and `dailyRecovery` as stubs for Phase 7 (US5)
 
-- [ ] T024 [P] [US2] Extend `ReportOrmRepository` in
+- [x] T024 [P] [US2] Extend `ReportOrmRepository` in
   `src/trust-report/infrastructure/persistence/report.typeorm-repository.ts` — implement:
   - `findById(id)`: SELECT by PK, return Report | null
   - `findByStatusPaginated(status, cursor?, limit)`: WHERE status = $1
@@ -242,12 +242,12 @@ cannot be re-reviewed.
     ORDER BY submitted_at DESC, id DESC LIMIT $limit; implements both-or-neither cursor rule
   - `update(id, fields)`: UPDATE reports SET ... WHERE id = $1 RETURNING *
 
-- [ ] T025 [P] [US2] Create `EventPublisherAdapter` implementing `IEventPublisherPort` in
+- [x] T025 [P] [US2] Create `EventPublisherAdapter` implementing `IEventPublisherPort` in
   `src/trust-report/infrastructure/events/event-publisher.adapter.ts` — inject `EventEmitter2`,
   implement `publishTrustScoreAlert(recipientId, content, referenceId?)` by calling
   `this.eventEmitter.emit('notification.trust-score-alert', { recipientId, content, referenceId })`
 
-- [ ] T026 [US2] Create `ReviewReportUseCase` in
+- [x] T026 [US2] Create `ReviewReportUseCase` in
   `src/trust-report/application/commands/review-report.use-case.ts`:
   1. `IReportRepositoryPort.findById(id)` → if null → throw `ReportNotFoundError`
   2. If `report.status !== PENDING` → throw `ReportAlreadyResolvedError`
@@ -267,13 +267,13 @@ cannot be re-reviewed.
   5. Return updated Report + (if `decision === 'valid'`) trust score snapshot
      `{ score: newScore, locked: gameLockedUntil !== null && gameLockedUntil > new Date(), lockedUntil: gameLockedUntil }`
 
-- [ ] T027 [US2] Create `ListReportsUseCase` (admin) in
+- [x] T027 [US2] Create `ListReportsUseCase` (admin) in
   `src/trust-report/application/queries/list-reports.use-case.ts` — accepts `{ status, cursor?, limit }`,
   delegates to `IReportRepositoryPort.findByStatusPaginated`, returns
   `{ items: Report[], nextCursor: {submittedAt, id} | null }` (nextCursor is last item's cursor
   or null if items < limit).
 
-- [ ] T028 [P] [US2] Write admin report DTOs:
+- [x] T028 [P] [US2] Write admin report DTOs:
   - `src/trust-report/interface/dto/admin-report-entry.dto.ts` — full admin view:
     id, reporterId, reportedUserId, reportTypeId, context, status, appliedPoints, submittedAt,
     resolvedAt, resolvedBy
@@ -283,7 +283,7 @@ cannot be re-reviewed.
     (IsIn validator)
   - `src/trust-report/interface/dto/trust-score-snapshot.dto.ts` — `{ score: number; locked: boolean; lockedUntil: Date | null }`
 
-- [ ] T029 [US2] Create `AdminReportsController` in
+- [x] T029 [US2] Create `AdminReportsController` in
   `src/trust-report/interface/http/admin/admin-reports.controller.ts` —
   `@Controller('admin/reports')`, `@UseGuards(JwtAuthGuard, PlatformAdminGuard)`:
   - `GET /` — `status` query param (default 'pending'), `limit` (default 20, max 50),
@@ -293,7 +293,7 @@ cannot be re-reviewed.
     `ReportAlreadyResolvedError → 409`; return `200` with report fields +
     `reportedUserTrustScore` (only when `decision = 'valid'`)
 
-- [ ] T030 [US2] Register US2 providers in `src/trust-report/trust-report.module.ts`:
+- [x] T030 [US2] Register US2 providers in `src/trust-report/trust-report.module.ts`:
   add `AdminReportsController` to `controllers`; add `TrustScoreOrmRepository`,
   `EventPublisherAdapter`, `ReviewReportUseCase`, `ListReportsUseCase` to `providers`, binding
   to port tokens.
