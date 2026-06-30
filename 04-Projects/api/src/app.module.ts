@@ -13,6 +13,7 @@ import { SharedAuthModule } from './shared-auth/shared-auth.module';
 import { NotificationModule } from './notification/notification.module';
 import { RealtimeModule } from './realtime/realtime.module';
 import { TrustReportModule } from './trust-report/trust-report.module';
+import { CaroGameModule } from './caro-game/caro-game.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { TrustReportModule } from './trust-report/trust-report.module';
     RealtimeModule,
     NotificationModule,
     TrustReportModule,
+    CaroGameModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: GlobalExceptionFilter },

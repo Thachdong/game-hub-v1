@@ -8,7 +8,6 @@ import {
 } from '@nestjs/common';
 import { Response } from 'express';
 import {
-  DomainError,
   AccountNotFoundError,
   SelfFriendRequestError,
   FriendRequestDuplicateError,
@@ -36,9 +35,15 @@ import {
   EmptyUpdateError,
   InvalidDeductionPointsError,
 } from '../../trust-report/domain/errors';
+import {
+  GameConfigNotFoundError,
+  GameConfigDuplicateError,
+  GameConfigInvalidBoardSizeError,
+  GameConfigInvalidMoveTimeError,
+} from '../../caro-game/domain/errors';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const DOMAIN_ERROR_STATUS = new Map<new (...args: any[]) => DomainError, HttpStatus>([
+const DOMAIN_ERROR_STATUS = new Map<new (...args: any[]) => Error, HttpStatus>([
   [AccountNotFoundError, HttpStatus.NOT_FOUND],
   [SelfFriendRequestError, HttpStatus.BAD_REQUEST],
   [FriendRequestDuplicateError, HttpStatus.CONFLICT],
@@ -61,6 +66,10 @@ const DOMAIN_ERROR_STATUS = new Map<new (...args: any[]) => DomainError, HttpSta
   [ReportTypeNameTakenError, HttpStatus.CONFLICT],
   [EmptyUpdateError, HttpStatus.BAD_REQUEST],
   [InvalidDeductionPointsError, HttpStatus.BAD_REQUEST],
+  [GameConfigNotFoundError, HttpStatus.NOT_FOUND],
+  [GameConfigDuplicateError, HttpStatus.CONFLICT],
+  [GameConfigInvalidBoardSizeError, HttpStatus.BAD_REQUEST],
+  [GameConfigInvalidMoveTimeError, HttpStatus.BAD_REQUEST],
 ]);
 
 @Catch()
@@ -77,13 +86,12 @@ export class GlobalExceptionFilter implements ExceptionFilter {
   }
 
   private resolve(exception: unknown): [HttpStatus, string] {
-    if (exception instanceof DomainError) {
-      const status =
-        DOMAIN_ERROR_STATUS.get(
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          exception.constructor as new (...args: any[]) => DomainError,
-        ) ?? HttpStatus.INTERNAL_SERVER_ERROR;
-      return [status, exception.message];
+    if (exception instanceof Error) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const status = DOMAIN_ERROR_STATUS.get(exception.constructor as new (...args: any[]) => Error);
+      if (status !== undefined) {
+        return [status, exception.message];
+      }
     }
 
     if (exception instanceof HttpException) {
