@@ -40,6 +40,21 @@ import {
   GameConfigDuplicateError,
   GameConfigInvalidBoardSizeError,
   GameConfigInvalidMoveTimeError,
+  MatchNotFoundError,
+  PlayerAlreadyInActiveStateError,
+  NotAParticipantError,
+  MatchNotInExpectedStatusError,
+  NotMatchCreatorError,
+  NotYourTurnError,
+  CellAlreadyOccupiedError,
+  CellOutOfBoundsError,
+  DrawRequestAlreadyPendingError,
+  NoDrawRequestPendingError,
+  ViewerMutedError,
+  NoActiveQuickPairRequestError,
+  NotFriendsError,
+  MatchPrivateAccessDeniedError,
+  MoveDeadlineExpiredError,
 } from '../../caro-game/domain/errors';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -70,6 +85,22 @@ const DOMAIN_ERROR_STATUS = new Map<new (...args: any[]) => Error, HttpStatus>([
   [GameConfigDuplicateError, HttpStatus.CONFLICT],
   [GameConfigInvalidBoardSizeError, HttpStatus.BAD_REQUEST],
   [GameConfigInvalidMoveTimeError, HttpStatus.BAD_REQUEST],
+  // Caro Match & Leaderboard errors
+  [MatchNotFoundError, HttpStatus.NOT_FOUND],
+  [PlayerAlreadyInActiveStateError, HttpStatus.CONFLICT],
+  [NotAParticipantError, HttpStatus.FORBIDDEN],
+  [MatchNotInExpectedStatusError, HttpStatus.CONFLICT],
+  [NotMatchCreatorError, HttpStatus.FORBIDDEN],
+  [NotYourTurnError, HttpStatus.FORBIDDEN],
+  [CellAlreadyOccupiedError, HttpStatus.CONFLICT],
+  [CellOutOfBoundsError, HttpStatus.BAD_REQUEST],
+  [DrawRequestAlreadyPendingError, HttpStatus.CONFLICT],
+  [NoDrawRequestPendingError, HttpStatus.NOT_FOUND],
+  [ViewerMutedError, HttpStatus.FORBIDDEN],
+  [NoActiveQuickPairRequestError, HttpStatus.NOT_FOUND],
+  [NotFriendsError, HttpStatus.UNPROCESSABLE_ENTITY],
+  [MatchPrivateAccessDeniedError, HttpStatus.FORBIDDEN],
+  [MoveDeadlineExpiredError, HttpStatus.CONFLICT],
 ]);
 
 @Catch()

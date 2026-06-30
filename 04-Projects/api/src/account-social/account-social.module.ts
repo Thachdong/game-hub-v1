@@ -45,6 +45,8 @@ import { RevokeGameAdminUseCase } from './application/commands/revoke-game-admin
 
 // Application Services
 import { AccountExistenceService } from './application/services/account-existence.service';
+import { FriendshipQueryService } from './application/services/friendship-query.service';
+import { AccountQueryService } from './application/services/account-query.service';
 
 // Application Queries
 import { GetAccountProfileUseCase } from './application/queries/get-account-profile.use-case';
@@ -94,6 +96,8 @@ import { AdminController } from './interface/http/admin.controller';
 
     // Services
     AccountExistenceService,
+    FriendshipQueryService,
+    AccountQueryService,
 
     // Commands
     LoginWithGoogleUseCase,
@@ -110,7 +114,7 @@ import { AdminController } from './interface/http/admin.controller';
     GetFriendRequestsUseCase,
 
   ],
-  exports: [AccountExistenceService],
+  exports: [AccountExistenceService, FriendshipQueryService, AccountQueryService],
   controllers: [
     AuthController,
     AccountController,
