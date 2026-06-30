@@ -11,12 +11,8 @@ import {
   Request,
   UseGuards,
 } from '@nestjs/common';
-import {
-  ApiBearerAuth,
-  ApiOperation,
-  ApiResponse,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiDataResponse, ApiErrorResponse } from '@common/decorators/api-response.decorator';
 import { JwtAuthGuard } from '../../../../shared-auth/jwt-auth.guard';
 import { GameAdminCaroGuard } from '../../guards/game-admin-caro.guard';
 import {
@@ -47,11 +43,11 @@ export class AdminGameConfigsController {
 
   @Post()
   @ApiOperation({ summary: 'Create a new game configuration' })
-  @ApiResponse({ status: 201, description: 'Created', type: AdminGameConfigDto })
-  @ApiResponse({ status: 400, description: 'Invalid enum value' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 403, description: 'Forbidden — not a Caro Game Admin' })
-  @ApiResponse({ status: 409, description: 'Duplicate active config' })
+  @ApiDataResponse(AdminGameConfigDto, { status: HttpStatus.CREATED, description: 'Config created' })
+  @ApiErrorResponse(HttpStatus.BAD_REQUEST, 'Invalid board size or move time')
+  @ApiErrorResponse(HttpStatus.UNAUTHORIZED, 'Missing or expired JWT')
+  @ApiErrorResponse(HttpStatus.FORBIDDEN, 'Not a Caro Game Admin')
+  @ApiErrorResponse(HttpStatus.CONFLICT, 'Active config with this combo already exists')
   async create(
     @Body() dto: CreateGameConfigDto,
     @Request() req: { user: { sub: string } },
@@ -65,23 +61,23 @@ export class AdminGameConfigsController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'List all game configurations (including inactive)' })
-  @ApiResponse({ status: 200, description: 'All configs', type: AdminListGameConfigsResponseDto })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 403, description: 'Forbidden' })
+  @ApiOperation({ summary: 'List all game configurations including inactive' })
+  @ApiDataResponse(AdminListGameConfigsResponseDto, { description: 'All configs' })
+  @ApiErrorResponse(HttpStatus.UNAUTHORIZED, 'Missing or expired JWT')
+  @ApiErrorResponse(HttpStatus.FORBIDDEN, 'Not a Caro Game Admin')
   async listAll(): Promise<AdminListGameConfigsResponseDto> {
     const configs = await this.listAllUseCase.execute();
     return { items: configs.map(this.toDto) };
   }
 
   @Patch(':id')
-  @ApiOperation({ summary: 'Update an existing game configuration' })
-  @ApiResponse({ status: 200, description: 'Updated config', type: AdminGameConfigDto })
-  @ApiResponse({ status: 400, description: 'Invalid enum value or empty body' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 403, description: 'Forbidden' })
-  @ApiResponse({ status: 404, description: 'Config not found' })
-  @ApiResponse({ status: 409, description: 'Duplicate active config' })
+  @ApiOperation({ summary: 'Update board size and/or move time of a configuration' })
+  @ApiDataResponse(AdminGameConfigDto, { description: 'Updated config' })
+  @ApiErrorResponse(HttpStatus.BAD_REQUEST, 'Invalid enum value or empty body')
+  @ApiErrorResponse(HttpStatus.UNAUTHORIZED, 'Missing or expired JWT')
+  @ApiErrorResponse(HttpStatus.FORBIDDEN, 'Not a Caro Game Admin')
+  @ApiErrorResponse(HttpStatus.NOT_FOUND, 'Config not found')
+  @ApiErrorResponse(HttpStatus.CONFLICT, 'Active config with this combo already exists')
   async update(
     @Param('id') id: string,
     @Body() dto: UpdateGameConfigDto,
@@ -93,10 +89,10 @@ export class AdminGameConfigsController {
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Deactivate (soft-delete) a game configuration' })
-  @ApiResponse({ status: 204, description: 'Deactivated' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 403, description: 'Forbidden' })
-  @ApiResponse({ status: 404, description: 'Config not found' })
+  @ApiResponse({ status: 204, description: 'Deactivated — no content' })
+  @ApiErrorResponse(HttpStatus.UNAUTHORIZED, 'Missing or expired JWT')
+  @ApiErrorResponse(HttpStatus.FORBIDDEN, 'Not a Caro Game Admin')
+  @ApiErrorResponse(HttpStatus.NOT_FOUND, 'Config not found')
   async deactivate(
     @Param('id') id: string,
     @Request() req: { user: { sub: string } },
@@ -105,12 +101,12 @@ export class AdminGameConfigsController {
   }
 
   @Post(':id/reactivate')
-  @ApiOperation({ summary: 'Reactivate a previously deactivated game configuration' })
-  @ApiResponse({ status: 200, description: 'Reactivated config', type: AdminGameConfigDto })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 403, description: 'Forbidden' })
-  @ApiResponse({ status: 404, description: 'Config not found' })
-  @ApiResponse({ status: 409, description: 'Duplicate active config' })
+  @ApiOperation({ summary: 'Reactivate a previously deactivated configuration' })
+  @ApiDataResponse(AdminGameConfigDto, { description: 'Reactivated config' })
+  @ApiErrorResponse(HttpStatus.UNAUTHORIZED, 'Missing or expired JWT')
+  @ApiErrorResponse(HttpStatus.FORBIDDEN, 'Not a Caro Game Admin')
+  @ApiErrorResponse(HttpStatus.NOT_FOUND, 'Config not found')
+  @ApiErrorResponse(HttpStatus.CONFLICT, 'Active config with same combo already exists')
   async reactivate(@Param('id') id: string): Promise<AdminGameConfigDto> {
     const config = await this.reactivateUseCase.execute({ id });
     return this.toDto(config);
