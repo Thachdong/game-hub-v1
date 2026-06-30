@@ -39,6 +39,10 @@ import { ListAllReportTypesUseCase } from './application/queries/list-all-report
 // Application (US4)
 import { GetTrustScoreUseCase } from './application/queries/get-trust-score.use-case';
 
+// Application (US5)
+import { InitializeTrustScoreUseCase } from './application/commands/initialize-trust-score.use-case';
+import { RecordDailyRecoveryUseCase } from './application/commands/record-daily-recovery.use-case';
+
 // Controllers (US1)
 import { ReportTypesController } from './interface/http/report-types.controller';
 import { ReportsController } from './interface/http/reports.controller';
@@ -51,6 +55,12 @@ import { AdminReportTypesController } from './interface/http/admin/admin-report-
 
 // Controllers (US4)
 import { TrustScoreController } from './interface/http/trust-score.controller';
+
+// Infrastructure (US5)
+import { AccountCreatedListener } from './infrastructure/events/account-created.listener';
+import { RequestAuthenticatedListener } from './infrastructure/events/request-authenticated.listener';
+import { TrustStatusAdapter } from './infrastructure/lock-status/trust-status.adapter';
+import { TRUST_STATUS_PORT } from './domain/ports/trust-status.port';
 
 @Module({
   imports: [
@@ -82,6 +92,13 @@ import { TrustScoreController } from './interface/http/trust-score.controller';
 
     // Use cases (US4)
     GetTrustScoreUseCase,
+
+    // Use cases + listeners (US5)
+    InitializeTrustScoreUseCase,
+    RecordDailyRecoveryUseCase,
+    AccountCreatedListener,
+    RequestAuthenticatedListener,
+    { provide: TRUST_STATUS_PORT, useClass: TrustStatusAdapter },
   ],
   controllers: [
     ReportTypesController,
@@ -90,6 +107,6 @@ import { TrustScoreController } from './interface/http/trust-score.controller';
     AdminReportTypesController,
     TrustScoreController,
   ],
-  exports: [],
+  exports: [TRUST_STATUS_PORT],
 })
 export class TrustReportModule {}

@@ -1,4 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ACCOUNT_REPO, IAccountRepository } from '@domain/ports/account.repository.port';
 import {
   GAME_ADMIN_ROLE_REPO,
@@ -22,6 +23,7 @@ export class LoginWithGoogleUseCase {
     @Inject(GAME_ADMIN_ROLE_REPO) private readonly gameAdminRoleRepo: IGameAdminRoleRepository,
     @Inject(TOKEN_SERVICE) private readonly tokenService: ITokenService,
     @Inject(APP_CONFIG) private readonly appConfig: AppConfig,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async execute(googleUser: GoogleUserInfo): Promise<LoginWithGoogleResult> {
@@ -32,6 +34,7 @@ export class LoginWithGoogleUseCase {
         username: googleUser.name,
         avatarUrl: googleUser.avatarUrl,
       });
+      this.eventEmitter.emit('account-social.account-created', { accountId: account.id });
     }
 
     const gameAdminRoles = await this.gameAdminRoleRepo.findByAccountId(account.id);

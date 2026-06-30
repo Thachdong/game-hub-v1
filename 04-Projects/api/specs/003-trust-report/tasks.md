@@ -440,7 +440,7 @@ the lock expires, each calendar day the user makes any authenticated request, th
 
 ### Implementation for User Story 5
 
-- [ ] T043 [US5] Edit `src/account-social/application/commands/login-with-google.use-case.ts` —
+- [x] T043 [US5] Edit `src/account-social/application/commands/login-with-google.use-case.ts` —
   the first-time creation branch is `if (!account) { account = await this.accountRepo.save({...}); }`
   (currently lines 29–34). After `this.accountRepo.save(...)` resolves, still inside the
   `if (!account)` block, add a fire-and-forget emit:
@@ -449,17 +449,17 @@ the lock expires, each calendar day the user makes any authenticated request, th
   only fire on first-time creation, not on repeat logins. Add `EventEmitter2` to the constructor:
   `private readonly eventEmitter: EventEmitter2` (import from `@nestjs/event-emitter`).
 
-- [ ] T044 [P] [US5] Create `AccountCreatedListener` in
+- [x] T044 [P] [US5] Create `AccountCreatedListener` in
   `src/trust-report/infrastructure/events/account-created.listener.ts` —
   `@Injectable()` class with `@OnEvent('account-social.account-created')` method that calls
   `InitializeTrustScoreUseCase.execute({ accountId })`.
 
-- [ ] T045 [P] [US5] Create `InitializeTrustScoreUseCase` in
+- [x] T045 [P] [US5] Create `InitializeTrustScoreUseCase` in
   `src/trust-report/application/commands/initialize-trust-score.use-case.ts` — calls
   `ITrustScoreRepositoryPort.initByAccountId(accountId)`; idempotent by design (ON CONFLICT DO
   NOTHING); no error thrown if row already exists.
 
-- [ ] T046 [US5] Extend `TrustScoreOrmRepository` in
+- [x] T046 [US5] Extend `TrustScoreOrmRepository` in
   `src/trust-report/infrastructure/persistence/trust-score.typeorm-repository.ts` — implement
   the two remaining stubs:
   - `initByAccountId(accountId)`: execute
@@ -469,26 +469,26 @@ the lock expires, each calendar day the user makes any authenticated request, th
     — if 0 rows updated (lock not yet expired, or no lock, or already recovered today) return
     null; otherwise return `{ newScore: row.score }`
 
-- [ ] T047 [P] [US5] Create `RequestAuthenticatedListener` in
+- [x] T047 [P] [US5] Create `RequestAuthenticatedListener` in
   `src/trust-report/infrastructure/events/request-authenticated.listener.ts` —
   `@Injectable()` class with `@OnEvent('auth.request-authenticated')` method that calls
   `RecordDailyRecoveryUseCase.execute({ accountId })`. This is invoked on every authenticated
   request; the use-case's WHERE clause ensures it's a cheap no-op on all but the first qualifying
   call each calendar day.
 
-- [ ] T048 [P] [US5] Create `RecordDailyRecoveryUseCase` in
+- [x] T048 [P] [US5] Create `RecordDailyRecoveryUseCase` in
   `src/trust-report/application/commands/record-daily-recovery.use-case.ts` — calls
   `ITrustScoreRepositoryPort.dailyRecovery(accountId)`; if null (no eligible row or already
   applied today), does nothing. No event emitted for recovery increments (recovery is not
   alert-worthy per `contracts/domain-events.md`).
 
-- [ ] T049 [US5] Create `TrustStatusAdapter` implementing `ITrustStatusPort` in
+- [x] T049 [US5] Create `TrustStatusAdapter` implementing `ITrustStatusPort` in
   `src/trust-report/infrastructure/lock-status/trust-status.adapter.ts` —
   `isLocked(accountId): Promise<{locked: boolean; until: Date | null}>` calls
   `ITrustScoreRepositoryPort.findByAccountId(accountId)`, returns
   `{ locked: row?.gameLockedUntil != null && row.gameLockedUntil > new Date(), until: row?.gameLockedUntil ?? null }`.
 
-- [ ] T050 [US5] Register US5 providers + export ITrustStatusPort in
+- [x] T050 [US5] Register US5 providers + export ITrustStatusPort in
   `src/trust-report/trust-report.module.ts`:
   add `AccountCreatedListener`, `RequestAuthenticatedListener`, `InitializeTrustScoreUseCase`,
   `RecordDailyRecoveryUseCase`, `TrustStatusAdapter` to `providers`; add `TrustStatusAdapter`
