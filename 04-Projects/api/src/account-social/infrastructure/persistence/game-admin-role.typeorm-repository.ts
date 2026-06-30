@@ -39,11 +39,14 @@ export class GameAdminRoleTypeOrmRepository implements IGameAdminRoleRepository 
   }
 
   async findByAccountId(accountId: string): Promise<string[]> {
-    const rows: Array<{ game_id: string }> = await this.dataSource.query(
-      `SELECT game_id FROM account_social.game_admin_roles WHERE account_id = $1`,
+    const rows: Array<{ slug: string }> = await this.dataSource.query(
+      `SELECT g.slug
+       FROM account_social.game_admin_roles gar
+       JOIN platform.games g ON g.id = gar.game_id
+       WHERE gar.account_id = $1`,
       [accountId],
     );
-    return rows.map((r) => r.game_id);
+    return rows.map((r) => r.slug);
   }
 
   async existsForPair(accountId: string, gameId: string): Promise<boolean> {
