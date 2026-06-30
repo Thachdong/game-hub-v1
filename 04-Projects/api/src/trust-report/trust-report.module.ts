@@ -30,12 +30,21 @@ import { SubmitReportUseCase } from './application/commands/submit-report.use-ca
 import { ReviewReportUseCase } from './application/commands/review-report.use-case';
 import { ListReportsUseCase } from './application/queries/list-reports.use-case';
 
+// Application (US3)
+import { CreateReportTypeUseCase } from './application/commands/create-report-type.use-case';
+import { UpdateReportTypeUseCase } from './application/commands/update-report-type.use-case';
+import { DeactivateReportTypeUseCase } from './application/commands/deactivate-report-type.use-case';
+import { ListAllReportTypesUseCase } from './application/queries/list-all-report-types.use-case';
+
 // Controllers (US1)
 import { ReportTypesController } from './interface/http/report-types.controller';
 import { ReportsController } from './interface/http/reports.controller';
 
 // Controllers (US2)
 import { AdminReportsController } from './interface/http/admin/admin-reports.controller';
+
+// Controllers (US3)
+import { AdminReportTypesController } from './interface/http/admin/admin-report-types.controller';
 
 @Module({
   imports: [
@@ -58,8 +67,19 @@ import { AdminReportsController } from './interface/http/admin/admin-reports.con
     // Use cases (US2)
     ReviewReportUseCase,
     ListReportsUseCase,
+
+    // Use cases (US3)
+    CreateReportTypeUseCase,
+    UpdateReportTypeUseCase,
+    DeactivateReportTypeUseCase,
+    ListAllReportTypesUseCase,
   ],
-  controllers: [ReportTypesController, ReportsController, AdminReportsController],
+  controllers: [
+    ReportTypesController,
+    ReportsController,
+    AdminReportsController,
+    AdminReportTypesController,
+  ],
   exports: [],
 })
 export class TrustReportModule {}

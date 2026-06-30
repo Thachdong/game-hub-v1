@@ -320,7 +320,7 @@ New types are immediately available to players. Deactivated types are no longer 
 
 ### Implementation for User Story 3
 
-- [ ] T031 [P] [US3] Extend `ReportTypeOrmRepository` in
+- [x] T031 [P] [US3] Extend `ReportTypeOrmRepository` in
   `src/trust-report/infrastructure/persistence/report-type.typeorm-repository.ts` — add:
   - `save(data)`: INSERT, check UNIQUE constraint (catch DB unique-violation and rethrow as
     `ReportTypeNameTakenError`), return created ReportType
@@ -331,30 +331,30 @@ New types are immediately available to players. Deactivated types are no longer 
     path works (no WHERE active = true filter)
   - `findAll()`: SELECT all including inactive, ORDER BY created_at ASC
 
-- [ ] T032 [P] [US3] Create `CreateReportTypeUseCase` in
+- [x] T032 [P] [US3] Create `CreateReportTypeUseCase` in
   `src/trust-report/application/commands/create-report-type.use-case.ts` — validate that
   `deductionPoints` is 1–100 (throw `DomainError` 'INVALID_DEDUCTION_POINTS' if not), call
   `IReportTypeRepositoryPort.save({ name, deductionPoints, active: true })`, propagate
   `ReportTypeNameTakenError` (handled in controller as 409).
 
-- [ ] T033 [P] [US3] Create `UpdateReportTypeUseCase` in
+- [x] T033 [P] [US3] Create `UpdateReportTypeUseCase` in
   `src/trust-report/application/commands/update-report-type.use-case.ts` — if fields object is
   empty (no keys) throw a `DomainError` 'EMPTY_UPDATE'; if `deductionPoints` provided validate
   1–100; call `IReportTypeRepositoryPort.update(id, fields)`; propagate
   `ReportTypeNotFoundError` (→ 404) and `ReportTypeNameTakenError` (→ 409).
 
-- [ ] T034 [P] [US3] Create `DeactivateReportTypeUseCase` in
+- [x] T034 [P] [US3] Create `DeactivateReportTypeUseCase` in
   `src/trust-report/application/commands/deactivate-report-type.use-case.ts` — call
   `IReportTypeRepositoryPort.findById(id, true)`: if null throw `ReportTypeNotFoundError`;
   if already inactive return without error (idempotent); otherwise call
   `IReportTypeRepositoryPort.update(id, { active: false })`.
 
-- [ ] T035 [P] [US3] Create `ListAllReportTypesUseCase` (admin) in
+- [x] T035 [P] [US3] Create `ListAllReportTypesUseCase` (admin) in
   `src/trust-report/application/queries/list-all-report-types.use-case.ts` — calls
   `IReportTypeRepositoryPort.findAll()`, returns full `ReportType[]` including `deductionPoints`
   and `active` fields.
 
-- [ ] T036 [P] [US3] Write admin report-type DTOs:
+- [x] T036 [P] [US3] Write admin report-type DTOs:
   - `src/trust-report/interface/dto/admin-report-type.dto.ts` — full admin view:
     id, name, deductionPoints, active, createdAt, updatedAt
   - `src/trust-report/interface/dto/create-report-type.dto.ts` — `name` (IsString, not empty),
@@ -363,7 +363,7 @@ New types are immediately available to players. Deactivated types are no longer 
     manual optionals: `name?`, `deductionPoints?` (IsInt Min 1 Max 100 if present), `active?`
     boolean)
 
-- [ ] T037 [US3] Create `AdminReportTypesController` in
+- [x] T037 [US3] Create `AdminReportTypesController` in
   `src/trust-report/interface/http/admin/admin-report-types.controller.ts` —
   `@Controller('admin/report-types')`, `@UseGuards(JwtAuthGuard, PlatformAdminGuard)`:
   - `GET /` → `ListAllReportTypesUseCase`, return `{ items: AdminReportTypeDto[] }`
@@ -373,7 +373,7 @@ New types are immediately available to players. Deactivated types are no longer 
   - `DELETE /:id` → `DeactivateReportTypeUseCase`; map `ReportTypeNotFoundError → 404`;
     return `204 No Content`
 
-- [ ] T038 [US3] Register US3 providers in `src/trust-report/trust-report.module.ts`:
+- [x] T038 [US3] Register US3 providers in `src/trust-report/trust-report.module.ts`:
   add `AdminReportTypesController` to `controllers`; add `CreateReportTypeUseCase`,
   `UpdateReportTypeUseCase`, `DeactivateReportTypeUseCase`, `ListAllReportTypesUseCase` to
   `providers`.
