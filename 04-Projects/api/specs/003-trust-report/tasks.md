@@ -149,26 +149,26 @@ report is persisted in `pending` status with full audit trail.
 
 ### Implementation for User Story 1
 
-- [ ] T014 [P] [US1] Create `ReportTypeOrmRepository` implementing `IReportTypeRepositoryPort`
+- [x] T014 [P] [US1] Create `ReportTypeOrmRepository` implementing `IReportTypeRepositoryPort`
   in `src/trust-report/infrastructure/persistence/report-type.typeorm-repository.ts` — implement
   only `findAllActive()` (WHERE active = true, ORDER BY name) and `findById(id, includeInactive=false)`
   (returns null if not found, or if active=false and includeInactive=false).
 
-- [ ] T015 [P] [US1] Create `AccountExistenceAdapter` implementing `IAccountExistencePort` in
+- [x] T015 [P] [US1] Create `AccountExistenceAdapter` implementing `IAccountExistencePort` in
   `src/trust-report/infrastructure/persistence/account-existence.adapter.ts` — inject
   `AccountExistenceService` from `account-social` module, delegate `exists()` call to it.
 
-- [ ] T016 [P] [US1] Create `ReportOrmRepository` implementing `IReportRepositoryPort` in
+- [x] T016 [P] [US1] Create `ReportOrmRepository` implementing `IReportRepositoryPort` in
   `src/trust-report/infrastructure/persistence/report.typeorm-repository.ts` — implement only
   `save(report: Report): Promise<Report>` for now (convert domain → ORM entity, insert, convert
   back). Leave other methods as stubs throwing `NotImplementedError` until Phase 4.
 
-- [ ] T017 [P] [US1] Create `ListReportTypesUseCase` (player-facing) in
+- [x] T017 [P] [US1] Create `ListReportTypesUseCase` (player-facing) in
   `src/trust-report/application/queries/list-report-types.use-case.ts` — calls
   `IReportTypeRepositoryPort.findAllActive()`, returns `Array<{id: string; name: string}>` (no
   `deductionPoints` — omit it at this layer).
 
-- [ ] T018 [US1] Create `SubmitReportUseCase` in
+- [x] T018 [US1] Create `SubmitReportUseCase` in
   `src/trust-report/application/commands/submit-report.use-case.ts` with this logic in order:
   1. If `command.reporterId === command.reportedUserId` → throw `SelfReportError`
   2. `IAccountExistencePort.exists(reportedUserId)` → if false → throw `AccountNotFoundError`
@@ -176,26 +176,26 @@ report is persisted in `pending` status with full audit trail.
   4. If found but `active === false` → throw `ReportTypeInactiveError`
   5. `IReportRepositoryPort.save(new Report(...))` → return saved Report
 
-- [ ] T019 [P] [US1] Write player-facing DTOs:
+- [x] T019 [P] [US1] Write player-facing DTOs:
   - `src/trust-report/interface/dto/player-report-type.dto.ts` — `{ id: string; name: string }`
   - `src/trust-report/interface/dto/submit-report.dto.ts` — `reportedUserId` (IsUUID),
     `reportTypeId` (IsUUID), `context` (IsString, MinLength 1, MaxLength 2000)
   - `src/trust-report/interface/dto/submit-report-response.dto.ts` — `{ id, reportedUserId, reportTypeId, context, status, submittedAt }`
     (no `reporterId` per contract)
 
-- [ ] T020 [US1] Create `ReportTypesController` in
+- [x] T020 [US1] Create `ReportTypesController` in
   `src/trust-report/interface/http/report-types.controller.ts` — `@Controller('report-types')`,
   `@UseGuards(JwtAuthGuard)`, single `GET /` handler calling `ListReportTypesUseCase`, return
   `{ items: PlayerReportTypeDto[] }`.
 
-- [ ] T021 [US1] Create `ReportsController` in
+- [x] T021 [US1] Create `ReportsController` in
   `src/trust-report/interface/http/reports.controller.ts` — `@Controller('reports')`,
   `@UseGuards(JwtAuthGuard)`, single `POST /` handler: extract `accountId` from
   `request.user.sub` as `reporterId`, call `SubmitReportUseCase`, map domain errors to HTTP
   (`SelfReportError → 400`, `AccountNotFoundError → 404`, `ReportTypeNotFoundError → 404`,
   `ReportTypeInactiveError → 422`), return `201 Created` with `SubmitReportResponseDto`.
 
-- [ ] T022 [US1] Register US1 providers in `src/trust-report/trust-report.module.ts`:
+- [x] T022 [US1] Register US1 providers in `src/trust-report/trust-report.module.ts`:
   add `ReportTypesController`, `ReportsController` to `controllers`; add
   `ReportTypeOrmRepository`, `ReportOrmRepository`, `AccountExistenceAdapter`,
   `ListReportTypesUseCase`, `SubmitReportUseCase` to `providers`, binding repository tokens to

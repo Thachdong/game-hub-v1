@@ -26,6 +26,16 @@ import {
   InvalidNotificationContentError,
   InvalidRecipientError,
 } from '../../notification/domain/errors';
+import {
+  SelfReportError,
+  ReportTypeNotFoundError,
+  ReportTypeInactiveError,
+  ReportNotFoundError,
+  ReportAlreadyResolvedError,
+  ReportTypeNameTakenError,
+  EmptyUpdateError,
+  InvalidDeductionPointsError,
+} from '../../trust-report/domain/errors';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const DOMAIN_ERROR_STATUS = new Map<new (...args: any[]) => DomainError, HttpStatus>([
@@ -43,6 +53,14 @@ const DOMAIN_ERROR_STATUS = new Map<new (...args: any[]) => DomainError, HttpSta
   [InvalidNotificationTypeError, HttpStatus.UNPROCESSABLE_ENTITY],
   [InvalidNotificationContentError, HttpStatus.UNPROCESSABLE_ENTITY],
   [InvalidRecipientError, HttpStatus.UNPROCESSABLE_ENTITY],
+  [SelfReportError, HttpStatus.BAD_REQUEST],
+  [ReportTypeNotFoundError, HttpStatus.NOT_FOUND],
+  [ReportTypeInactiveError, HttpStatus.UNPROCESSABLE_ENTITY],
+  [ReportNotFoundError, HttpStatus.NOT_FOUND],
+  [ReportAlreadyResolvedError, HttpStatus.CONFLICT],
+  [ReportTypeNameTakenError, HttpStatus.CONFLICT],
+  [EmptyUpdateError, HttpStatus.BAD_REQUEST],
+  [InvalidDeductionPointsError, HttpStatus.BAD_REQUEST],
 ]);
 
 @Catch()
