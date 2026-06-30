@@ -824,6 +824,390 @@ paths:
         - Trust Score
       security:
         - bearer: []
+  /api/admin/caro/game-configs:
+    post:
+      operationId: AdminGameConfigsController_create
+      summary: Create a new game configuration
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateGameConfigDto'
+      responses:
+        '201':
+          description: Config created
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      data:
+                        $ref: '#/components/schemas/AdminGameConfigDto'
+        '400':
+          description: Invalid board size or move time
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      statusCode:
+                        example: 400
+                      data:
+                        nullable: true
+                        example: null
+        '401':
+          description: Missing or expired JWT
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      statusCode:
+                        example: 401
+                      data:
+                        nullable: true
+                        example: null
+        '403':
+          description: Not a Caro Game Admin
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      statusCode:
+                        example: 403
+                      data:
+                        nullable: true
+                        example: null
+        '409':
+          description: Active config with this combo already exists
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      statusCode:
+                        example: 409
+                      data:
+                        nullable: true
+                        example: null
+      tags:
+        - Admin — Caro Game Configs
+      security:
+        - bearer: []
+    get:
+      operationId: AdminGameConfigsController_listAll
+      summary: List all game configurations including inactive
+      parameters: []
+      responses:
+        '200':
+          description: All configs
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      data:
+                        $ref: '#/components/schemas/AdminListGameConfigsResponseDto'
+        '401':
+          description: Missing or expired JWT
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      statusCode:
+                        example: 401
+                      data:
+                        nullable: true
+                        example: null
+        '403':
+          description: Not a Caro Game Admin
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      statusCode:
+                        example: 403
+                      data:
+                        nullable: true
+                        example: null
+      tags:
+        - Admin — Caro Game Configs
+      security:
+        - bearer: []
+  /api/admin/caro/game-configs/{id}:
+    patch:
+      operationId: AdminGameConfigsController_update
+      summary: Update board size and/or move time of a configuration
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateGameConfigDto'
+      responses:
+        '200':
+          description: Updated config
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      data:
+                        $ref: '#/components/schemas/AdminGameConfigDto'
+        '400':
+          description: Invalid enum value or empty body
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      statusCode:
+                        example: 400
+                      data:
+                        nullable: true
+                        example: null
+        '401':
+          description: Missing or expired JWT
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      statusCode:
+                        example: 401
+                      data:
+                        nullable: true
+                        example: null
+        '403':
+          description: Not a Caro Game Admin
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      statusCode:
+                        example: 403
+                      data:
+                        nullable: true
+                        example: null
+        '404':
+          description: Config not found
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      statusCode:
+                        example: 404
+                      data:
+                        nullable: true
+                        example: null
+        '409':
+          description: Active config with this combo already exists
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      statusCode:
+                        example: 409
+                      data:
+                        nullable: true
+                        example: null
+      tags:
+        - Admin — Caro Game Configs
+      security:
+        - bearer: []
+    delete:
+      operationId: AdminGameConfigsController_deactivate
+      summary: Deactivate (soft-delete) a game configuration
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Deactivated — no content
+        '401':
+          description: Missing or expired JWT
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      statusCode:
+                        example: 401
+                      data:
+                        nullable: true
+                        example: null
+        '403':
+          description: Not a Caro Game Admin
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      statusCode:
+                        example: 403
+                      data:
+                        nullable: true
+                        example: null
+        '404':
+          description: Config not found
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      statusCode:
+                        example: 404
+                      data:
+                        nullable: true
+                        example: null
+      tags:
+        - Admin — Caro Game Configs
+      security:
+        - bearer: []
+  /api/admin/caro/game-configs/{id}/reactivate:
+    post:
+      operationId: AdminGameConfigsController_reactivate
+      summary: Reactivate a previously deactivated configuration
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Reactivated config
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      data:
+                        $ref: '#/components/schemas/AdminGameConfigDto'
+        '401':
+          description: Missing or expired JWT
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      statusCode:
+                        example: 401
+                      data:
+                        nullable: true
+                        example: null
+        '403':
+          description: Not a Caro Game Admin
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      statusCode:
+                        example: 403
+                      data:
+                        nullable: true
+                        example: null
+        '404':
+          description: Config not found
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      statusCode:
+                        example: 404
+                      data:
+                        nullable: true
+                        example: null
+        '409':
+          description: Active config with same combo already exists
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      statusCode:
+                        example: 409
+                      data:
+                        nullable: true
+                        example: null
+      tags:
+        - Admin — Caro Game Configs
+      security:
+        - bearer: []
+  /api/caro/game-configs:
+    get:
+      operationId: GameConfigsController_list
+      summary: List active game configurations available for game creation
+      parameters: []
+      responses:
+        '200':
+          description: Active configs ordered by creation time
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      data:
+                        $ref: '#/components/schemas/ListGameConfigsResponseDto'
+        '401':
+          description: Missing or expired JWT
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      statusCode:
+                        example: 401
+                      data:
+                        nullable: true
+                        example: null
+      tags:
+        - Caro — Game Configs
+      security:
+        - bearer: []
 info:
   title: Game Hub API
   description: Account & Social Module
@@ -1414,3 +1798,140 @@ components:
         - score
         - gameLocked
         - updatedAt
+    AdminGameConfigDto:
+      type: object
+      properties:
+        id:
+          type: string
+        boardSize:
+          type: string
+          enum:
+            - 18x18
+            - 25x25
+            - 40x40
+        moveTimeSeconds:
+          type: number
+          enum:
+            - 5
+            - 10
+            - 15
+            - 25
+            - 35
+            - 45
+            - 60
+        active:
+          type: boolean
+        createdBy:
+          type: string
+        createdAt:
+          format: date-time
+          type: string
+        updatedAt:
+          format: date-time
+          type: string
+        deactivatedBy:
+          type: object
+          nullable: true
+        deactivatedAt:
+          type: object
+          nullable: true
+      required:
+        - id
+        - boardSize
+        - moveTimeSeconds
+        - active
+        - createdBy
+        - createdAt
+        - updatedAt
+        - deactivatedBy
+        - deactivatedAt
+    CreateGameConfigDto:
+      type: object
+      properties:
+        boardSize:
+          type: string
+          enum:
+            - 18x18
+            - 25x25
+            - 40x40
+          example: 25x25
+        moveTimeSeconds:
+          type: number
+          enum:
+            - 5
+            - 10
+            - 15
+            - 25
+            - 35
+            - 45
+            - 60
+          example: 15
+      required:
+        - boardSize
+        - moveTimeSeconds
+    AdminListGameConfigsResponseDto:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminGameConfigDto'
+      required:
+        - items
+    UpdateGameConfigDto:
+      type: object
+      properties:
+        boardSize:
+          type: string
+          enum:
+            - 18x18
+            - 25x25
+            - 40x40
+        moveTimeSeconds:
+          type: number
+          enum:
+            - 5
+            - 10
+            - 15
+            - 25
+            - 35
+            - 45
+            - 60
+    GameConfigDto:
+      type: object
+      properties:
+        id:
+          type: string
+        boardSize:
+          type: string
+          enum:
+            - 18x18
+            - 25x25
+            - 40x40
+        moveTimeSeconds:
+          type: number
+          enum:
+            - 5
+            - 10
+            - 15
+            - 25
+            - 35
+            - 45
+            - 60
+        createdAt:
+          format: date-time
+          type: string
+      required:
+        - id
+        - boardSize
+        - moveTimeSeconds
+        - createdAt
+    ListGameConfigsResponseDto:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/GameConfigDto'
+      required:
+        - items
