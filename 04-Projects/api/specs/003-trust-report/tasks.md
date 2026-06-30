@@ -503,14 +503,14 @@ the lock expires, each calendar day the user makes any authenticated request, th
 
 **Purpose**: OpenAPI documentation (required by Constitution §VI) + end-to-end validation.
 
-- [ ] T051 [P] Add `@ApiProperty` to every field in all DTO classes in
+- [x] T051 [P] Add `@ApiProperty` to every field in all DTO classes in
   `src/trust-report/interface/dto/` (player-report-type.dto.ts, submit-report.dto.ts,
   submit-report-response.dto.ts, admin-report-entry.dto.ts, admin-list-reports-response.dto.ts,
   review-report.dto.ts, trust-score-snapshot.dto.ts, trust-score-response.dto.ts,
   admin-report-type.dto.ts, create-report-type.dto.ts, update-report-type.dto.ts). Include
   `type`, `example`, `nullable`, and `required` metadata on each decorator.
 
-- [ ] T052 [P] Add `@ApiOperation`, `@ApiResponse` (for each distinct HTTP status), and
+- [x] T052 [P] Add `@ApiOperation`, `@ApiResponse` (for each distinct HTTP status), and
   `@ApiBearerAuth` to every controller handler across all 5 controller files:
   `src/trust-report/interface/http/report-types.controller.ts`,
   `src/trust-report/interface/http/reports.controller.ts`,
@@ -519,7 +519,7 @@ the lock expires, each calendar day the user makes any authenticated request, th
   `src/trust-report/interface/http/admin/admin-report-types.controller.ts`.
   Cover all success and error responses listed in `contracts/http-api.md`.
 
-- [ ] T053 Run the project's Swagger generation script (e.g., `npm run swagger:generate` or
+- [x] T053 Run the project's Swagger generation script (e.g., `npm run swagger:generate` or
   equivalent from `package.json`) to regenerate `openapi.yml` at the repository root; commit
   the updated file as part of the trust-report PR (Constitution §VI requirement).
 
