@@ -6,6 +6,7 @@ import { AuthConfig } from '@config/auth.config';
 import { JwtStrategy } from './jwt.strategy';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { OptionalJwtGuard } from './optional-jwt.guard';
+import { PlatformAdminGuard } from './platform-admin.guard';
 
 @Global()
 @Module({
@@ -23,7 +24,7 @@ import { OptionalJwtGuard } from './optional-jwt.guard';
       inject: [ConfigService],
     }),
   ],
-  providers: [JwtStrategy, JwtAuthGuard, OptionalJwtGuard],
-  exports: [PassportModule, JwtModule, JwtStrategy, JwtAuthGuard, OptionalJwtGuard],
+  providers: [JwtStrategy, JwtAuthGuard, OptionalJwtGuard, PlatformAdminGuard],
+  exports: [PassportModule, JwtModule, JwtStrategy, JwtAuthGuard, OptionalJwtGuard, PlatformAdminGuard],
 })
 export class SharedAuthModule {}

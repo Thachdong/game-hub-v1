@@ -22,7 +22,7 @@ of each story. All file paths are relative to the repo root.
 
 **Purpose**: Create the source tree skeleton so all subsequent tasks know where to write files.
 
-- [ ] T001 Create directory tree for the new module: `src/trust-report/domain/{entities,ports,errors}`, `src/trust-report/application/{commands,queries}`, `src/trust-report/infrastructure/{events,persistence/typeorm-entities,lock-status}`, `src/trust-report/interface/{http/admin,dto}`
+- [x] T001 Create directory tree for the new module: `src/trust-report/domain/{entities,ports,errors}`, `src/trust-report/application/{commands,queries}`, `src/trust-report/infrastructure/{events,persistence/typeorm-entities,lock-status}`, `src/trust-report/interface/{http/admin,dto}`
 
 ---
 
@@ -34,28 +34,28 @@ schema.
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete.
 
-- [ ] T002 [P] Write `Report` domain entity + `ReportStatus` enum (PENDING/VALID/INVALID) in
+- [x] T002 [P] Write `Report` domain entity + `ReportStatus` enum (PENDING/VALID/INVALID) in
   `src/trust-report/domain/entities/report.ts` — pure TypeScript class, fields: id, reporterId,
   reportedUserId, reportTypeId, context, status, appliedPoints(number|null), submittedAt,
   resolvedAt(Date|null), resolvedBy(string|null). No NestJS or TypeORM imports.
 
-- [ ] T003 [P] Write `ReportType` domain entity in
+- [x] T003 [P] Write `ReportType` domain entity in
   `src/trust-report/domain/entities/report-type.ts` — pure TypeScript class, fields: id, name,
   deductionPoints(number 1–100), active(boolean), createdAt, updatedAt. No NestJS or TypeORM
   imports.
 
-- [ ] T004 [P] Write `TrustScore` domain entity in
+- [x] T004 [P] Write `TrustScore` domain entity in
   `src/trust-report/domain/entities/trust-score.ts` — pure TypeScript class, fields: accountId,
   score(number 0–100), gameLockedUntil(Date|null), lastRecoveryDate(string|null, YYYY-MM-DD),
   updatedAt. No NestJS or TypeORM imports.
 
-- [ ] T005 [P] Write all domain error classes in `src/trust-report/domain/errors/index.ts`:
+- [x] T005 [P] Write all domain error classes in `src/trust-report/domain/errors/index.ts`:
   `SelfReportError`, `AccountNotFoundError`, `ReportTypeNotFoundError`,
   `ReportTypeInactiveError`, `ReportNotFoundError`, `ReportAlreadyResolvedError`,
   `ReportTypeNameTakenError`. Each extends a base `DomainError` with a `code` string property
   (use the error-code strings from `contracts/http-api.md`).
 
-- [ ] T006 [P] Write the five port interfaces in `src/trust-report/domain/ports/`:
+- [x] T006 [P] Write the five port interfaces in `src/trust-report/domain/ports/`:
   - `report.repository.port.ts` — `IReportRepositoryPort`: `save(report: Report): Promise<Report>`,
     `findById(id: string): Promise<Report | null>`,
     `findByStatusPaginated(status: ReportStatus, cursor: {submittedAt: Date; id: string} | undefined, limit: number): Promise<Report[]>`,
@@ -74,27 +74,27 @@ schema.
   - `event-publisher.port.ts` — `IEventPublisherPort`:
     `publishTrustScoreAlert(recipientId: string, content: string, referenceId?: string): Promise<void>`
 
-- [ ] T007 [P] Write `ReportTypeOrmEntity` in
+- [x] T007 [P] Write `ReportTypeOrmEntity` in
   `src/trust-report/infrastructure/persistence/typeorm-entities/report-type.orm-entity.ts` —
   `@Entity({ schema: 'trust_report', name: 'report_types' })`, columns: id(PrimaryGeneratedColumn uuid),
   name(unique), deductionPoints(int, column name `deduction_points`), active(bool default true),
   createdAt(`@CreateDateColumn`), updatedAt(`@UpdateDateColumn`). Add CHECK constraint
   `deduction_points BETWEEN 1 AND 100` in the migration (not here).
 
-- [ ] T008 [P] Write `ReportOrmEntity` in
+- [x] T008 [P] Write `ReportOrmEntity` in
   `src/trust-report/infrastructure/persistence/typeorm-entities/report.orm-entity.ts` —
   `@Entity({ schema: 'trust_report', name: 'reports' })`, columns: id(uuid PK), reporterId(uuid),
   reportedUserId(uuid), reportTypeId(uuid), context(text), status(enum ReportStatus, default PENDING),
   appliedPoints(int nullable), submittedAt(`@CreateDateColumn`), resolvedAt(timestamptz nullable),
   resolvedBy(uuid nullable). CHECK constraint `reporter_id != reported_user_id` goes in migration.
 
-- [ ] T009 [P] Write `TrustScoreOrmEntity` in
+- [x] T009 [P] Write `TrustScoreOrmEntity` in
   `src/trust-report/infrastructure/persistence/typeorm-entities/trust-score.orm-entity.ts` —
   `@Entity({ schema: 'trust_report', name: 'trust_scores' })`, columns: accountId(PrimaryColumn uuid),
   score(int default 100), gameLockedUntil(timestamptz nullable), lastRecoveryDate(date nullable),
   updatedAt(`@UpdateDateColumn`). CHECK constraint `score BETWEEN 0 AND 100` goes in migration.
 
-- [ ] T010 Write migration `src/database/migrations/1751200000000-CreateTrustReportSchema.ts`
+- [x] T010 Write migration `src/database/migrations/1751200000000-CreateTrustReportSchema.ts`
   with these 5 operations in order:
   1. `CREATE SCHEMA IF NOT EXISTS trust_report`
   2. Create `trust_report.report_types` — columns per T007, `UNIQUE(name)`,
@@ -108,7 +108,7 @@ schema.
   5. Seed two default active report types:
      `INSERT INTO trust_report.report_types(id, name, deduction_points) VALUES (gen_random_uuid(), 'cheating', 20), (gen_random_uuid(), 'harassment', 10)`
 
-- [ ] T011 [P] Promote `PlatformAdminGuard` to `shared-auth`:
+- [x] T011 [P] Promote `PlatformAdminGuard` to `shared-auth`:
   - Copy `src/account-social/interface/guards/platform-admin.guard.ts` →
     `src/shared-auth/platform-admin.guard.ts` (verify it is a stateless `CanActivate` checking
     `request.user.isPlatformAdmin === true`; remove or replace the import of its previous location)
@@ -117,12 +117,12 @@ schema.
     existing account-social consumers (keep a re-export if other account-social code imports it
     internally)
 
-- [ ] T012 Add `auth.request-authenticated` fire-and-forget emit to `src/shared-auth/jwt-auth.guard.ts`:
+- [x] T012 Add `auth.request-authenticated` fire-and-forget emit to `src/shared-auth/jwt-auth.guard.ts`:
   after successful `super.canActivate(context)` and payload extraction, add
   `this.eventEmitter.emit('auth.request-authenticated', { accountId: payload.sub, occurredAt: new Date() })`
   **without `await`** — inject `EventEmitter2` via constructor. Do not change any existing logic.
 
-- [ ] T013 Bootstrap `TrustReportModule` and register with `AppModule`:
+- [x] T013 Bootstrap `TrustReportModule` and register with `AppModule`:
   - Create `src/trust-report/trust-report.module.ts` with:
     `TypeOrmModule.forFeature([ReportTypeOrmEntity, ReportOrmEntity, TrustScoreOrmEntity])`,
     import `SharedAuthModule` (for `JwtAuthGuard`, `PlatformAdminGuard`),

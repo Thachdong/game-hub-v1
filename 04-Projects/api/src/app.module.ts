@@ -12,6 +12,7 @@ import { AccountSocialModule } from './account-social/account-social.module';
 import { SharedAuthModule } from './shared-auth/shared-auth.module';
 import { NotificationModule } from './notification/notification.module';
 import { RealtimeModule } from './realtime/realtime.module';
+import { TrustReportModule } from './trust-report/trust-report.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { RealtimeModule } from './realtime/realtime.module';
     AccountSocialModule,
     RealtimeModule,
     NotificationModule,
+    TrustReportModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: GlobalExceptionFilter },
