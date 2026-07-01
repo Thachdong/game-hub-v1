@@ -20,6 +20,7 @@ import {
   PlayerProfileNotFoundError,
 } from '../../domain/errors';
 import { TournamentRegistration } from '../../domain/entities/tournament-registration';
+import { PairIdlePlayersUseCase } from './pair-idle-players.use-case';
 
 export interface RegisterForTournamentInput {
   tournamentId: string;
@@ -37,6 +38,7 @@ export class RegisterForTournamentUseCase {
     private readonly profileRepo: IPlayerProfileRepositoryPort,
     @Inject(REALTIME_ROOM_PORT)
     private readonly realtimeRoom: IRealtimeRoomPort,
+    private readonly pairIdlePlayersUseCase: PairIdlePlayersUseCase,
   ) {}
 
   async execute(input: RegisterForTournamentInput): Promise<TournamentRegistration> {
@@ -65,6 +67,11 @@ export class RegisterForTournamentUseCase {
       'tournament:participant-updated',
       { tournamentId: input.tournamentId, playerId: input.playerId, action: 'registered' },
     );
+
+    // T057: late registration during in_progress — try to pair immediately
+    if (tournament.status === 'in_progress') {
+      await this.pairIdlePlayersUseCase.execute(input.tournamentId);
+    }
 
     return registration;
   }

@@ -28,6 +28,7 @@ import { RealtimeService } from '../realtime/realtime.service';
 import { TOURNAMENT_CREATOR_REQUEST_REPOSITORY_PORT } from './domain/ports/tournament-creator-request.repository.port';
 import { TOURNAMENT_REPOSITORY_PORT } from './domain/ports/tournament.repository.port';
 import { TOURNAMENT_REGISTRATION_REPOSITORY_PORT } from './domain/ports/tournament-registration.repository.port';
+import { TOURNAMENT_MATCH_REPOSITORY_PORT } from './domain/ports/tournament-match.repository.port';
 
 // ── Infrastructure ────────────────────────────────────────────────────────────
 import { GameConfigTypeOrmRepository } from './infrastructure/persistence/game-config.typeorm-repository';
@@ -101,6 +102,12 @@ import { EndTournamentUseCase } from './application/commands/end-tournament.use-
 import { TournamentSchedulerService } from './infrastructure/scheduling/tournament-scheduler.service';
 import { TournamentCancelledHandler } from './infrastructure/events/tournament-cancelled.handler';
 
+// ── US5 matchmaking ───────────────────────────────────────────────────────────
+import { TournamentMatchOrmEntity } from './infrastructure/persistence/typeorm-entities/tournament-match.orm-entity';
+import { TournamentMatchTypeOrmRepository } from './infrastructure/persistence/tournament-match.typeorm-repository';
+import { TournamentMatchmakingService } from './infrastructure/matchmaking/tournament-matchmaking.service';
+import { PairIdlePlayersUseCase } from './application/commands/pair-idle-players.use-case';
+
 // ── US1 use-cases (tournament creator role) ───────────────────────────────────
 import { RequestTournamentCreatorRoleUseCase } from './application/commands/request-tournament-creator-role.use-case';
 import { ReviewTournamentCreatorRequestUseCase } from './application/commands/review-tournament-creator-request.use-case';
@@ -133,6 +140,7 @@ import { TournamentAdminController } from './interface/http/tournament-admin.con
       TournamentCreatorRequestOrmEntity,
       TournamentOrmEntity,
       TournamentRegistrationOrmEntity,
+      TournamentMatchOrmEntity,
     ]),
     SharedAuthModule,
     RealtimeModule,
@@ -185,6 +193,11 @@ import { TournamentAdminController } from './interface/http/tournament-admin.con
     EndTournamentUseCase,
     TournamentSchedulerService,
     TournamentCancelledHandler,
+
+    // ── US5 matchmaking ───────────────────────────────────────────────────
+    { provide: TOURNAMENT_MATCH_REPOSITORY_PORT, useClass: TournamentMatchTypeOrmRepository },
+    TournamentMatchmakingService,
+    PairIdlePlayersUseCase,
 
     // ── US1 use-cases (tournament creator role) ───────────────────────────
     RequestTournamentCreatorRoleUseCase,

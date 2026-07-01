@@ -1,4 +1,4 @@
-import { Inject, Injectable, Optional } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import {
   TOURNAMENT_REPOSITORY_PORT,
   ITournamentRepository,
@@ -11,6 +11,7 @@ import { REALTIME_ROOM_PORT, IRealtimeRoomPort } from '../../../realtime/realtim
 import { TournamentNotFoundError, TournamentAlreadyStartedError } from '../../domain/errors';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { TournamentCancelledEvent } from '../../domain/events/tournament.events';
+import { PairIdlePlayersUseCase } from './pair-idle-players.use-case';
 
 const MIN_PLAYERS = 5;
 
@@ -24,6 +25,7 @@ export class StartTournamentUseCase {
     @Inject(REALTIME_ROOM_PORT)
     private readonly realtimeRoom: IRealtimeRoomPort,
     private readonly eventEmitter: EventEmitter2,
+    private readonly pairIdlePlayersUseCase: PairIdlePlayersUseCase,
   ) {}
 
   async execute(tournamentId: string): Promise<void> {
@@ -61,6 +63,7 @@ export class StartTournamentUseCase {
       { tournamentId, status: 'in_progress' },
     );
 
-    // T056: PairIdlePlayersUseCase will be injected and called here in Phase 7
+    // T056: pair all idle players immediately after tournament starts
+    await this.pairIdlePlayersUseCase.execute(tournamentId);
   }
 }
