@@ -9,11 +9,13 @@ import { GameConfigOrmEntity } from './infrastructure/persistence/typeorm-entiti
 import { MatchOrmEntity } from './infrastructure/persistence/typeorm-entities/match.orm-entity';
 import { MatchMoveOrmEntity } from './infrastructure/persistence/typeorm-entities/match-move.orm-entity';
 import { QuickPairRequestOrmEntity } from './infrastructure/persistence/typeorm-entities/quick-pair-request.orm-entity';
+import { ChatMessageOrmEntity } from './infrastructure/persistence/typeorm-entities/chat-message.orm-entity';
 import { PlayerProfileOrmEntity } from './infrastructure/persistence/typeorm-entities/player-profile.orm-entity';
 
 // ── Port tokens ───────────────────────────────────────────────────────────────
 import { GAME_CONFIG_REPOSITORY_PORT } from './domain/ports/game-config.repository.port';
 import { QUICK_PAIR_REPOSITORY_PORT } from './domain/ports/quick-pair.repository.port';
+import { CHAT_REPOSITORY_PORT } from './domain/ports/chat.repository.port';
 import { MATCH_REPOSITORY_PORT } from './domain/ports/match.repository.port';
 import { PLAYER_PROFILE_REPOSITORY_PORT } from './domain/ports/player-profile.repository.port';
 import { MATCH_TIMER_SERVICE_PORT } from './domain/ports/match-timer.service.port';
@@ -25,6 +27,7 @@ import { RealtimeService } from '../realtime/realtime.service';
 import { GameConfigTypeOrmRepository } from './infrastructure/persistence/game-config.typeorm-repository';
 import { MatchTypeOrmRepository } from './infrastructure/persistence/match.typeorm-repository';
 import { QuickPairTypeOrmRepository } from './infrastructure/persistence/quick-pair.typeorm-repository';
+import { ChatTypeOrmRepository } from './infrastructure/persistence/chat.typeorm-repository';
 import { PlayerProfileTypeOrmRepository } from './infrastructure/persistence/player-profile.typeorm-repository';
 import { MatchTimerService } from './infrastructure/match-timer.service';
 import { FriendCheckAdapter } from './infrastructure/friend-check/friend-check.adapter';
@@ -60,12 +63,18 @@ import { RespondDrawRequestUseCase } from './application/use-cases/respond-draw-
 import { QuickPairUseCase } from './application/use-cases/quick-pair.use-case';
 import { CancelQuickPairUseCase } from './application/use-cases/cancel-quick-pair.use-case';
 
+// ── US4 use-cases ─────────────────────────────────────────────────────────────
+import { SendChatMessageUseCase } from './application/use-cases/send-chat-message.use-case';
+import { GetChatHistoryUseCase } from './application/use-cases/get-chat-history.use-case';
+import { MuteViewerUseCase } from './application/use-cases/mute-viewer.use-case';
+
 // ── Controllers / Guards ──────────────────────────────────────────────────────
 import { AdminGameConfigsController } from './interface/http/admin/admin-game-configs.controller';
 import { GameConfigsController } from './interface/http/game-configs.controller';
 import { MatchController } from './interface/http/match.controller';
 import { GameplayController } from './interface/http/gameplay.controller';
 import { QuickPairController } from './interface/http/quick-pair.controller';
+import { ChatController } from './interface/http/chat.controller';
 import { GameAdminCaroGuard } from './interface/guards/game-admin-caro.guard';
 
 @Module({
@@ -76,6 +85,7 @@ import { GameAdminCaroGuard } from './interface/guards/game-admin-caro.guard';
       MatchMoveOrmEntity,
       PlayerProfileOrmEntity,
       QuickPairRequestOrmEntity,
+      ChatMessageOrmEntity,
     ]),
     SharedAuthModule,
     RealtimeModule,
@@ -87,6 +97,7 @@ import { GameAdminCaroGuard } from './interface/guards/game-admin-caro.guard';
     { provide: MATCH_REPOSITORY_PORT, useClass: MatchTypeOrmRepository },
     { provide: PLAYER_PROFILE_REPOSITORY_PORT, useClass: PlayerProfileTypeOrmRepository },
     { provide: QUICK_PAIR_REPOSITORY_PORT, useClass: QuickPairTypeOrmRepository },
+    { provide: CHAT_REPOSITORY_PORT, useClass: ChatTypeOrmRepository },
 
     // ── Service adapters ──────────────────────────────────────────────────
     MatchTimerService,
@@ -133,7 +144,12 @@ import { GameAdminCaroGuard } from './interface/guards/game-admin-caro.guard';
     // ── US3 use-cases ─────────────────────────────────────────────────────
     QuickPairUseCase,
     CancelQuickPairUseCase,
+
+    // ── US4 use-cases ─────────────────────────────────────────────────────
+    SendChatMessageUseCase,
+    GetChatHistoryUseCase,
+    MuteViewerUseCase,
   ],
-  controllers: [AdminGameConfigsController, GameConfigsController, MatchController, GameplayController, QuickPairController],
+  controllers: [AdminGameConfigsController, GameConfigsController, MatchController, GameplayController, QuickPairController, ChatController],
 })
 export class CaroGameModule {}
