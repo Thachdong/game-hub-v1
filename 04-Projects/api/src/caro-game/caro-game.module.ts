@@ -46,10 +46,18 @@ import { LeaveMatchBeforeStartUseCase } from './application/use-cases/leave-matc
 import { GetLobbyUseCase } from './application/use-cases/get-lobby.use-case';
 import { GetMatchStateUseCase } from './application/use-cases/get-match-state.use-case';
 
+// ── US2 use-cases ─────────────────────────────────────────────────────────────
+import { StartMatchUseCase } from './application/use-cases/start-match.use-case';
+import { PlaceMoveUseCase } from './application/use-cases/place-move.use-case';
+import { SurrenderUseCase } from './application/use-cases/surrender.use-case';
+import { SendDrawRequestUseCase } from './application/use-cases/send-draw-request.use-case';
+import { RespondDrawRequestUseCase } from './application/use-cases/respond-draw-request.use-case';
+
 // ── Controllers / Guards ──────────────────────────────────────────────────────
 import { AdminGameConfigsController } from './interface/http/admin/admin-game-configs.controller';
 import { GameConfigsController } from './interface/http/game-configs.controller';
 import { MatchController } from './interface/http/match.controller';
+import { GameplayController } from './interface/http/gameplay.controller';
 import { GameAdminCaroGuard } from './interface/guards/game-admin-caro.guard';
 
 @Module({
@@ -104,7 +112,14 @@ import { GameAdminCaroGuard } from './interface/guards/game-admin-caro.guard';
     LeaveMatchBeforeStartUseCase,
     GetLobbyUseCase,
     GetMatchStateUseCase,
+
+    // ── US2 use-cases ─────────────────────────────────────────────────────
+    StartMatchUseCase,
+    PlaceMoveUseCase,
+    SurrenderUseCase,
+    SendDrawRequestUseCase,
+    RespondDrawRequestUseCase,
   ],
-  controllers: [AdminGameConfigsController, GameConfigsController, MatchController],
+  controllers: [AdminGameConfigsController, GameConfigsController, MatchController, GameplayController],
 })
 export class CaroGameModule {}
