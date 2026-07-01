@@ -11,6 +11,7 @@ import { MatchMoveOrmEntity } from './infrastructure/persistence/typeorm-entitie
 import { QuickPairRequestOrmEntity } from './infrastructure/persistence/typeorm-entities/quick-pair-request.orm-entity';
 import { ChatMessageOrmEntity } from './infrastructure/persistence/typeorm-entities/chat-message.orm-entity';
 import { PlayerProfileOrmEntity } from './infrastructure/persistence/typeorm-entities/player-profile.orm-entity';
+import { TournamentCreatorRequestOrmEntity } from './infrastructure/persistence/typeorm-entities/tournament-creator-request.orm-entity';
 
 // ── Port tokens ───────────────────────────────────────────────────────────────
 import { GAME_CONFIG_REPOSITORY_PORT } from './domain/ports/game-config.repository.port';
@@ -22,6 +23,7 @@ import { MATCH_TIMER_SERVICE_PORT } from './domain/ports/match-timer.service.por
 import { FRIEND_CHECK_PORT } from './domain/ports/friend-check.port';
 import { REALTIME_PUSH_PORT, REALTIME_ROOM_PORT } from '../realtime/realtime-push.port';
 import { RealtimeService } from '../realtime/realtime.service';
+import { TOURNAMENT_CREATOR_REQUEST_REPOSITORY_PORT } from './domain/ports/tournament-creator-request.repository.port';
 
 // ── Infrastructure ────────────────────────────────────────────────────────────
 import { GameConfigTypeOrmRepository } from './infrastructure/persistence/game-config.typeorm-repository';
@@ -33,6 +35,8 @@ import { MatchTimerService } from './infrastructure/match-timer.service';
 import { FriendCheckAdapter } from './infrastructure/friend-check/friend-check.adapter';
 import { MuteRegistryService } from './infrastructure/mute-registry.service';
 import { MatchInvitationHandler } from './infrastructure/events/match-invitation.handler';
+import { TournamentCreatorRequestTypeOrmRepository } from './infrastructure/persistence/tournament-creator-request.typeorm-repository';
+import { TournamentRoleHandler } from './infrastructure/events/tournament-role.handler';
 
 // ── Game-config use-cases ────────────────────────────────────────────────────
 import { CreateGameConfigUseCase } from './application/commands/create-game-config.use-case';
@@ -75,6 +79,12 @@ import { GetLeaderboardUseCase } from './application/use-cases/get-leaderboard.u
 import { GetPlayerProfileUseCase } from './application/use-cases/get-player-profile.use-case';
 import { GetMatchHistoryUseCase } from './application/use-cases/get-match-history.use-case';
 
+// ── US1 use-cases (tournament creator role) ───────────────────────────────────
+import { RequestTournamentCreatorRoleUseCase } from './application/commands/request-tournament-creator-role.use-case';
+import { ReviewTournamentCreatorRequestUseCase } from './application/commands/review-tournament-creator-request.use-case';
+import { RevokeTournamentCreatorRoleUseCase } from './application/commands/revoke-tournament-creator-role.use-case';
+import { ListTournamentCreatorRequestsUseCase } from './application/queries/list-tournament-creator-requests.use-case';
+
 // ── Controllers / Guards ──────────────────────────────────────────────────────
 import { AdminGameConfigsController } from './interface/http/admin/admin-game-configs.controller';
 import { GameConfigsController } from './interface/http/game-configs.controller';
@@ -85,6 +95,9 @@ import { ChatController } from './interface/http/chat.controller';
 import { LeaderboardController } from './interface/http/leaderboard.controller';
 import { PlayerProfileController } from './interface/http/player-profile.controller';
 import { GameAdminCaroGuard } from './interface/guards/game-admin-caro.guard';
+import { TournamentCreatorGuard } from './interface/guards/tournament-creator.guard';
+import { TournamentController } from './interface/http/tournament.controller';
+import { TournamentAdminController } from './interface/http/tournament-admin.controller';
 
 @Module({
   imports: [
@@ -95,6 +108,7 @@ import { GameAdminCaroGuard } from './interface/guards/game-admin-caro.guard';
       PlayerProfileOrmEntity,
       QuickPairRequestOrmEntity,
       ChatMessageOrmEntity,
+      TournamentCreatorRequestOrmEntity,
     ]),
     SharedAuthModule,
     RealtimeModule,
@@ -121,9 +135,20 @@ import { GameAdminCaroGuard } from './interface/guards/game-admin-caro.guard';
 
     // ── Event handlers ────────────────────────────────────────────────────
     MatchInvitationHandler,
+    TournamentRoleHandler,
 
     // ── Guards ────────────────────────────────────────────────────────────
     GameAdminCaroGuard,
+    TournamentCreatorGuard,
+
+    // ── Tournament creator repository ─────────────────────────────────────
+    { provide: TOURNAMENT_CREATOR_REQUEST_REPOSITORY_PORT, useClass: TournamentCreatorRequestTypeOrmRepository },
+
+    // ── US1 use-cases (tournament creator role) ───────────────────────────
+    RequestTournamentCreatorRoleUseCase,
+    ReviewTournamentCreatorRequestUseCase,
+    RevokeTournamentCreatorRoleUseCase,
+    ListTournamentCreatorRequestsUseCase,
 
     // ── Game-config use-cases ─────────────────────────────────────────────
     CreateGameConfigUseCase,
@@ -175,6 +200,8 @@ import { GameAdminCaroGuard } from './interface/guards/game-admin-caro.guard';
     ChatController,
     LeaderboardController,
     PlayerProfileController,
+    TournamentController,
+    TournamentAdminController,
   ],
 })
 export class CaroGameModule {}
