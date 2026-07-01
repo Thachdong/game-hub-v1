@@ -29,6 +29,7 @@ import { TOURNAMENT_CREATOR_REQUEST_REPOSITORY_PORT } from './domain/ports/tourn
 import { TOURNAMENT_REPOSITORY_PORT } from './domain/ports/tournament.repository.port';
 import { TOURNAMENT_REGISTRATION_REPOSITORY_PORT } from './domain/ports/tournament-registration.repository.port';
 import { TOURNAMENT_MATCH_REPOSITORY_PORT } from './domain/ports/tournament-match.repository.port';
+import { TOURNAMENT_CHAT_REPOSITORY_PORT } from './domain/ports/tournament-chat.repository.port';
 
 // ── Infrastructure ────────────────────────────────────────────────────────────
 import { GameConfigTypeOrmRepository } from './infrastructure/persistence/game-config.typeorm-repository';
@@ -112,6 +113,12 @@ import { PairIdlePlayersUseCase } from './application/commands/pair-idle-players
 import { RecordTournamentMatchResultUseCase } from './application/commands/record-tournament-match-result.use-case';
 import { TournamentMatchCompletedHandler } from './infrastructure/events/tournament-match-completed.handler';
 
+// ── US7 chat ──────────────────────────────────────────────────────────────────
+import { TournamentChatMessageOrmEntity } from './infrastructure/persistence/typeorm-entities/tournament-chat-message.orm-entity';
+import { TournamentChatTypeOrmRepository } from './infrastructure/persistence/tournament-chat.typeorm-repository';
+import { SendTournamentChatMessageUseCase } from './application/commands/send-tournament-chat-message.use-case';
+import { GetTournamentChatUseCase } from './application/queries/get-tournament-chat.use-case';
+
 // ── US1 use-cases (tournament creator role) ───────────────────────────────────
 import { RequestTournamentCreatorRoleUseCase } from './application/commands/request-tournament-creator-role.use-case';
 import { ReviewTournamentCreatorRequestUseCase } from './application/commands/review-tournament-creator-request.use-case';
@@ -145,6 +152,7 @@ import { TournamentAdminController } from './interface/http/tournament-admin.con
       TournamentOrmEntity,
       TournamentRegistrationOrmEntity,
       TournamentMatchOrmEntity,
+      TournamentChatMessageOrmEntity,
     ]),
     SharedAuthModule,
     RealtimeModule,
@@ -206,6 +214,11 @@ import { TournamentAdminController } from './interface/http/tournament-admin.con
     // ── US6 arena scoring ─────────────────────────────────────────────────
     RecordTournamentMatchResultUseCase,
     TournamentMatchCompletedHandler,
+
+    // ── US7 chat ──────────────────────────────────────────────────────────
+    { provide: TOURNAMENT_CHAT_REPOSITORY_PORT, useClass: TournamentChatTypeOrmRepository },
+    SendTournamentChatMessageUseCase,
+    GetTournamentChatUseCase,
 
     // ── US1 use-cases (tournament creator role) ───────────────────────────
     RequestTournamentCreatorRoleUseCase,

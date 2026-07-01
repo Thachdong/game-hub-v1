@@ -22,6 +22,9 @@ import { GetTournamentDetailsUseCase } from '../../application/queries/get-tourn
 import { CreateTournamentDto, ListTournamentsQueryDto } from '../dto/tournament.dto';
 import { RegisterForTournamentUseCase } from '../../application/commands/register-for-tournament.use-case';
 import { GetTournamentParticipantListUseCase } from '../../application/queries/get-tournament-participant-list.use-case';
+import { SendTournamentChatMessageUseCase } from '../../application/commands/send-tournament-chat-message.use-case';
+import { GetTournamentChatUseCase } from '../../application/queries/get-tournament-chat.use-case';
+import { SendTournamentChatDto } from '../dto/tournament-chat.dto';
 
 @ApiTags('tournament')
 @Controller('caro')
@@ -33,6 +36,8 @@ export class TournamentController {
     private readonly getTournamentDetailsUseCase: GetTournamentDetailsUseCase,
     private readonly registerForTournamentUseCase: RegisterForTournamentUseCase,
     private readonly getParticipantListUseCase: GetTournamentParticipantListUseCase,
+    private readonly sendChatUseCase: SendTournamentChatMessageUseCase,
+    private readonly getChatUseCase: GetTournamentChatUseCase,
   ) {}
 
   // ── US1: Role request ─────────────────────────────────────────────────────
@@ -141,6 +146,53 @@ export class TournamentController {
       status: r.status,
       eloAtRegistration: r.eloAtRegistration,
       registeredAt: r.registeredAt,
+    }));
+  }
+
+  // ── US7: Tournament chat ──────────────────────────────────────────────────
+
+  @Post('tournaments/:tournamentId/chat')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Send a chat message (registered participants only)' })
+  async sendChatMessage(
+    @Param('tournamentId', ParseUUIDPipe) tournamentId: string,
+    @Body() dto: SendTournamentChatDto,
+    @Req() req: Request & { user: { sub: string } },
+  ) {
+    const message = await this.sendChatUseCase.execute({
+      tournamentId,
+      senderPlayerId: req.user.sub,
+      content: dto.content,
+    });
+    return {
+      messageId: message.id,
+      senderPlayerId: message.senderPlayerId,
+      content: message.content,
+      sentAt: message.sentAt,
+    };
+  }
+
+  @Get('tournaments/:tournamentId/chat')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get recent chat messages (registered participants only)' })
+  async getChatMessages(
+    @Param('tournamentId', ParseUUIDPipe) tournamentId: string,
+    @Query('limit') limit: string | undefined,
+    @Req() req: Request & { user: { sub: string } },
+  ) {
+    const messages = await this.getChatUseCase.execute(
+      tournamentId,
+      req.user.sub,
+      limit ? parseInt(limit, 10) : undefined,
+    );
+    return messages.map(m => ({
+      messageId: m.id,
+      senderPlayerId: m.senderPlayerId,
+      content: m.content,
+      sentAt: m.sentAt,
     }));
   }
 
