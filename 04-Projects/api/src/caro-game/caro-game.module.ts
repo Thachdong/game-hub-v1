@@ -12,6 +12,7 @@ import { QuickPairRequestOrmEntity } from './infrastructure/persistence/typeorm-
 import { ChatMessageOrmEntity } from './infrastructure/persistence/typeorm-entities/chat-message.orm-entity';
 import { PlayerProfileOrmEntity } from './infrastructure/persistence/typeorm-entities/player-profile.orm-entity';
 import { TournamentCreatorRequestOrmEntity } from './infrastructure/persistence/typeorm-entities/tournament-creator-request.orm-entity';
+import { TournamentOrmEntity } from './infrastructure/persistence/typeorm-entities/tournament.orm-entity';
 
 // ── Port tokens ───────────────────────────────────────────────────────────────
 import { GAME_CONFIG_REPOSITORY_PORT } from './domain/ports/game-config.repository.port';
@@ -24,6 +25,7 @@ import { FRIEND_CHECK_PORT } from './domain/ports/friend-check.port';
 import { REALTIME_PUSH_PORT, REALTIME_ROOM_PORT } from '../realtime/realtime-push.port';
 import { RealtimeService } from '../realtime/realtime.service';
 import { TOURNAMENT_CREATOR_REQUEST_REPOSITORY_PORT } from './domain/ports/tournament-creator-request.repository.port';
+import { TOURNAMENT_REPOSITORY_PORT } from './domain/ports/tournament.repository.port';
 
 // ── Infrastructure ────────────────────────────────────────────────────────────
 import { GameConfigTypeOrmRepository } from './infrastructure/persistence/game-config.typeorm-repository';
@@ -36,6 +38,7 @@ import { FriendCheckAdapter } from './infrastructure/friend-check/friend-check.a
 import { MuteRegistryService } from './infrastructure/mute-registry.service';
 import { MatchInvitationHandler } from './infrastructure/events/match-invitation.handler';
 import { TournamentCreatorRequestTypeOrmRepository } from './infrastructure/persistence/tournament-creator-request.typeorm-repository';
+import { TournamentTypeOrmRepository } from './infrastructure/persistence/tournament.typeorm-repository';
 import { TournamentRoleHandler } from './infrastructure/events/tournament-role.handler';
 
 // ── Game-config use-cases ────────────────────────────────────────────────────
@@ -79,6 +82,11 @@ import { GetLeaderboardUseCase } from './application/use-cases/get-leaderboard.u
 import { GetPlayerProfileUseCase } from './application/use-cases/get-player-profile.use-case';
 import { GetMatchHistoryUseCase } from './application/use-cases/get-match-history.use-case';
 
+// ── US2 tournament use-cases ──────────────────────────────────────────────────
+import { CreateTournamentUseCase } from './application/commands/create-tournament.use-case';
+import { ListTournamentsUseCase } from './application/queries/list-tournaments.use-case';
+import { GetTournamentDetailsUseCase } from './application/queries/get-tournament-details.use-case';
+
 // ── US1 use-cases (tournament creator role) ───────────────────────────────────
 import { RequestTournamentCreatorRoleUseCase } from './application/commands/request-tournament-creator-role.use-case';
 import { ReviewTournamentCreatorRequestUseCase } from './application/commands/review-tournament-creator-request.use-case';
@@ -109,6 +117,7 @@ import { TournamentAdminController } from './interface/http/tournament-admin.con
       QuickPairRequestOrmEntity,
       ChatMessageOrmEntity,
       TournamentCreatorRequestOrmEntity,
+      TournamentOrmEntity,
     ]),
     SharedAuthModule,
     RealtimeModule,
@@ -141,8 +150,14 @@ import { TournamentAdminController } from './interface/http/tournament-admin.con
     GameAdminCaroGuard,
     TournamentCreatorGuard,
 
-    // ── Tournament creator repository ─────────────────────────────────────
+    // ── Tournament repositories ───────────────────────────────────────────
     { provide: TOURNAMENT_CREATOR_REQUEST_REPOSITORY_PORT, useClass: TournamentCreatorRequestTypeOrmRepository },
+    { provide: TOURNAMENT_REPOSITORY_PORT, useClass: TournamentTypeOrmRepository },
+
+    // ── US2 tournament use-cases ──────────────────────────────────────────
+    CreateTournamentUseCase,
+    ListTournamentsUseCase,
+    GetTournamentDetailsUseCase,
 
     // ── US1 use-cases (tournament creator role) ───────────────────────────
     RequestTournamentCreatorRoleUseCase,
