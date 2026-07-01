@@ -13,6 +13,8 @@ import {
   MoveDeadlineExpiredError,
 } from '../../domain/errors';
 import { MatchMove } from '../../domain/entities/match-move';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { MatchCompletedEvent } from '../../domain/events/tournament.events';
 
 interface PlaceMoveInput {
   matchId: string;
@@ -42,6 +44,7 @@ export class PlaceMoveUseCase {
     @Inject(MATCH_TIMER_SERVICE_PORT) private readonly timerService: IMatchTimerServicePort,
     @Inject(PLAYER_PROFILE_REPOSITORY_PORT) private readonly profileRepo: IPlayerProfileRepositoryPort,
     @Inject(REALTIME_ROOM_PORT) private readonly realtimeRoom: IRealtimeRoomPort,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async execute(input: PlaceMoveInput): Promise<PlaceMoveResult> {
@@ -122,6 +125,18 @@ export class PlaceMoveUseCase {
         playerXEloChange: xDelta,
         playerOEloChange: oDelta,
       });
+
+      this.eventEmitter.emit(
+        'match.completed',
+        new MatchCompletedEvent(
+          input.matchId,
+          match.tournamentId,
+          winnerId ?? null,
+          isDraw,
+          match.playerXId!,
+          match.playerOId!,
+        ),
+      );
 
       return { move, isGameOver: true, result, winnerId };
     }
@@ -239,5 +254,10 @@ export class PlaceMoveUseCase {
       playerOEloChange: oDelta,
       reason: 'timeout',
     });
+
+    this.eventEmitter.emit(
+      'match.completed',
+      new MatchCompletedEvent(matchId, match.tournamentId, winnerId, false, playerXId, playerOId),
+    );
   }
 }

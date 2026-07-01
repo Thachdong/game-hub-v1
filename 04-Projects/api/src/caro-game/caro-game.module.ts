@@ -108,6 +108,10 @@ import { TournamentMatchTypeOrmRepository } from './infrastructure/persistence/t
 import { TournamentMatchmakingService } from './infrastructure/matchmaking/tournament-matchmaking.service';
 import { PairIdlePlayersUseCase } from './application/commands/pair-idle-players.use-case';
 
+// ── US6 arena scoring ─────────────────────────────────────────────────────────
+import { RecordTournamentMatchResultUseCase } from './application/commands/record-tournament-match-result.use-case';
+import { TournamentMatchCompletedHandler } from './infrastructure/events/tournament-match-completed.handler';
+
 // ── US1 use-cases (tournament creator role) ───────────────────────────────────
 import { RequestTournamentCreatorRoleUseCase } from './application/commands/request-tournament-creator-role.use-case';
 import { ReviewTournamentCreatorRequestUseCase } from './application/commands/review-tournament-creator-request.use-case';
@@ -198,6 +202,10 @@ import { TournamentAdminController } from './interface/http/tournament-admin.con
     { provide: TOURNAMENT_MATCH_REPOSITORY_PORT, useClass: TournamentMatchTypeOrmRepository },
     TournamentMatchmakingService,
     PairIdlePlayersUseCase,
+
+    // ── US6 arena scoring ─────────────────────────────────────────────────
+    RecordTournamentMatchResultUseCase,
+    TournamentMatchCompletedHandler,
 
     // ── US1 use-cases (tournament creator role) ───────────────────────────
     RequestTournamentCreatorRoleUseCase,
