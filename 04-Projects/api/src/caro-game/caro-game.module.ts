@@ -94,6 +94,13 @@ import { GetTournamentDetailsUseCase } from './application/queries/get-tournamen
 import { RegisterForTournamentUseCase } from './application/commands/register-for-tournament.use-case';
 import { GetTournamentParticipantListUseCase } from './application/queries/get-tournament-participant-list.use-case';
 
+// ── US4 lifecycle use-cases ───────────────────────────────────────────────────
+import { StartTournamentUseCase } from './application/commands/start-tournament.use-case';
+import { CancelTournamentUseCase } from './application/commands/cancel-tournament.use-case';
+import { EndTournamentUseCase } from './application/commands/end-tournament.use-case';
+import { TournamentSchedulerService } from './infrastructure/scheduling/tournament-scheduler.service';
+import { TournamentCancelledHandler } from './infrastructure/events/tournament-cancelled.handler';
+
 // ── US1 use-cases (tournament creator role) ───────────────────────────────────
 import { RequestTournamentCreatorRoleUseCase } from './application/commands/request-tournament-creator-role.use-case';
 import { ReviewTournamentCreatorRequestUseCase } from './application/commands/review-tournament-creator-request.use-case';
@@ -171,6 +178,13 @@ import { TournamentAdminController } from './interface/http/tournament-admin.con
     // ── US3 registration use-cases ────────────────────────────────────────
     RegisterForTournamentUseCase,
     GetTournamentParticipantListUseCase,
+
+    // ── US4 lifecycle use-cases ───────────────────────────────────────────
+    StartTournamentUseCase,
+    CancelTournamentUseCase,
+    EndTournamentUseCase,
+    TournamentSchedulerService,
+    TournamentCancelledHandler,
 
     // ── US1 use-cases (tournament creator role) ───────────────────────────
     RequestTournamentCreatorRoleUseCase,
