@@ -1,12 +1,34 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { SharedAuthModule } from '../shared-auth/shared-auth.module';
+import { RealtimeModule } from '../realtime/realtime.module';
+import { AccountSocialModule } from '../account-social/account-social.module';
 
+// ── ORM entities ──────────────────────────────────────────────────────────────
 import { GameConfigOrmEntity } from './infrastructure/persistence/typeorm-entities/game-config.orm-entity';
-import { GameConfigTypeOrmRepository } from './infrastructure/persistence/game-config.typeorm-repository';
+import { MatchOrmEntity } from './infrastructure/persistence/typeorm-entities/match.orm-entity';
+import { MatchMoveOrmEntity } from './infrastructure/persistence/typeorm-entities/match-move.orm-entity';
+import { PlayerProfileOrmEntity } from './infrastructure/persistence/typeorm-entities/player-profile.orm-entity';
 
+// ── Port tokens ───────────────────────────────────────────────────────────────
 import { GAME_CONFIG_REPOSITORY_PORT } from './domain/ports/game-config.repository.port';
+import { MATCH_REPOSITORY_PORT } from './domain/ports/match.repository.port';
+import { PLAYER_PROFILE_REPOSITORY_PORT } from './domain/ports/player-profile.repository.port';
+import { MATCH_TIMER_SERVICE_PORT } from './domain/ports/match-timer.service.port';
+import { FRIEND_CHECK_PORT } from './domain/ports/friend-check.port';
+import { REALTIME_PUSH_PORT, REALTIME_ROOM_PORT } from '../realtime/realtime-push.port';
+import { RealtimeService } from '../realtime/realtime.service';
 
+// ── Infrastructure ────────────────────────────────────────────────────────────
+import { GameConfigTypeOrmRepository } from './infrastructure/persistence/game-config.typeorm-repository';
+import { MatchTypeOrmRepository } from './infrastructure/persistence/match.typeorm-repository';
+import { PlayerProfileTypeOrmRepository } from './infrastructure/persistence/player-profile.typeorm-repository';
+import { MatchTimerService } from './infrastructure/match-timer.service';
+import { FriendCheckAdapter } from './infrastructure/friend-check/friend-check.adapter';
+import { MuteRegistryService } from './infrastructure/mute-registry.service';
+import { MatchInvitationHandler } from './infrastructure/events/match-invitation.handler';
+
+// ── Game-config use-cases ────────────────────────────────────────────────────
 import { CreateGameConfigUseCase } from './application/commands/create-game-config.use-case';
 import { UpdateGameConfigUseCase } from './application/commands/update-game-config.use-case';
 import { DeactivateGameConfigUseCase } from './application/commands/deactivate-game-config.use-case';
@@ -14,25 +36,75 @@ import { ReactivateGameConfigUseCase } from './application/commands/reactivate-g
 import { ListAllGameConfigsUseCase } from './application/queries/list-all-game-configs.use-case';
 import { ListActiveGameConfigsUseCase } from './application/queries/list-active-game-configs.use-case';
 
+// ── US1 use-cases ─────────────────────────────────────────────────────────────
+import { CreateMatchUseCase } from './application/use-cases/create-match.use-case';
+import { CancelMatchUseCase } from './application/use-cases/cancel-match.use-case';
+import { InvitePlayerUseCase } from './application/use-cases/invite-player.use-case';
+import { RespondToInvitationUseCase } from './application/use-cases/respond-to-invitation.use-case';
+import { JoinMatchUseCase } from './application/use-cases/join-match.use-case';
+import { LeaveMatchBeforeStartUseCase } from './application/use-cases/leave-match-before-start.use-case';
+import { GetLobbyUseCase } from './application/use-cases/get-lobby.use-case';
+import { GetMatchStateUseCase } from './application/use-cases/get-match-state.use-case';
+
+// ── Controllers / Guards ──────────────────────────────────────────────────────
 import { AdminGameConfigsController } from './interface/http/admin/admin-game-configs.controller';
 import { GameConfigsController } from './interface/http/game-configs.controller';
+import { MatchController } from './interface/http/match.controller';
 import { GameAdminCaroGuard } from './interface/guards/game-admin-caro.guard';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([GameConfigOrmEntity]),
+    TypeOrmModule.forFeature([
+      GameConfigOrmEntity,
+      MatchOrmEntity,
+      MatchMoveOrmEntity,
+      PlayerProfileOrmEntity,
+    ]),
     SharedAuthModule,
+    RealtimeModule,
+    AccountSocialModule,
   ],
   providers: [
+    // ── Repository adapters ───────────────────────────────────────────────
     { provide: GAME_CONFIG_REPOSITORY_PORT, useClass: GameConfigTypeOrmRepository },
+    { provide: MATCH_REPOSITORY_PORT, useClass: MatchTypeOrmRepository },
+    { provide: PLAYER_PROFILE_REPOSITORY_PORT, useClass: PlayerProfileTypeOrmRepository },
+
+    // ── Service adapters ──────────────────────────────────────────────────
+    MatchTimerService,
+    { provide: MATCH_TIMER_SERVICE_PORT, useExisting: MatchTimerService },
+    FriendCheckAdapter,
+    { provide: FRIEND_CHECK_PORT, useExisting: FriendCheckAdapter },
+    MuteRegistryService,
+
+    // ── Realtime port re-exports (from RealtimeModule) ────────────────────
+    { provide: REALTIME_PUSH_PORT, useExisting: RealtimeService },
+    { provide: REALTIME_ROOM_PORT, useExisting: RealtimeService },
+
+    // ── Event handlers ────────────────────────────────────────────────────
+    MatchInvitationHandler,
+
+    // ── Guards ────────────────────────────────────────────────────────────
     GameAdminCaroGuard,
+
+    // ── Game-config use-cases ─────────────────────────────────────────────
     CreateGameConfigUseCase,
     UpdateGameConfigUseCase,
     DeactivateGameConfigUseCase,
     ReactivateGameConfigUseCase,
     ListAllGameConfigsUseCase,
     ListActiveGameConfigsUseCase,
+
+    // ── US1 use-cases ─────────────────────────────────────────────────────
+    CreateMatchUseCase,
+    CancelMatchUseCase,
+    InvitePlayerUseCase,
+    RespondToInvitationUseCase,
+    JoinMatchUseCase,
+    LeaveMatchBeforeStartUseCase,
+    GetLobbyUseCase,
+    GetMatchStateUseCase,
   ],
-  controllers: [AdminGameConfigsController, GameConfigsController],
+  controllers: [AdminGameConfigsController, GameConfigsController, MatchController],
 })
 export class CaroGameModule {}
