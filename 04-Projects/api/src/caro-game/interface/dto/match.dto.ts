@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsIn, IsNotEmpty, IsString, IsUUID } from 'class-validator';
+import { IsIn, IsUUID } from 'class-validator';
 
 // ── Request DTOs ──────────────────────────────────────────────────────────────
 
