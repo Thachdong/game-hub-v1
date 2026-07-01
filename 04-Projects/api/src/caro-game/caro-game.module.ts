@@ -68,6 +68,13 @@ import { SendChatMessageUseCase } from './application/use-cases/send-chat-messag
 import { GetChatHistoryUseCase } from './application/use-cases/get-chat-history.use-case';
 import { MuteViewerUseCase } from './application/use-cases/mute-viewer.use-case';
 
+// ── US5 use-cases ─────────────────────────────────────────────────────────────
+import { GetLeaderboardUseCase } from './application/use-cases/get-leaderboard.use-case';
+
+// ── US6 use-cases ─────────────────────────────────────────────────────────────
+import { GetPlayerProfileUseCase } from './application/use-cases/get-player-profile.use-case';
+import { GetMatchHistoryUseCase } from './application/use-cases/get-match-history.use-case';
+
 // ── Controllers / Guards ──────────────────────────────────────────────────────
 import { AdminGameConfigsController } from './interface/http/admin/admin-game-configs.controller';
 import { GameConfigsController } from './interface/http/game-configs.controller';
@@ -75,6 +82,8 @@ import { MatchController } from './interface/http/match.controller';
 import { GameplayController } from './interface/http/gameplay.controller';
 import { QuickPairController } from './interface/http/quick-pair.controller';
 import { ChatController } from './interface/http/chat.controller';
+import { LeaderboardController } from './interface/http/leaderboard.controller';
+import { PlayerProfileController } from './interface/http/player-profile.controller';
 import { GameAdminCaroGuard } from './interface/guards/game-admin-caro.guard';
 
 @Module({
@@ -149,7 +158,23 @@ import { GameAdminCaroGuard } from './interface/guards/game-admin-caro.guard';
     SendChatMessageUseCase,
     GetChatHistoryUseCase,
     MuteViewerUseCase,
+
+    // ── US5 use-cases ─────────────────────────────────────────────────────
+    GetLeaderboardUseCase,
+
+    // ── US6 use-cases ─────────────────────────────────────────────────────
+    GetPlayerProfileUseCase,
+    GetMatchHistoryUseCase,
   ],
-  controllers: [AdminGameConfigsController, GameConfigsController, MatchController, GameplayController, QuickPairController, ChatController],
+  controllers: [
+    AdminGameConfigsController,
+    GameConfigsController,
+    MatchController,
+    GameplayController,
+    QuickPairController,
+    ChatController,
+    LeaderboardController,
+    PlayerProfileController,
+  ],
 })
 export class CaroGameModule {}
