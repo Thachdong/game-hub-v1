@@ -153,3 +153,93 @@ export class GameConfigInvalidMoveTimeError extends Error {
     this.name = 'GameConfigInvalidMoveTimeError';
   }
 }
+
+// ── Tournament errors ──────────────────────────────────────────────────────────
+
+export class TournamentNotFoundError extends Error {
+  readonly code = 'TOURNAMENT_NOT_FOUND';
+  constructor() {
+    super('Tournament not found');
+    this.name = 'TournamentNotFoundError';
+  }
+}
+
+export class TournamentAlreadyStartedError extends Error {
+  readonly code = 'TOURNAMENT_ALREADY_STARTED';
+  constructor() {
+    super('Tournament has already started');
+    this.name = 'TournamentAlreadyStartedError';
+  }
+}
+
+export class TournamentRegistrationClosedError extends Error {
+  readonly code = 'TOURNAMENT_REGISTRATION_CLOSED';
+  constructor() {
+    super('Tournament registration is closed (tournament has ended or been cancelled)');
+    this.name = 'TournamentRegistrationClosedError';
+  }
+}
+
+export class InsufficientEloError extends Error {
+  readonly code = 'INSUFFICIENT_ELO';
+  constructor(required: number, current: number) {
+    super(`Minimum elo of ${required} required; your current elo is ${current}`);
+    this.name = 'InsufficientEloError';
+  }
+}
+
+export class AlreadyRegisteredError extends Error {
+  readonly code = 'ALREADY_REGISTERED';
+  constructor() {
+    super('You are already registered for this tournament');
+    this.name = 'AlreadyRegisteredError';
+  }
+}
+
+export class NotRegisteredError extends Error {
+  readonly code = 'NOT_REGISTERED';
+  constructor() {
+    super('You are not registered in this tournament');
+    this.name = 'NotRegisteredError';
+  }
+}
+
+export class TournamentCreatorRoleAlreadyExistsError extends Error {
+  readonly code = 'TOURNAMENT_CREATOR_ROLE_EXISTS';
+  constructor() {
+    super('Player already has the Tournament Creator role');
+    this.name = 'TournamentCreatorRoleAlreadyExistsError';
+  }
+}
+
+export class PendingRequestAlreadyExistsError extends Error {
+  readonly code = 'PENDING_REQUEST_EXISTS';
+  constructor() {
+    super('A pending Tournament Creator role request already exists for this player');
+    this.name = 'PendingRequestAlreadyExistsError';
+  }
+}
+
+export class TournamentCreatorRequestNotFoundError extends Error {
+  readonly code = 'TOURNAMENT_CREATOR_REQUEST_NOT_FOUND';
+  constructor() {
+    super('Tournament creator request not found');
+    this.name = 'TournamentCreatorRequestNotFoundError';
+  }
+}
+
+export class TournamentCreatorRequestNotPendingError extends Error {
+  readonly code = 'TOURNAMENT_CREATOR_REQUEST_NOT_PENDING';
+  constructor() {
+    super('Tournament creator request is not in pending status');
+    this.name = 'TournamentCreatorRequestNotPendingError';
+  }
+}
+
+export class PlayerProfileNotFoundError extends Error {
+  readonly code = 'PLAYER_PROFILE_NOT_FOUND';
+  constructor() {
+    super('Player profile not found');
+    this.name = 'PlayerProfileNotFoundError';
+  }
+}

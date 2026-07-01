@@ -37,6 +37,13 @@ export interface MatchHistoryPage {
   nextCursor: string | null;
 }
 
+export interface CreateTournamentMatchData {
+  whitePlayerId: string;
+  blackPlayerId: string;
+  gameConfigId: string;
+  tournamentId: string;
+}
+
 export interface IMatchRepositoryPort {
   findById(id: string): Promise<Match | null>;
   findActiveByPlayerId(playerId: string): Promise<Match | null>;
@@ -47,4 +54,6 @@ export interface IMatchRepositoryPort {
   saveMove(data: { matchId: string; playerId: string; row: number; col: number; sequenceNumber: number }): Promise<MatchMove>;
   findMovesByMatchId(matchId: string): Promise<MatchMove[]>;
   findNextSequenceNumber(matchId: string): Promise<number>;
+  /** Creates an auto-started tournament match (no lobby phase). */
+  createTournamentMatch(data: CreateTournamentMatchData): Promise<Match>;
 }

@@ -58,6 +58,15 @@ export class PlayerProfileTypeOrmRepository implements IPlayerProfileRepositoryP
     return entities.map(this.toDomain);
   }
 
+  async updateTournamentCreatorFlag(playerId: string, value: boolean): Promise<void> {
+    await this.repo
+      .createQueryBuilder()
+      .update(PlayerProfileOrmEntity)
+      .set({ isTournamentCreator: value })
+      .where('player_id = :playerId', { playerId })
+      .execute();
+  }
+
   private toDomain(e: PlayerProfileOrmEntity): PlayerProfile {
     const p = new PlayerProfile();
     p.id = e.id;
@@ -67,6 +76,7 @@ export class PlayerProfileTypeOrmRepository implements IPlayerProfileRepositoryP
     p.wins = e.wins;
     p.losses = e.losses;
     p.draws = e.draws;
+    p.isTournamentCreator = e.isTournamentCreator ?? false;
     p.createdAt = e.createdAt;
     p.updatedAt = e.updatedAt;
     return p;

@@ -1,4 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ACCOUNT_REPO, IAccountRepository } from '@domain/ports/account.repository.port';
 import {
@@ -24,6 +26,7 @@ export class LoginWithGoogleUseCase {
     @Inject(TOKEN_SERVICE) private readonly tokenService: ITokenService,
     @Inject(APP_CONFIG) private readonly appConfig: AppConfig,
     private readonly eventEmitter: EventEmitter2,
+    @InjectDataSource() private readonly dataSource: DataSource,
   ) {}
 
   async execute(googleUser: GoogleUserInfo): Promise<LoginWithGoogleResult> {
@@ -39,16 +42,26 @@ export class LoginWithGoogleUseCase {
 
     const gameAdminRoles = await this.gameAdminRoleRepo.findByAccountId(account.id);
     const isPlatformAdmin = this.appConfig.platformAdminEmails.includes(account.email);
+    const isTournamentCreator = await this.lookupTournamentCreatorFlag(account.id);
 
     const accessToken = this.tokenService.signAccessToken({
       sub: account.id,
       email: account.email,
       isPlatformAdmin,
       gameAdminRoles,
+      isTournamentCreator,
       type: 'access',
     });
     const refreshToken = this.tokenService.signRefreshToken(account.id);
 
     return { accessToken, refreshToken, account };
+  }
+
+  private async lookupTournamentCreatorFlag(playerId: string): Promise<boolean> {
+    const rows = await this.dataSource.query<{ is_tournament_creator: boolean }[]>(
+      `SELECT is_tournament_creator FROM caro_game.player_profiles WHERE player_id = $1 LIMIT 1`,
+      [playerId],
+    );
+    return rows[0]?.is_tournament_creator ?? false;
   }
 }

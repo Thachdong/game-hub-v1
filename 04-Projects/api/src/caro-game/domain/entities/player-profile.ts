@@ -6,6 +6,7 @@ export class PlayerProfile {
   wins: number;
   losses: number;
   draws: number;
+  isTournamentCreator: boolean;
   createdAt: Date;
   updatedAt: Date;
 }

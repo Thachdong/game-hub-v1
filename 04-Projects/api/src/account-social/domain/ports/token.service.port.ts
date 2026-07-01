@@ -3,6 +3,7 @@ export interface AccessTokenPayload {
   email: string;
   isPlatformAdmin: boolean;
   gameAdminRoles: string[];
+  isTournamentCreator: boolean;
   type: 'access';
 }
 

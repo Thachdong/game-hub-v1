@@ -31,6 +31,7 @@ export class Match {
   deadlineAt: Date | null;
   startedAt: Date | null;
   endedAt: Date | null;
+  tournamentId: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
