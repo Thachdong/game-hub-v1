@@ -20,6 +20,8 @@ import { CreateTournamentUseCase } from '../../application/commands/create-tourn
 import { ListTournamentsUseCase } from '../../application/queries/list-tournaments.use-case';
 import { GetTournamentDetailsUseCase } from '../../application/queries/get-tournament-details.use-case';
 import { CreateTournamentDto, ListTournamentsQueryDto } from '../dto/tournament.dto';
+import { RegisterForTournamentUseCase } from '../../application/commands/register-for-tournament.use-case';
+import { GetTournamentParticipantListUseCase } from '../../application/queries/get-tournament-participant-list.use-case';
 
 @ApiTags('tournament')
 @Controller('caro')
@@ -29,6 +31,8 @@ export class TournamentController {
     private readonly createTournamentUseCase: CreateTournamentUseCase,
     private readonly listTournamentsUseCase: ListTournamentsUseCase,
     private readonly getTournamentDetailsUseCase: GetTournamentDetailsUseCase,
+    private readonly registerForTournamentUseCase: RegisterForTournamentUseCase,
+    private readonly getParticipantListUseCase: GetTournamentParticipantListUseCase,
   ) {}
 
   // ── US1: Role request ─────────────────────────────────────────────────────
@@ -95,6 +99,49 @@ export class TournamentController {
       })),
       nextCursor,
     };
+  }
+
+  // ── US3: Registration & participant list ──────────────────────────────────
+
+  @Post('tournaments/:tournamentId/registrations')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Register for a tournament (ELO-gated)' })
+  async registerForTournament(
+    @Param('tournamentId', ParseUUIDPipe) tournamentId: string,
+    @Req() req: Request & { user: { sub: string } },
+  ) {
+    const registration = await this.registerForTournamentUseCase.execute({
+      tournamentId,
+      playerId: req.user.sub,
+    });
+    return {
+      registrationId: registration.id,
+      tournamentId: registration.tournamentId,
+      playerId: registration.playerId,
+      eloAtRegistration: registration.eloAtRegistration,
+      tournamentPoints: registration.tournamentPoints,
+      winStreak: registration.winStreak,
+      status: registration.status,
+      registeredAt: registration.registeredAt,
+    };
+  }
+
+  @Get('tournaments/:tournamentId/participants')
+  @ApiOperation({ summary: 'Get tournament participant list ordered by score (public)' })
+  async getParticipants(@Param('tournamentId', ParseUUIDPipe) tournamentId: string) {
+    const registrations = await this.getParticipantListUseCase.execute(tournamentId);
+    return registrations.map((r, idx) => ({
+      rank: idx + 1,
+      registrationId: r.id,
+      playerId: r.playerId,
+      tournamentPoints: r.tournamentPoints,
+      winStreak: r.winStreak,
+      status: r.status,
+      eloAtRegistration: r.eloAtRegistration,
+      registeredAt: r.registeredAt,
+    }));
   }
 
   @Get('tournaments/:tournamentId')
