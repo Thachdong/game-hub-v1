@@ -55,6 +55,18 @@ import {
   NotFriendsError,
   MatchPrivateAccessDeniedError,
   MoveDeadlineExpiredError,
+  // Tournament errors
+  TournamentNotFoundError,
+  TournamentAlreadyStartedError,
+  TournamentRegistrationClosedError,
+  InsufficientEloError,
+  AlreadyRegisteredError,
+  NotRegisteredError,
+  TournamentCreatorRoleAlreadyExistsError,
+  PendingRequestAlreadyExistsError,
+  TournamentCreatorRequestNotFoundError,
+  TournamentCreatorRequestNotPendingError,
+  PlayerProfileNotFoundError,
 } from '../../caro-game/domain/errors';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -101,6 +113,18 @@ const DOMAIN_ERROR_STATUS = new Map<new (...args: any[]) => Error, HttpStatus>([
   [NotFriendsError, HttpStatus.UNPROCESSABLE_ENTITY],
   [MatchPrivateAccessDeniedError, HttpStatus.FORBIDDEN],
   [MoveDeadlineExpiredError, HttpStatus.CONFLICT],
+  // Tournament errors
+  [TournamentNotFoundError, HttpStatus.NOT_FOUND],
+  [TournamentAlreadyStartedError, HttpStatus.CONFLICT],
+  [TournamentRegistrationClosedError, HttpStatus.UNPROCESSABLE_ENTITY],
+  [InsufficientEloError, HttpStatus.FORBIDDEN],
+  [AlreadyRegisteredError, HttpStatus.CONFLICT],
+  [NotRegisteredError, HttpStatus.FORBIDDEN],
+  [TournamentCreatorRoleAlreadyExistsError, HttpStatus.CONFLICT],
+  [PendingRequestAlreadyExistsError, HttpStatus.CONFLICT],
+  [TournamentCreatorRequestNotFoundError, HttpStatus.NOT_FOUND],
+  [TournamentCreatorRequestNotPendingError, HttpStatus.CONFLICT],
+  [PlayerProfileNotFoundError, HttpStatus.NOT_FOUND],
 ]);
 
 @Catch()

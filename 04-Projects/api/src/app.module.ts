@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { ScheduleModule } from '@nestjs/schedule';
 import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { authConfig } from '@config/auth.config';
 import { googleOAuthConfig } from '@config/google-oauth.config';
@@ -36,6 +37,7 @@ import { CaroGameModule } from './caro-game/caro-game.module';
       inject: [ConfigService],
     }),
     EventEmitterModule.forRoot({ wildcard: false }),
+    ScheduleModule.forRoot(),
     SharedAuthModule,
     AccountSocialModule,
     RealtimeModule,

@@ -9,6 +9,7 @@ import {
   UpdateMatchData,
   MatchHistoryCursor,
   MatchHistoryPage,
+  CreateTournamentMatchData,
 } from '../../domain/ports/match.repository.port';
 import { Match } from '../../domain/entities/match';
 import { MatchMove } from '../../domain/entities/match-move';
@@ -162,6 +163,40 @@ export class MatchTypeOrmRepository implements IMatchRepositoryPort {
     return (result?.max ?? 0) + 1;
   }
 
+  async createTournamentMatch(data: CreateTournamentMatchData): Promise<Match> {
+    const [playerXId, playerOId] =
+      Math.random() < 0.5
+        ? [data.whitePlayerId, data.blackPlayerId]
+        : [data.blackPlayerId, data.whitePlayerId];
+
+    const now = new Date();
+    const deadline = new Date(now.getTime() + 30 * 1000);
+
+    const entity = this.matchRepo.create({
+      configId: data.gameConfigId,
+      boardSize: '18x18',
+      moveTimeSeconds: 30,
+      visibility: 'public',
+      status: 'in_progress',
+      creatorId: data.whitePlayerId,
+      secondPlayerId: data.blackPlayerId,
+      playerXId,
+      playerOId,
+      currentTurnPlayerId: playerXId,
+      pendingDrawRequestFromId: null,
+      result: null,
+      winnerPlayerId: null,
+      playerXEloChange: null,
+      playerOEloChange: null,
+      deadlineAt: deadline,
+      startedAt: now,
+      endedAt: null,
+      tournamentId: data.tournamentId,
+    });
+    const saved = await this.matchRepo.save(entity);
+    return this.toDomain(saved);
+  }
+
   private toDomain(e: MatchOrmEntity): Match {
     const m = new Match();
     m.id = e.id;
@@ -183,6 +218,7 @@ export class MatchTypeOrmRepository implements IMatchRepositoryPort {
     m.deadlineAt = e.deadlineAt;
     m.startedAt = e.startedAt;
     m.endedAt = e.endedAt;
+    m.tournamentId = e.tournamentId ?? null;
     m.createdAt = e.createdAt;
     m.updatedAt = e.updatedAt;
     return m;

@@ -8,6 +8,8 @@ import {
   NotAParticipantError,
   MatchNotInExpectedStatusError,
 } from '../../domain/errors';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { MatchCompletedEvent } from '../../domain/events/tournament.events';
 
 interface SurrenderInput {
   matchId: string;
@@ -21,6 +23,7 @@ export class SurrenderUseCase {
     @Inject(MATCH_TIMER_SERVICE_PORT) private readonly timerService: IMatchTimerServicePort,
     @Inject(PLAYER_PROFILE_REPOSITORY_PORT) private readonly profileRepo: IPlayerProfileRepositoryPort,
     @Inject(REALTIME_ROOM_PORT) private readonly realtimeRoom: IRealtimeRoomPort,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async execute(input: SurrenderInput): Promise<void> {
@@ -75,5 +78,17 @@ export class SurrenderUseCase {
       playerOEloChange: oDelta,
       reason: 'surrender',
     });
+
+    this.eventEmitter.emit(
+      'match.completed',
+      new MatchCompletedEvent(
+        input.matchId,
+        match.tournamentId,
+        winnerId,
+        false,
+        match.playerXId!,
+        match.playerOId!,
+      ),
+    );
   }
 }

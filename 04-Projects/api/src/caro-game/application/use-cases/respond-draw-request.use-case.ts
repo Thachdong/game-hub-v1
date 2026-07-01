@@ -9,6 +9,8 @@ import {
   MatchNotInExpectedStatusError,
   NoDrawRequestPendingError,
 } from '../../domain/errors';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { MatchCompletedEvent } from '../../domain/events/tournament.events';
 
 interface RespondDrawRequestInput {
   matchId: string;
@@ -23,6 +25,7 @@ export class RespondDrawRequestUseCase {
     @Inject(MATCH_TIMER_SERVICE_PORT) private readonly timerService: IMatchTimerServicePort,
     @Inject(PLAYER_PROFILE_REPOSITORY_PORT) private readonly profileRepo: IPlayerProfileRepositoryPort,
     @Inject(REALTIME_ROOM_PORT) private readonly realtimeRoom: IRealtimeRoomPort,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async execute(input: RespondDrawRequestInput): Promise<void> {
@@ -83,5 +86,17 @@ export class RespondDrawRequestUseCase {
       playerXEloChange: xDelta,
       playerOEloChange: oDelta,
     });
+
+    this.eventEmitter.emit(
+      'match.completed',
+      new MatchCompletedEvent(
+        input.matchId,
+        match.tournamentId,
+        null,
+        true,
+        match.playerXId!,
+        match.playerOId!,
+      ),
+    );
   }
 }

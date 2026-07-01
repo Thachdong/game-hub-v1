@@ -69,6 +69,9 @@ export class MatchOrmEntity {
   @Column({ name: 'ended_at', type: 'timestamptz', nullable: true })
   endedAt: Date | null;
 
+  @Column({ name: 'tournament_id', type: 'uuid', nullable: true })
+  tournamentId: string | null;
+
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;
 

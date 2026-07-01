@@ -1208,6 +1208,1268 @@ paths:
         - Caro — Game Configs
       security:
         - bearer: []
+  /api/caro/matches/lobby:
+    get:
+      operationId: MatchController_lobby
+      summary: List open public matches in the lobby
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/LobbyMatchDto'
+        '401':
+          description: Missing or expired JWT
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      statusCode:
+                        example: 401
+                      data:
+                        nullable: true
+                        example: null
+      tags:
+        - Caro — Matches
+      security:
+        - bearer: []
+  /api/caro/matches:
+    post:
+      operationId: MatchController_create
+      summary: Create a new match
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMatchDto'
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      data:
+                        $ref: '#/components/schemas/CreateMatchResponseDto'
+        '404':
+          description: Config not found
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      statusCode:
+                        example: 404
+                      data:
+                        nullable: true
+                        example: null
+        '409':
+          description: Player already in active match
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      statusCode:
+                        example: 409
+                      data:
+                        nullable: true
+                        example: null
+      tags:
+        - Caro — Matches
+      security:
+        - bearer: []
+  /api/caro/matches/{id}/join:
+    post:
+      operationId: MatchController_join
+      summary: Join a public lobby match
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      data:
+                        $ref: '#/components/schemas/JoinMatchResponseDto'
+        '404':
+          description: Match not found
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      statusCode:
+                        example: 404
+                      data:
+                        nullable: true
+                        example: null
+        '409':
+          description: Match not open or player already active
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      statusCode:
+                        example: 409
+                      data:
+                        nullable: true
+                        example: null
+      tags:
+        - Caro — Matches
+      security:
+        - bearer: []
+  /api/caro/matches/{id}:
+    delete:
+      operationId: MatchController_cancel
+      summary: Cancel a match (creator only, before it starts)
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      data:
+                        $ref: '#/components/schemas/CancelOrLeaveResponseDto'
+        '403':
+          description: Not the match creator
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      statusCode:
+                        example: 403
+                      data:
+                        nullable: true
+                        example: null
+        '409':
+          description: Match cannot be cancelled in current status
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      statusCode:
+                        example: 409
+                      data:
+                        nullable: true
+                        example: null
+      tags:
+        - Caro — Matches
+      security:
+        - bearer: []
+    get:
+      operationId: MatchController_getState
+      summary: Get full match state including moves
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      data:
+                        $ref: '#/components/schemas/MatchStateDto'
+        '404':
+          description: Match not found
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      statusCode:
+                        example: 404
+                      data:
+                        nullable: true
+                        example: null
+      tags:
+        - Caro — Matches
+      security:
+        - bearer: []
+  /api/caro/matches/{id}/leave:
+    post:
+      operationId: MatchController_leave
+      summary: Leave a match before it starts (second player)
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      data:
+                        $ref: '#/components/schemas/CancelOrLeaveResponseDto'
+        '403':
+          description: Not a participant
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      statusCode:
+                        example: 403
+                      data:
+                        nullable: true
+                        example: null
+        '409':
+          description: Match not in waiting_for_start status
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      statusCode:
+                        example: 409
+                      data:
+                        nullable: true
+                        example: null
+      tags:
+        - Caro — Matches
+      security:
+        - bearer: []
+  /api/caro/matches/{id}/invite:
+    post:
+      operationId: MatchController_invite
+      summary: Invite a friend to a private match
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InvitePlayerDto'
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      data:
+                        $ref: '#/components/schemas/InviteResponseDto'
+        '403':
+          description: Not the match creator
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      statusCode:
+                        example: 403
+                      data:
+                        nullable: true
+                        example: null
+        '422':
+          description: Not friends with target player
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      statusCode:
+                        example: 422
+                      data:
+                        nullable: true
+                        example: null
+      tags:
+        - Caro — Matches
+      security:
+        - bearer: []
+  /api/caro/matches/{id}/invitation/respond:
+    put:
+      operationId: MatchController_respondToInvitation
+      summary: Accept or decline a match invitation
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RespondInvitationDto'
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      data:
+                        $ref: '#/components/schemas/InvitationRespondResponseDto'
+        '404':
+          description: Match not found
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      statusCode:
+                        example: 404
+                      data:
+                        nullable: true
+                        example: null
+        '409':
+          description: Player already in active match
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      statusCode:
+                        example: 409
+                      data:
+                        nullable: true
+                        example: null
+      tags:
+        - Caro — Matches
+      security:
+        - bearer: []
+  /api/caro/matches/{id}/moves:
+    get:
+      operationId: MatchController_getMoves
+      summary: Get all moves for a match
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/MoveDto'
+        '404':
+          description: Match not found
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      statusCode:
+                        example: 404
+                      data:
+                        nullable: true
+                        example: null
+      tags:
+        - Caro — Matches
+      security:
+        - bearer: []
+    post:
+      operationId: GameplayController_move
+      summary: Place a move on the board
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlaceMoveDto'
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      data:
+                        $ref: '#/components/schemas/PlaceMoveResponseDto'
+        '403':
+          description: Not your turn or not a participant
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      statusCode:
+                        example: 403
+                      data:
+                        nullable: true
+                        example: null
+        '409':
+          description: Cell occupied or deadline expired
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      statusCode:
+                        example: 409
+                      data:
+                        nullable: true
+                        example: null
+      tags:
+        - Caro — Gameplay
+      security:
+        - bearer: []
+  /api/caro/matches/{id}/start:
+    post:
+      operationId: GameplayController_start
+      summary: Start a match (creator only)
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      data:
+                        $ref: '#/components/schemas/CreateMatchResponseDto'
+        '403':
+          description: Not the match creator
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      statusCode:
+                        example: 403
+                      data:
+                        nullable: true
+                        example: null
+        '409':
+          description: Match not in waiting_for_start status
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      statusCode:
+                        example: 409
+                      data:
+                        nullable: true
+                        example: null
+      tags:
+        - Caro — Gameplay
+      security:
+        - bearer: []
+  /api/caro/matches/{id}/surrender:
+    post:
+      operationId: GameplayController_surrenderMatch
+      summary: Surrender the match
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '403':
+          description: Not a participant
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      statusCode:
+                        example: 403
+                      data:
+                        nullable: true
+                        example: null
+        '409':
+          description: Match not in progress
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      statusCode:
+                        example: 409
+                      data:
+                        nullable: true
+                        example: null
+      tags:
+        - Caro — Gameplay
+      security:
+        - bearer: []
+  /api/caro/matches/{id}/draw-request:
+    post:
+      operationId: GameplayController_sendDrawRequest
+      summary: Send a draw request to the opponent
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '403':
+          description: Not a participant
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      statusCode:
+                        example: 403
+                      data:
+                        nullable: true
+                        example: null
+        '409':
+          description: Draw request already pending
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      statusCode:
+                        example: 409
+                      data:
+                        nullable: true
+                        example: null
+      tags:
+        - Caro — Gameplay
+      security:
+        - bearer: []
+  /api/caro/matches/{id}/draw-request/respond:
+    put:
+      operationId: GameplayController_respondToDrawRequest
+      summary: Accept or decline a draw request
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RespondDrawDto'
+      responses:
+        '403':
+          description: Not a participant
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      statusCode:
+                        example: 403
+                      data:
+                        nullable: true
+                        example: null
+        '404':
+          description: No pending draw request
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      statusCode:
+                        example: 404
+                      data:
+                        nullable: true
+                        example: null
+      tags:
+        - Caro — Gameplay
+      security:
+        - bearer: []
+  /api/caro/quick-pair:
+    post:
+      operationId: QuickPairController_pair
+      summary: Enter the quick pair queue or instantly match with a waiting opponent
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuickPairRequestDto'
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      data:
+                        $ref: '#/components/schemas/QuickPairResponseDto'
+        '404':
+          description: Config not found or inactive
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      statusCode:
+                        example: 404
+                      data:
+                        nullable: true
+                        example: null
+        '409':
+          description: Player already in active state
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      statusCode:
+                        example: 409
+                      data:
+                        nullable: true
+                        example: null
+      tags:
+        - Caro — Quick Pair
+      security:
+        - bearer: []
+    delete:
+      operationId: QuickPairController_cancel
+      summary: Cancel an active quick pair request
+      parameters: []
+      responses:
+        '404':
+          description: No active quick pair request
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      statusCode:
+                        example: 404
+                      data:
+                        nullable: true
+                        example: null
+      tags:
+        - Caro — Quick Pair
+      security:
+        - bearer: []
+  /api/caro/matches/{matchId}/chat:
+    get:
+      operationId: ChatController_history
+      summary: Get chat history for a match
+      parameters:
+        - name: matchId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/ChatMessageResponseDto'
+        '404':
+          description: Match not found
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      statusCode:
+                        example: 404
+                      data:
+                        nullable: true
+                        example: null
+      tags:
+        - Caro — Chat
+      security:
+        - bearer: []
+    post:
+      operationId: ChatController_send
+      summary: Send a chat message in a match
+      parameters:
+        - name: matchId
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendChatDto'
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      data:
+                        $ref: '#/components/schemas/ChatMessageResponseDto'
+        '403':
+          description: Viewer is muted
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      statusCode:
+                        example: 403
+                      data:
+                        nullable: true
+                        example: null
+        '404':
+          description: Match not found
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      statusCode:
+                        example: 404
+                      data:
+                        nullable: true
+                        example: null
+      tags:
+        - Caro — Chat
+      security:
+        - bearer: []
+  /api/caro/matches/{matchId}/chat/mute:
+    post:
+      operationId: ChatController_mute
+      summary: Mute a viewer in this match (participants only)
+      parameters:
+        - name: matchId
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MuteViewerDto'
+      responses:
+        '403':
+          description: Not a participant
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      statusCode:
+                        example: 403
+                      data:
+                        nullable: true
+                        example: null
+        '404':
+          description: Match not found
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      statusCode:
+                        example: 404
+                      data:
+                        nullable: true
+                        example: null
+      tags:
+        - Caro — Chat
+      security:
+        - bearer: []
+  /api/caro/leaderboard:
+    get:
+      operationId: LeaderboardController_top10
+      summary: Get top 10 players by ELO
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      data:
+                        $ref: '#/components/schemas/LeaderboardResponseDto'
+        '401':
+          description: Missing or expired JWT
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      statusCode:
+                        example: 401
+                      data:
+                        nullable: true
+                        example: null
+      tags:
+        - Caro — Leaderboard
+      security:
+        - bearer: []
+  /api/caro/players/me:
+    get:
+      operationId: PlayerProfileController_myProfile
+      summary: Get own Caro player profile
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      data:
+                        $ref: '#/components/schemas/PlayerProfileResponseDto'
+        '404':
+          description: Profile not yet created (play your first match)
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      statusCode:
+                        example: 404
+                      data:
+                        nullable: true
+                        example: null
+      tags:
+        - Caro — Player Profiles
+      security:
+        - bearer: []
+  /api/caro/players/{playerId}:
+    get:
+      operationId: PlayerProfileController_profile
+      summary: Get Caro player profile by player ID
+      parameters:
+        - name: playerId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      data:
+                        $ref: '#/components/schemas/PlayerProfileResponseDto'
+        '404':
+          description: Profile not found
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      statusCode:
+                        example: 404
+                      data:
+                        nullable: true
+                        example: null
+      tags:
+        - Caro — Player Profiles
+      security:
+        - bearer: []
+  /api/caro/players/me/history:
+    get:
+      operationId: PlayerProfileController_myHistory
+      summary: Get own match history (cursor-paginated)
+      parameters:
+        - name: limit
+          required: false
+          in: query
+          schema:
+            default: 20
+            type: number
+        - name: cursor
+          required: false
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      data:
+                        $ref: '#/components/schemas/MatchHistoryResponseDto'
+      tags:
+        - Caro — Player Profiles
+      security:
+        - bearer: []
+  /api/caro/players/{playerId}/history:
+    get:
+      operationId: PlayerProfileController_playerHistory
+      summary: Get match history for a player (cursor-paginated)
+      parameters:
+        - name: playerId
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          schema:
+            default: 20
+            type: number
+        - name: cursor
+          required: false
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseDto'
+                  - properties:
+                      data:
+                        $ref: '#/components/schemas/MatchHistoryResponseDto'
+      tags:
+        - Caro — Player Profiles
+      security:
+        - bearer: []
+  /api/caro/tournament-creator-requests:
+    post:
+      operationId: TournamentController_requestCreatorRole
+      summary: Request the Tournament Creator role
+      parameters: []
+      responses:
+        '201':
+          description: ''
+      tags:
+        - tournament
+      security:
+        - bearer: []
+  /api/caro/tournaments:
+    post:
+      operationId: TournamentController_createTournament
+      summary: Create a new tournament (Tournament Creator only)
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTournamentDto'
+      responses:
+        '201':
+          description: ''
+      tags:
+        - tournament
+      security:
+        - bearer: []
+    get:
+      operationId: TournamentController_listTournaments
+      summary: List all tournaments (public)
+      parameters:
+        - name: status
+          required: false
+          in: query
+          schema:
+            enum:
+              - waiting
+              - in_progress
+              - ended
+              - cancelled
+            type: string
+        - name: limit
+          required: false
+          in: query
+          schema:
+            default: 20
+            type: number
+        - name: cursor
+          required: false
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+      tags:
+        - tournament
+  /api/caro/tournaments/{tournamentId}/registrations:
+    post:
+      operationId: TournamentController_registerForTournament
+      summary: Register for a tournament (ELO-gated)
+      parameters:
+        - name: tournamentId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '201':
+          description: ''
+      tags:
+        - tournament
+      security:
+        - bearer: []
+  /api/caro/tournaments/{tournamentId}/participants:
+    get:
+      operationId: TournamentController_getParticipants
+      summary: Get tournament participant list ordered by score (public)
+      parameters:
+        - name: tournamentId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+      tags:
+        - tournament
+  /api/caro/tournaments/{tournamentId}/chat:
+    post:
+      operationId: TournamentController_sendChatMessage
+      summary: Send a chat message (registered participants only)
+      parameters:
+        - name: tournamentId
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendTournamentChatDto'
+      responses:
+        '201':
+          description: ''
+      tags:
+        - tournament
+      security:
+        - bearer: []
+    get:
+      operationId: TournamentController_getChatMessages
+      summary: Get recent chat messages (registered participants only)
+      parameters:
+        - name: tournamentId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+      tags:
+        - tournament
+      security:
+        - bearer: []
+  /api/caro/tournaments/{tournamentId}:
+    get:
+      operationId: TournamentController_getTournament
+      summary: Get tournament details (public)
+      parameters:
+        - name: tournamentId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+      tags:
+        - tournament
+  /api/caro/admin/tournament-creator-requests:
+    get:
+      operationId: TournamentAdminController_listRequests
+      summary: List tournament creator role requests
+      parameters:
+        - name: status
+          required: false
+          in: query
+          schema:
+            enum:
+              - pending
+              - approved
+              - rejected
+            type: string
+      responses:
+        '200':
+          description: ''
+      tags:
+        - tournament-admin
+      security:
+        - bearer: []
+  /api/caro/admin/tournament-creator-requests/{requestId}:
+    patch:
+      operationId: TournamentAdminController_reviewRequest
+      summary: Approve or reject a tournament creator role request
+      parameters:
+        - name: requestId
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReviewRequestDto'
+      responses:
+        '200':
+          description: ''
+      tags:
+        - tournament-admin
+      security:
+        - bearer: []
+  /api/caro/admin/tournament-creators/{playerId}:
+    delete:
+      operationId: TournamentAdminController_revokeRole
+      summary: Revoke Tournament Creator role from a player
+      parameters:
+        - name: playerId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+      tags:
+        - tournament-admin
+      security:
+        - bearer: []
 info:
   title: Game Hub API
   description: Account & Social Module
@@ -1935,3 +3197,505 @@ components:
             $ref: '#/components/schemas/GameConfigDto'
       required:
         - items
+    LobbyMatchDto:
+      type: object
+      properties:
+        id:
+          type: string
+        boardSize:
+          type: string
+        moveTimeSeconds:
+          type: number
+        status:
+          type: string
+        creatorUsername:
+          type: string
+        secondPlayerUsername:
+          type: object
+          nullable: true
+        createdAt:
+          format: date-time
+          type: string
+      required:
+        - id
+        - boardSize
+        - moveTimeSeconds
+        - status
+        - creatorUsername
+        - secondPlayerUsername
+        - createdAt
+    CreateMatchResponseDto:
+      type: object
+      properties:
+        id:
+          type: string
+        configId:
+          type: string
+        boardSize:
+          type: string
+        moveTimeSeconds:
+          type: number
+        visibility:
+          type: string
+        status:
+          type: string
+        creatorId:
+          type: string
+        createdAt:
+          format: date-time
+          type: string
+      required:
+        - id
+        - configId
+        - boardSize
+        - moveTimeSeconds
+        - visibility
+        - status
+        - creatorId
+        - createdAt
+    CreateMatchDto:
+      type: object
+      properties:
+        configId:
+          type: string
+          description: Active game configuration UUID
+        visibility:
+          type: string
+          enum:
+            - public
+            - private
+      required:
+        - configId
+        - visibility
+    JoinMatchResponseDto:
+      type: object
+      properties:
+        matchId:
+          type: string
+        status:
+          type: string
+      required:
+        - matchId
+        - status
+    CancelOrLeaveResponseDto:
+      type: object
+      properties:
+        id:
+          type: string
+        status:
+          type: string
+      required:
+        - id
+        - status
+    InviteResponseDto:
+      type: object
+      properties:
+        matchId:
+          type: string
+        invitedPlayerId:
+          type: string
+      required:
+        - matchId
+        - invitedPlayerId
+    InvitePlayerDto:
+      type: object
+      properties:
+        friendId:
+          type: string
+          description: UUID of the friend to invite
+      required:
+        - friendId
+    InvitationRespondResponseDto:
+      type: object
+      properties:
+        matchId:
+          type: string
+        status:
+          type: string
+      required:
+        - matchId
+        - status
+    RespondInvitationDto:
+      type: object
+      properties:
+        action:
+          type: string
+          enum:
+            - accept
+            - decline
+      required:
+        - action
+    PlayerInMatchDto:
+      type: object
+      properties:
+        id:
+          type: string
+        username:
+          type: string
+        elo:
+          type: number
+        winRate:
+          type: number
+      required:
+        - id
+        - username
+        - elo
+        - winRate
+    MoveDto:
+      type: object
+      properties:
+        playerId:
+          type: string
+        row:
+          type: number
+        col:
+          type: number
+        sequenceNumber:
+          type: number
+        placedAt:
+          format: date-time
+          type: string
+      required:
+        - playerId
+        - row
+        - col
+        - sequenceNumber
+        - placedAt
+    MatchStateDto:
+      type: object
+      properties:
+        id:
+          type: string
+        boardSize:
+          type: string
+        moveTimeSeconds:
+          type: number
+        visibility:
+          type: string
+        status:
+          type: string
+        creatorId:
+          type: string
+        playerX:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/PlayerInMatchDto'
+        playerO:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/PlayerInMatchDto'
+        currentTurnPlayerId:
+          type: object
+          nullable: true
+        deadlineAt:
+          type: object
+          nullable: true
+        moves:
+          type: array
+          items:
+            $ref: '#/components/schemas/MoveDto'
+        viewers:
+          type: array
+          items:
+            type: string
+        pendingDrawRequestFromId:
+          type: object
+          nullable: true
+        result:
+          type: object
+          nullable: true
+        winnerPlayerId:
+          type: object
+          nullable: true
+        startedAt:
+          type: object
+          nullable: true
+        endedAt:
+          type: object
+          nullable: true
+        createdAt:
+          format: date-time
+          type: string
+      required:
+        - id
+        - boardSize
+        - moveTimeSeconds
+        - visibility
+        - status
+        - creatorId
+        - playerX
+        - playerO
+        - currentTurnPlayerId
+        - deadlineAt
+        - moves
+        - viewers
+        - pendingDrawRequestFromId
+        - result
+        - winnerPlayerId
+        - startedAt
+        - endedAt
+        - createdAt
+    PlaceMoveResponseDto:
+      type: object
+      properties:
+        playerId:
+          type: string
+        row:
+          type: number
+        col:
+          type: number
+        sequenceNumber:
+          type: number
+        placedAt:
+          format: date-time
+          type: string
+        isGameOver:
+          type: boolean
+        result:
+          type: object
+          nullable: true
+        winnerPlayerId:
+          type: object
+          nullable: true
+      required:
+        - playerId
+        - row
+        - col
+        - sequenceNumber
+        - placedAt
+        - isGameOver
+        - result
+        - winnerPlayerId
+    PlaceMoveDto:
+      type: object
+      properties:
+        row:
+          type: number
+          description: Row index (0-based)
+        col:
+          type: number
+          description: Column index (0-based)
+      required:
+        - row
+        - col
+    RespondDrawDto:
+      type: object
+      properties:
+        action:
+          type: string
+          enum:
+            - accept
+            - decline
+      required:
+        - action
+    QuickPairResponseDto:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+            - waiting
+            - matched
+        requestId:
+          type: object
+          nullable: true
+        matchId:
+          type: object
+          nullable: true
+      required:
+        - status
+        - requestId
+        - matchId
+    QuickPairRequestDto:
+      type: object
+      properties:
+        configId:
+          type: string
+          description: Active game configuration UUID
+      required:
+        - configId
+    ChatMessageResponseDto:
+      type: object
+      properties:
+        id:
+          type: string
+        matchId:
+          type: string
+        senderId:
+          type: string
+        content:
+          type: string
+        sentAt:
+          format: date-time
+          type: string
+      required:
+        - id
+        - matchId
+        - senderId
+        - content
+        - sentAt
+    SendChatDto:
+      type: object
+      properties:
+        content:
+          type: string
+          maxLength: 500
+      required:
+        - content
+    MuteViewerDto:
+      type: object
+      properties:
+        viewerId:
+          type: string
+          description: UUID of the viewer to mute
+      required:
+        - viewerId
+    LeaderboardEntryDto:
+      type: object
+      properties:
+        rank:
+          type: number
+        playerId:
+          type: string
+        elo:
+          type: number
+        matchesPlayed:
+          type: number
+        wins:
+          type: number
+        losses:
+          type: number
+        draws:
+          type: number
+        winRate:
+          type: number
+      required:
+        - rank
+        - playerId
+        - elo
+        - matchesPlayed
+        - wins
+        - losses
+        - draws
+        - winRate
+    LeaderboardResponseDto:
+      type: object
+      properties:
+        entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/LeaderboardEntryDto'
+      required:
+        - entries
+    PlayerProfileResponseDto:
+      type: object
+      properties:
+        playerId:
+          type: string
+        elo:
+          type: number
+        matchesPlayed:
+          type: number
+        wins:
+          type: number
+        losses:
+          type: number
+        draws:
+          type: number
+        winRate:
+          type: number
+        createdAt:
+          format: date-time
+          type: string
+      required:
+        - playerId
+        - elo
+        - matchesPlayed
+        - wins
+        - losses
+        - draws
+        - winRate
+        - createdAt
+    MatchHistoryItemDto:
+      type: object
+      properties:
+        id:
+          type: string
+        boardSize:
+          type: string
+        moveTimeSeconds:
+          type: number
+        result:
+          type: object
+        winnerPlayerId:
+          type: object
+          nullable: true
+        playerXEloChange:
+          type: object
+          nullable: true
+        playerOEloChange:
+          type: object
+          nullable: true
+        startedAt:
+          type: object
+          nullable: true
+        endedAt:
+          type: object
+          nullable: true
+      required:
+        - id
+        - boardSize
+        - moveTimeSeconds
+        - result
+        - winnerPlayerId
+        - playerXEloChange
+        - playerOEloChange
+        - startedAt
+        - endedAt
+    MatchHistoryResponseDto:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/MatchHistoryItemDto'
+        nextCursor:
+          type: object
+          nullable: true
+      required:
+        - items
+    CreateTournamentDto:
+      type: object
+      properties:
+        gameConfigId:
+          type: string
+        minElo:
+          type: number
+          minimum: 0
+        startAt:
+          type: string
+        endAt:
+          type: string
+      required:
+        - gameConfigId
+        - minElo
+        - startAt
+        - endAt
+    SendTournamentChatDto:
+      type: object
+      properties:
+        content:
+          type: string
+          maxLength: 500
+      required:
+        - content
+    ReviewRequestDto:
+      type: object
+      properties:
+        action:
+          type: string
+          enum:
+            - approve
+            - reject
+      required:
+        - action

@@ -11,4 +11,5 @@ export interface IPlayerProfileRepositoryPort {
    *  Returns the new ELO. Throws if no profile exists. */
   updateEloAtomic(playerId: string, delta: number, outcome: MatchOutcome): Promise<number>;
   findTopN(n: number): Promise<PlayerProfile[]>;
+  updateTournamentCreatorFlag(playerId: string, value: boolean): Promise<void>;
 }

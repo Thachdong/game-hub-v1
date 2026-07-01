@@ -31,6 +31,9 @@ export class PlayerProfileOrmEntity {
   @Column({ type: 'int', default: 0 })
   draws: number;
 
+  @Column({ name: 'is_tournament_creator', type: 'boolean', default: false })
+  isTournamentCreator: boolean;
+
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;
 
