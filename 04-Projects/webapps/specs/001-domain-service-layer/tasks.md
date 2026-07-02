@@ -125,13 +125,13 @@ FR-010–FR-013.
 
 ### Implementation for User Story 3
 
-- [ ] T030 [P] [US3] Define `Friend`, `FriendRequestRecord`, `FriendRequestsList`, `Notification`, `ReportType`, `Report`, `TrustScore` types per `contracts/profiles-service.ts` in `packages/profiles-service/src/types.ts`
-- [ ] T031 [P] [US3] Implement `sendFriendRequest`, `listFriendRequests`, `resolveFriendRequest`, `listFriends` in `packages/profiles-service/src/friends.ts` (depends on T030, `service-core`)
-- [ ] T032 [P] [US3] Implement `listNotifications` (returns `CursorPage<Notification>`), `markNotificationRead` in `packages/profiles-service/src/notifications.ts` (depends on T030)
-- [ ] T033 [P] [US3] Implement `listReportTypes`, `submitReport` in `packages/profiles-service/src/reports.ts` (depends on T030)
-- [ ] T034 [P] [US3] Implement `getMyTrustScore`, normalizing the backend's `gameLocked`/`gameLockedUntil` fields to this package's `locked`/`lockedUntil` per data-model.md, in `packages/profiles-service/src/trust-score.ts` (depends on T030)
-- [ ] T035 [US3] Create the public entry point in `packages/profiles-service/src/index.ts` (depends on T031, T032, T033, T034)
-- [ ] T036 [P] [US3] Unit tests for the friends/notifications/reports/trust-score modules, including a `listNotifications` pagination (`nextCursor`) test, in `packages/profiles-service/src/*.test.ts`
+- [X] T030 [P] [US3] Define `Friend`, `FriendRequestRecord`, `FriendRequestsList`, `Notification`, `ReportType`, `Report`, `TrustScore` types per `contracts/profiles-service.ts` in `packages/profiles-service/src/types.ts`
+- [X] T031 [P] [US3] Implement `sendFriendRequest`, `listFriendRequests`, `resolveFriendRequest`, `listFriends` in `packages/profiles-service/src/friends.ts` (depends on T030, `service-core`)
+- [X] T032 [P] [US3] Implement `listNotifications` (returns `CursorPage<Notification>`), `markNotificationRead` in `packages/profiles-service/src/notifications.ts` (depends on T030)
+- [X] T033 [P] [US3] Implement `listReportTypes`, `submitReport` in `packages/profiles-service/src/reports.ts` (depends on T030)
+- [X] T034 [P] [US3] Implement `getMyTrustScore`, normalizing the backend's `gameLocked`/`gameLockedUntil` fields to this package's `locked`/`lockedUntil` per data-model.md, in `packages/profiles-service/src/trust-score.ts` (depends on T030)
+- [X] T035 [US3] Create the public entry point in `packages/profiles-service/src/index.ts` (depends on T031, T032, T033, T034)
+- [X] T036 [P] [US3] Unit tests for the friends/notifications/reports/trust-score modules, including a `listNotifications` pagination (`nextCursor`) test, in `packages/profiles-service/src/*.test.ts`
 
 **Checkpoint**: User Stories 1, 2, AND 3 all work independently.
 
