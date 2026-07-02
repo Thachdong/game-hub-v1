@@ -36,15 +36,15 @@ feature. Six packages: `service-core`, `auth-service`, `account-service`, `profi
 
 **Purpose**: Scaffold the Turborepo monorepo itself — none of this exists yet in the workspace.
 
-- [ ] T001 Create root Turborepo scaffolding: `package.json` (private, pnpm workspaces), `pnpm-workspace.yaml` (`packages: ["packages/*"]`), `turbo.json` (pipeline: `build`, `dev`, `lint`, `test`, `typecheck`), and `tsconfig.base.json` (strict mode, ES2022 target, NodeNext module) at the repository root
-- [ ] T002 [P] Configure root-level shared ESLint + Prettier config at the repository root (`.eslintrc.cjs` or `eslint.config.js`, `.prettierrc`)
-- [ ] T003 [P] Add root `.gitignore` entries for `node_modules/`, `dist/`, `.turbo/` if not already present
-- [ ] T004 [P] Scaffold `packages/service-core/package.json` (name `@game-hub/service-core`, `main`/`types`/`exports` entries, `axios` dependency, `typescript` + `vitest` devDependencies, extends root `tsconfig.base.json` via `packages/service-core/tsconfig.json`)
-- [ ] T005 [P] Scaffold `packages/auth-service/package.json` (name `@game-hub/auth-service`, dependency on `@game-hub/service-core` via `workspace:*`, `exports` map with a `.` entry for `client.ts`/`types.ts` and a `./bff` entry for `bff.ts`, `packages/auth-service/tsconfig.json`)
-- [ ] T006 [P] Scaffold `packages/account-service/package.json` (name `@game-hub/account-service`, depends on `@game-hub/service-core` via `workspace:*`, `packages/account-service/tsconfig.json`)
-- [ ] T007 [P] Scaffold `packages/profiles-service/package.json` (name `@game-hub/profiles-service`, depends on `@game-hub/service-core` via `workspace:*`, `packages/profiles-service/tsconfig.json`)
-- [ ] T008 [P] Scaffold `packages/admin-service/package.json` (name `@game-hub/admin-service`, depends on `@game-hub/service-core` via `workspace:*`, `packages/admin-service/tsconfig.json`)
-- [ ] T009 [P] Scaffold `packages/caro-service/package.json` (name `@game-hub/caro-service`, depends on `@game-hub/service-core` via `workspace:*`, `packages/caro-service/tsconfig.json`)
+- [X] T001 Create root Turborepo scaffolding: `package.json` (private, pnpm workspaces), `pnpm-workspace.yaml` (`packages: ["packages/*"]`), `turbo.json` (pipeline: `build`, `dev`, `lint`, `test`, `typecheck`), and `tsconfig.base.json` (strict mode, ES2022 target, NodeNext module) at the repository root
+- [X] T002 [P] Configure root-level shared ESLint + Prettier config at the repository root (`.eslintrc.cjs` or `eslint.config.js`, `.prettierrc`)
+- [X] T003 [P] Add root `.gitignore` entries for `node_modules/`, `dist/`, `.turbo/` if not already present
+- [X] T004 [P] Scaffold `packages/service-core/package.json` (name `@game-hub/service-core`, `main`/`types`/`exports` entries, `axios` dependency, `typescript` + `vitest` devDependencies, extends root `tsconfig.base.json` via `packages/service-core/tsconfig.json`)
+- [X] T005 [P] Scaffold `packages/auth-service/package.json` (name `@game-hub/auth-service`, dependency on `@game-hub/service-core` via `workspace:*`, `exports` map with a `.` entry for `client.ts`/`types.ts` and a `./bff` entry for `bff.ts`, `packages/auth-service/tsconfig.json`)
+- [X] T006 [P] Scaffold `packages/account-service/package.json` (name `@game-hub/account-service`, depends on `@game-hub/service-core` via `workspace:*`, `packages/account-service/tsconfig.json`)
+- [X] T007 [P] Scaffold `packages/profiles-service/package.json` (name `@game-hub/profiles-service`, depends on `@game-hub/service-core` via `workspace:*`, `packages/profiles-service/tsconfig.json`)
+- [X] T008 [P] Scaffold `packages/admin-service/package.json` (name `@game-hub/admin-service`, depends on `@game-hub/service-core` via `workspace:*`, `packages/admin-service/tsconfig.json`)
+- [X] T009 [P] Scaffold `packages/caro-service/package.json` (name `@game-hub/caro-service`, depends on `@game-hub/service-core` via `workspace:*`, `packages/caro-service/tsconfig.json`)
 
 **Checkpoint**: `pnpm install` resolves the workspace with no errors; six empty-but-typed packages exist.
 
