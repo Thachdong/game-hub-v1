@@ -93,23 +93,31 @@ Alternatives considered.
   anything; forcing that abstraction onto an already-completed exchange is more complex than the
   chosen approach for no benefit.
 
-## 4. Route protection mechanism: layout-level check, not middleware
+## 4. Route protection mechanism: layout-level check, not middleware-based auth
 
 - **Decision**: Protect the `(protected)` route group with a Server Component check at
-  `(protected)/layout.tsx` — call NextAuth's `auth()` helper, and if there is no session,
-  `redirect('/login?callbackUrl=' + encodeURIComponent(currentPath))` (satisfying FR-006 and
-  FR-007's return-to-original-page requirement in one step, since Next.js Server Components can read
-  the current path).
+  `(protected)/layout.tsx` — call NextAuth's `auth()` helper, and if there is no session (or the
+  session has `error: "RefreshFailed"`, FR-004), `redirect('/login?callbackUrl=' +
+  encodeURIComponent(currentPath))` (FR-006, FR-007).
 - **Rationale**: `auth()` in a Server Component resolves as part of server rendering — no HTML for
   protected content is ever sent to an unauthenticated browser, so there is no flash/loading-state
   concern for this specific check (resolves FR-006's "no error/partial state" and contributes to
-  SC-006). `middleware.ts` (Edge runtime) was considered but adds a second place route-protection
-  logic could live, and Edge middleware can only cheaply check for the *presence* of NextAuth's
-  session cookie, not fully resolve `auth()` the same way — using both would be redundant for this
-  feature's needs (no page in scope needs Edge-speed rejection before Node.js execution).
-- **Alternatives considered**: `middleware.ts` intercepting all `(protected)` routes — rejected as
-  redundant with the simpler layout-level check for this feature's scope; may be revisited later if
-  a future feature needs Edge-level rejection (e.g., rate limiting) for reasons unrelated to auth.
+  SC-006). The *auth decision itself* (redirect or not) deliberately does not live in
+  `middleware.ts` — Edge middleware can only cheaply check for the session cookie's *presence*, not
+  fully resolve `auth()`'s server-side JWT/session logic the same way, and using both would be a
+  redundant second place the decision could live.
+- **Implementation discovery (during `/speckit-implement`)**: getting `currentPath` for the
+  `callbackUrl` above turned out to need a small amount of middleware after all — Next.js Server
+  Components (including layouts) have no built-in way to read the current request's pathname; only
+  Client Components get `usePathname()`. `apps/web/middleware.ts` was added, but it does **not**
+  make any auth/redirect decision — its only job is copying `request.nextUrl.pathname` onto a
+  `x-pathname` request header, which `(protected)/layout.tsx` reads via `headers()`. This doesn't
+  change the decision above: the auth check and redirect logic still live entirely in the layout;
+  the middleware is pure request-context plumbing with no knowledge of sessions.
+- **Alternatives considered**: `middleware.ts` intercepting all `(protected)` routes and making the
+  auth decision itself — rejected per the Rationale above. Having each protected `page.tsx` pass its
+  own hardcoded path instead of reading the pathname generically — rejected as duplicative across
+  `account`/`tournament`/`admin` and easy to forget when a future page is added to the group.
 
 ## 5. The FR-012/SC-006 loading-state requirement mostly resolves for free
 

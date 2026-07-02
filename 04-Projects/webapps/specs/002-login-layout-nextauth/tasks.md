@@ -124,12 +124,12 @@ the originally-requested page.
 
 ### Implementation for User Story 3
 
-- [ ] T024 [US3] Implement `apps/web/app/(protected)/layout.tsx` — calls `auth()`, redirects to `/login?callbackUrl=<current path>` when there is no session **or when `session.error === 'RefreshFailed'`** (FR-006, FR-004), otherwise renders children inside the shared chrome (depends on T009, T020)
-- [ ] T025 [P] [US3] Create the placeholder `apps/web/app/(protected)/account/page.tsx` (depends on T024)
-- [ ] T026 [P] [US3] Create the placeholder `apps/web/app/(protected)/tournament/page.tsx` (depends on T024)
-- [ ] T027 [P] [US3] Create the placeholder `apps/web/app/(protected)/admin/page.tsx` — plain sign-in gate only via T024, no Platform Admin role check (spec.md Clarifications, 2026-07-03) (depends on T024)
-- [ ] T028 [US3] Extend `apps/web/app/(public)/login/page.tsx` to read its own `?callbackUrl=` search param (set by T024's redirect) and pass it as a prop to `LoginCard`, so T014's cookie-setting logic (research.md §2) receives the real destination instead of always defaulting — the actual post-sign-in redirect happens in T012, this task only wires the value from the URL into the component (FR-007) (depends on T015, T024)
-- [ ] T029 [P] [US3] Unit test: `(protected)/layout.tsx` redirects to `/login?callbackUrl=...` when a mocked `auth()` returns `null` **or a session with `error: 'RefreshFailed'`** (FR-004), and renders children when it returns a valid error-free session, in `apps/web/app/(protected)/layout.test.tsx` (depends on T024)
+- [X] T024 [US3] Implement `apps/web/middleware.ts` (forwards the current pathname onto an `x-pathname` request header — no auth decision, see research.md §4's implementation-discovery note) and `apps/web/app/(protected)/layout.tsx` — calls `auth()`, reads the pathname header, redirects to `/login?callbackUrl=<current path>` when there is no session **or when `session.error === 'RefreshFailed'`** (FR-006, FR-004), otherwise renders children inside the shared chrome (depends on T009, T020)
+- [X] T025 [P] [US3] Create the placeholder `apps/web/app/(protected)/account/page.tsx` (depends on T024)
+- [X] T026 [P] [US3] Create the placeholder `apps/web/app/(protected)/tournament/page.tsx` (depends on T024)
+- [X] T027 [P] [US3] Create the placeholder `apps/web/app/(protected)/admin/page.tsx` — plain sign-in gate only via T024, no Platform Admin role check (spec.md Clarifications, 2026-07-03) (depends on T024)
+- [X] T028 [US3] Extend `apps/web/app/(public)/login/page.tsx` to read its own `?callbackUrl=` search param (set by T024's redirect) and pass it as a prop to `LoginCard`, so T014's cookie-setting logic (research.md §2) receives the real destination instead of always defaulting — the actual post-sign-in redirect happens in T012, this task only wires the value from the URL into the component (FR-007) (depends on T015, T024)
+- [X] T029 [P] [US3] Unit test: `(protected)/layout.tsx` redirects to `/login?callbackUrl=...` when a mocked `auth()` returns `null` **or a session with `error: 'RefreshFailed'`** (FR-004), and renders children when it returns a valid error-free session, in `apps/web/app/(protected)/layout.test.tsx` (depends on T024)
 
 **Checkpoint**: User Stories 1–3 all work independently — quickstart.md §4 passes end-to-end.
 

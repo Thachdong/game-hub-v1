@@ -109,6 +109,8 @@ apps/
     ├── package.json
     ├── next.config.ts
     ├── tsconfig.json
+    ├── middleware.ts                  # pathname-forwarding plumbing ONLY, no auth decision —
+    │                                 # see research.md §4's "Implementation discovery" note
     ├── app/
     │   ├── layout.tsx                # root layout: <html>/<body>, NextAuth SessionProvider
     │   ├── loading.tsx                # FR-012 fallback for the root segment
@@ -153,9 +155,10 @@ apps/
 **Structure Decision**: Web application structure — this feature adds `apps/web` (the first
 `apps/*` package) consuming the existing `packages/*` domain services. Two Route Groups
 (`(public)`, `(protected)`) per constitution Principle II keep the sign-in-required layout
-separate from the public layout without affecting URL paths. `middleware.ts` is intentionally not
-used for route protection — see research.md §4 for why the `(protected)/layout.tsx` Server
-Component check was chosen instead.
+separate from the public layout without affecting URL paths. `middleware.ts` does **not** make the
+route-protection decision — that stays in `(protected)/layout.tsx`'s Server Component check, per
+research.md §4; the middleware exists only to forward the current pathname (a Next.js Server
+Component limitation discovered during implementation), not to gate access.
 
 ## Complexity Tracking
 
