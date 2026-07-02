@@ -1,42 +1,29 @@
 <!--
 SYNC IMPACT REPORT
 ==================
-Version change: [template — no version] → 1.0.0
-Bump rationale: MAJOR — initial ratification; all principles established from scratch.
+Version change: 1.0.0 → 1.1.0
+Bump rationale: MINOR — new mandated technology guidance added (icon library) to Coding
+Conventions; no principle redefined or removed.
 
-Principles added:
-  - I.   Turborepo Monorepo Structure
-  - II.  Next.js App Router with Route Groups
-  - III. Atomic Design Component Architecture
-  - IV.  Webapp/API Boundary via Service Interfaces
-  - V.   Progressive Common Code Extraction (Rule of Two)
-  - VI.  Client-Side Auth & Realtime Contract
+Principles added: none (this amendment touches Coding Conventions, not Core Principles)
 
-Sections added:
-  - Core Principles (6 principles)
-  - Coding Conventions
-  - Testing
-  - Governance
+Sections modified:
+  - Coding Conventions — added an "Icons" convention mandating `lucide-react`.
 
 Templates status:
-  - .specify/templates/plan-template.md  ✅ No update required — "Constitution Check" section
-                                            already contains a generic placeholder
-                                            "[Gates determined based on constitution file]"
-                                            that correctly defers gate logic to this file.
-  - .specify/templates/spec-template.md  ✅ No update required — template is technology-agnostic
-                                            and compatible with this constitution.
-  - .specify/templates/tasks-template.md ✅ No update required — task phases (Setup, Foundational,
-                                            User Story phases) align with app/route-group/service
-                                            layer ordering used here.
-  - CLAUDE.md                            ✅ No update required — only directs readers to "the
-                                            current plan"; no principle-specific references exist.
+  - .specify/templates/plan-template.md  ✅ No update required — Constitution Check gate remains
+                                            a generic placeholder; no new gate needed for a
+                                            library-choice convention.
+  - .specify/templates/spec-template.md  ✅ No update required.
+  - .specify/templates/tasks-template.md ✅ No update required.
+  - CLAUDE.md                            ✅ No update required.
   - .specify/templates/commands/*.md     ✅ N/A — directory does not exist in this workspace.
 
-Deferred items:
+Deferred items (carried over from 1.0.0):
   - Testing principle: ADR-TONG has no accepted testing decisions yet (mirrors the same gap in
     the sibling API constitution). Marked with TODO(TESTING_PRINCIPLE) below.
-  - Styling/state-management library choice: not mandated here; left to each app's plan.md
-    Technical Context so a premature stack choice isn't baked into governance.
+  - Styling library (CSS framework/engine) choice: still not mandated — only the icon library was
+    specified in this amendment. Left to each app's plan.md Technical Context.
 -->
 
 # Game Hub Webapp Constitution
@@ -132,6 +119,9 @@ The webapp MUST honor the auth and realtime contracts established by the API sid
   custom hooks, and components alike.
 - **Atomic Design is authoritative for UI structure** in this workspace; it is intentionally
   out of scope for the API constitution, which defers UI conventions to this document.
+- **Icons**: `lucide-react` is the mandated icon library across all apps and packages. A second
+  icon library (e.g. `react-icons`, `heroicons`, inline custom SVGs for anything lucide already
+  covers) MUST NOT be introduced without an ADR superseding this convention.
 
 ## Testing
 
@@ -153,4 +143,4 @@ coverage gates), they MUST be added here and reflected in `.specify/templates/ta
 - **Complexity justification**: Any deviation from a MUST rule in this constitution requires an
   explicit justification entry in the `Complexity Tracking` table of `plan.md`.
 
-**Version**: 1.0.0 | **Ratified**: 2026-07-02 | **Last Amended**: 2026-07-02
+**Version**: 1.1.0 | **Ratified**: 2026-07-02 | **Last Amended**: 2026-07-02
