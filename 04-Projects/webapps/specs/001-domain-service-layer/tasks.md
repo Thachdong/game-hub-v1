@@ -58,13 +58,13 @@ all five domain packages need it simultaneously, not speculatively.
 
 **⚠️ CRITICAL**: No user story (Phase 3+) can begin until this phase is complete.
 
-- [ ] T010 [P] Create `ServiceResult`/`ServiceSuccess`/`ServiceFailure`/`ServiceErrorReason`/`Cursor`/`CursorPage` types per `contracts/service-core.ts` in `packages/service-core/src/types.ts`
-- [ ] T011 Implement `createHttpClient` axios factory (base URL, `getAccessToken` header injection, `onUnauthenticated` 401 hook, 10s timeout per research.md §9) in `packages/service-core/src/http-client.ts` (depends on T010)
-- [ ] T012 [P] Implement the transient-failure retry/backoff policy — `GET` requests only, up to 2 retries, 300ms exponential backoff, per research.md §6 — in `packages/service-core/src/retry.ts` (depends on T010)
-- [ ] T013 Implement the `withServiceResult` higher-order function composing the http client + retry policy + the FR-005 failure-reason mapping (401→UNAUTHENTICATED, 403→UNAUTHORIZED, 400→VALIDATION, 404→NOT_FOUND, 5xx/unmapped→SERVER_ERROR, request-never-sent→NETWORK_ERROR) in `packages/service-core/src/with-service-result.ts` (depends on T011, T012)
-- [ ] T014 Create the public barrel export in `packages/service-core/src/index.ts` (depends on T010, T011, T012, T013)
-- [ ] T015 [P] Unit test: `withServiceResult` normalizes mocked 200/400/401/403/404/5xx axios responses to the correct `ServiceResult` shape and `reason`, per research.md §4, in `packages/service-core/src/with-service-result.test.ts`
-- [ ] T016 [P] Unit test: retry policy retries a `GET` exactly 2 times with backoff on `NETWORK_ERROR`/`SERVER_ERROR` and never retries `POST`/`PUT`/`PATCH`/`DELETE`, per research.md §6, in `packages/service-core/src/retry.test.ts`
+- [X] T010 [P] Create `ServiceResult`/`ServiceSuccess`/`ServiceFailure`/`ServiceErrorReason`/`Cursor`/`CursorPage` types per `contracts/service-core.ts` in `packages/service-core/src/types.ts`
+- [X] T011 Implement `createHttpClient` axios factory (base URL, `getAccessToken` header injection, `onUnauthenticated` 401 hook, 10s timeout per research.md §9) in `packages/service-core/src/http-client.ts` (depends on T010)
+- [X] T012 [P] Implement the transient-failure retry/backoff policy — `GET` requests only, up to 2 retries, 300ms exponential backoff, per research.md §6 — in `packages/service-core/src/retry.ts` (depends on T010)
+- [X] T013 Implement the `withServiceResult` higher-order function composing the http client + retry policy + the FR-005 failure-reason mapping (401→UNAUTHENTICATED, 403→UNAUTHORIZED, 400→VALIDATION, 404→NOT_FOUND, 5xx/unmapped→SERVER_ERROR, request-never-sent→NETWORK_ERROR) in `packages/service-core/src/with-service-result.ts` (depends on T011, T012)
+- [X] T014 Create the public barrel export in `packages/service-core/src/index.ts` (depends on T010, T011, T012, T013)
+- [X] T015 [P] Unit test: `withServiceResult` normalizes mocked 200/400/401/403/404/5xx axios responses to the correct `ServiceResult` shape and `reason`, per research.md §4, in `packages/service-core/src/with-service-result.test.ts`
+- [X] T016 [P] Unit test: retry policy retries a `GET` exactly 2 times with backoff on `NETWORK_ERROR`/`SERVER_ERROR` and never retries `POST`/`PUT`/`PATCH`/`DELETE`, per research.md §6, in `packages/service-core/src/retry.test.ts`
 
 **Checkpoint**: `service-core` builds, typechecks, and its unit tests pass. All five domain
 packages can now be implemented in parallel.
