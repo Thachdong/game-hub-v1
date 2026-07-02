@@ -148,11 +148,11 @@ taxonomy without needing any other package.
 
 ### Implementation for User Story 4
 
-- [ ] T037 [P] [US4] Define `AdminAssignment`, `AdminReportEntry`, `ConfirmReportResult`, `AdminReportType`, `TrustScoreSnapshot` types per `contracts/admin-service.ts` in `packages/admin-service/src/types.ts`
-- [ ] T038 [P] [US4] Implement `assignGameAdmin`, `removeGameAdmin` in `packages/admin-service/src/game-admins.ts` (depends on T037, `service-core`)
-- [ ] T039 [P] [US4] Implement `listReportsForModeration` (returns `CursorPage<AdminReportEntry>`), `confirmReport`, `listReportTypesAdmin`, `createReportType`, `updateReportType` in `packages/admin-service/src/reports.ts` (depends on T037)
-- [ ] T040 [US4] Create the public entry point in `packages/admin-service/src/index.ts` (depends on T038, T039)
-- [ ] T041 [P] [US4] Unit tests for game-admins/reports modules, including the non-admin → `UNAUTHORIZED` case, in `packages/admin-service/src/*.test.ts`
+- [X] T037 [P] [US4] Define `AdminAssignment`, `AdminReportEntry`, `ConfirmReportResult`, `AdminReportType`, `TrustScoreSnapshot` types per `contracts/admin-service.ts` in `packages/admin-service/src/types.ts`
+- [X] T038 [P] [US4] Implement `assignGameAdmin`, `removeGameAdmin` in `packages/admin-service/src/game-admins.ts` (depends on T037, `service-core`)
+- [X] T039 [P] [US4] Implement `listReportsForModeration` (returns `CursorPage<AdminReportEntry>`), `confirmReport`, `listReportTypesAdmin`, `createReportType`, `updateReportType` in `packages/admin-service/src/reports.ts` (depends on T037)
+- [X] T040 [US4] Create the public entry point in `packages/admin-service/src/index.ts` (depends on T038, T039)
+- [X] T041 [P] [US4] Unit tests for game-admins/reports modules, including the non-admin → `UNAUTHORIZED` case, in `packages/admin-service/src/*.test.ts`
 
 **Checkpoint**: User Stories 1–4 all work independently.
 
