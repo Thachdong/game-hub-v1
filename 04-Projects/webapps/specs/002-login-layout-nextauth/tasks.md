@@ -55,12 +55,12 @@ independently testable at all — no story can demonstrate "signed in" vs "signe
 
 **⚠️ CRITICAL**: No user story (Phase 3+) can begin until this phase is complete.
 
-- [ ] T006 Define the `Session`/`JWT` type augmentation per `contracts/session.ts` in `apps/web/lib/next-auth.d.ts` (depends on T002)
-- [ ] T007 Implement the NextAuth config — `Credentials` provider (pass-through `authorize()`, research.md §3), `jwt` callback (embeds `accessToken`/`refreshToken`/`account`, implements FR-003 refresh-rotation via `POST /api/auth/refresh` on expiry per research.md §6, sets `error: "RefreshFailed"` on rotation failure per FR-004), `session` callback (exposes `accessToken` + `account`, never `refreshToken`, per spec.md Clarifications 2026-07-03) — in `apps/web/lib/auth.ts` (depends on T006)
-- [ ] T008 Implement the NextAuth route handler in `apps/web/app/api/auth/[...nextauth]/route.ts` (depends on T007)
-- [ ] T009 Implement the root layout — `<html>`/`<body>`, server-fetches `auth()` and seeds `<SessionProvider session={session}>` per research.md §5 (avoids the FR-012/SC-006 loading flash) — in `apps/web/app/layout.tsx` (depends on T007)
-- [ ] T010 [P] Implement the root `loading.tsx` fallback in `apps/web/app/loading.tsx` (depends on T002)
-- [ ] T011 [P] Unit test: `jwt` callback renews an expired `accessToken` via a mocked refresh call and updates the token; sets `error: "RefreshFailed"` when the refresh call itself fails — in `apps/web/lib/auth.test.ts` (depends on T007)
+- [X] T006 Define the `Session`/`JWT` type augmentation per `contracts/session.ts` in `apps/web/lib/next-auth.d.ts` (depends on T002)
+- [X] T007 Implement the NextAuth config — `Credentials` provider (pass-through `authorize()`, research.md §3), `jwt` callback (embeds `accessToken`/`refreshToken`/`account`, implements FR-003 refresh-rotation via `POST /api/auth/refresh` on expiry per research.md §6, sets `error: "RefreshFailed"` on rotation failure per FR-004), `session` callback (exposes `accessToken` + `account`, never `refreshToken`, per spec.md Clarifications 2026-07-03) — in `apps/web/lib/auth.ts`, with the refresh-rotation logic itself extracted to `apps/web/lib/token-refresh.ts` so it doesn't require importing `NextAuth()`'s full initialization (which pulls in `next/server`, unavailable outside the Next.js build) just to unit-test it (depends on T006)
+- [X] T008 Implement the NextAuth route handler in `apps/web/app/api/auth/[...nextauth]/route.ts` (depends on T007)
+- [X] T009 Implement the root layout — `<html>`/`<body>`, server-fetches `auth()` and seeds `<SessionProvider session={session}>` per research.md §5 (avoids the FR-012/SC-006 loading flash) — in `apps/web/app/layout.tsx` (depends on T007)
+- [X] T010 [P] Implement the root `loading.tsx` fallback in `apps/web/app/loading.tsx` (depends on T002)
+- [X] T011 [P] Unit test: `refreshAccessToken` renews an expired `accessToken` via a mocked refresh call and updates the token; sets `error: "RefreshFailed"` when the refresh call itself fails or throws — in `apps/web/lib/token-refresh.test.ts` (depends on T007)
 
 **Checkpoint**: NextAuth session type, config, and route handler exist; root layout seeds session
 correctly. `useSession()`/`auth()` are usable by every subsequent phase.
