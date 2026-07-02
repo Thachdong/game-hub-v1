@@ -189,11 +189,11 @@ FR-016–FR-022.
 
 **Purpose**: Validation and documentation spanning all six packages.
 
-- [ ] T053 [P] Add a root `README.md` documenting the package layout, the `ServiceResult` pattern, and how to add a new service function
-- [ ] T054 Run `pnpm turbo run typecheck --filter=@game-hub/*` and fix any cross-package type errors (validates SC-005)
-- [ ] T055 Run `pnpm turbo run test --filter=@game-hub/*` and confirm every package's unit tests pass
+- [X] T053 [P] Add a root `README.md` documenting the package layout, the `ServiceResult` pattern, and how to add a new service function
+- [X] T054 Run `pnpm turbo run typecheck --filter=@game-hub/*` and fix any cross-package type errors (validates SC-005)
+- [X] T055 Run `pnpm turbo run test --filter=@game-hub/*` and confirm every package's unit tests pass
 - [ ] T056 Execute quickstart.md's manual smoke-test steps (§4–§5) against a running backend and record the results
-- [ ] T057 Re-review `checklists/api.md` (CHK001–CHK027) against the finished implementation and check off any items the implementation itself resolved beyond spec level
+- [X] T057 Re-review `checklists/api.md` (CHK001–CHK027) against the finished implementation and check off any items the implementation itself resolved beyond spec level
 
 ---
 

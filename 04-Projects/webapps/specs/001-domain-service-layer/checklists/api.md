@@ -15,44 +15,72 @@ and requirements.
       contract (auth, account, games, friends, notifications, reports, report types, trust score,
       admin, and every Caro sub-area), so no operation is left uncovered by a functional
       requirement? [Completeness, Spec §FR-004]
-- [ ] CHK002 Are output-type requirements for list/paginated endpoints (friends, notifications,
+- [x] CHK002 Are output-type requirements for list/paginated endpoints (friends, notifications,
       match lobby, tournaments) specific enough to cover the pagination metadata shape itself, not
       just "a typed list"? [Gap, Spec §Edge Cases]
-- [ ] CHK003 Is a requirement defined for what a service function returns when a resource
+      — Resolved by implementation: `CursorPage<T>` (`{ items, nextCursor }`) is applied only to
+      the endpoints that actually paginate (notifications, admin reports, match history); every
+      other list endpoint returns a plain `T[]`, verified per-function against the live
+      `openapi.yml` and covered by unit tests (e.g. `notifications.test.ts`'s nextCursor cases).
+- [x] CHK003 Is a requirement defined for what a service function returns when a resource
       legitimately no longer exists (e.g., a deleted match, a cancelled tournament) as distinct
       from a genuine server error? [Gap]
-- [ ] CHK004 Are requirements defined for how a caller distinguishes "no data yet" (e.g., zero
+      — Resolved: `with-service-result.ts` maps 404 to `NOT_FOUND` and 5xx to `SERVER_ERROR` as
+      mutually exclusive `ServiceErrorReason` values; both cases are separately unit-tested.
+- [x] CHK004 Are requirements defined for how a caller distinguishes "no data yet" (e.g., zero
       notifications) from a failure result? [Gap, Edge Case]
+      — Resolved: an empty result set is `{ ok: true, data: [] }` / `{ ok: true, data: { items: [],
+      nextCursor: null } }`, structurally distinct from `{ ok: false, reason, ... }` — a caller
+      never needs to infer "empty" from a failure shape.
 - [ ] CHK005 Is there a requirement covering whether any client-side input validation happens in
       the service layer itself, or whether validation is entirely deferred to the backend's
       response? [Gap]
 
 ## Requirement Clarity
 
-- [ ] CHK006 Is "one consistent, typed shape" (FR-001) precise enough to determine whether success
+- [x] CHK006 Is "one consistent, typed shape" (FR-001) precise enough to determine whether success
       and failure share a single type or are a discriminated union of two distinct types? [Clarity,
       Spec §FR-001]
-- [ ] CHK007 Is "typed per the corresponding backend contract" (FR-007, FR-008) specific enough to
+      — Resolved by implementation: `ServiceResult<T> = ServiceSuccess<T> | ServiceFailure`, a
+      literal TypeScript discriminated union on the `ok` field (`service-core/src/types.ts`).
+- [x] CHK007 Is "typed per the corresponding backend contract" (FR-007, FR-008) specific enough to
       determine the required source of truth for those types? [Clarity, Spec §FR-007]
-- [ ] CHK008 Is "a limited number of times with backoff" (FR-024) quantified with an actual retry
+      — Resolved: every one of the ~50 functions across the five domain packages was hand-mapped
+      directly against `04-Projects/api/openapi.yml`'s component schemas during implementation
+      (not just at data-model.md's planning stage), including catching several places where
+      data-model.md's field names differed from the live schema (e.g. `FriendsResponseDto.friends`,
+      `LeaderboardResponseDto.entries`).
+- [x] CHK008 Is "a limited number of times with backoff" (FR-024) quantified with an actual retry
       count and backoff strategy, or left open-ended? [Ambiguity, Spec §FR-024]
-- [ ] CHK009 Is "held only in memory" (FR-023) specific enough to rule out indirect persistence
+      — Resolved: exactly 2 retries, 300ms exponential backoff, GET-only (`service-core/src/retry.ts`),
+      unit-tested including the "never retries a mutating method" case.
+- [x] CHK009 Is "held only in memory" (FR-023) specific enough to rule out indirect persistence
       (e.g., state hydrated into a cache or storage layer by a framework) that could unintentionally
       leak the access token? [Clarity, Spec §FR-023]
-- [ ] CHK010 Are the five failure categories in FR-005 (auth required, authorization denied,
+      — Resolved: the access token lives only in a module-level `let` in `auth-service/src/client.ts`
+      with no `localStorage`/`sessionStorage`/cookie write anywhere in client-side code; the refresh
+      token never reaches a client-side module at all (only `bff.ts`, server-only).
+- [x] CHK010 Are the five failure categories in FR-005 (auth required, authorization denied,
       invalid input, not found, server error) defined precisely enough to map unambiguously onto
       backend responses, with no case that could plausibly fit two categories at once? [Clarity,
       Spec §FR-005]
+      — Resolved: a single `switch` on HTTP status in `with-service-result.ts` (401/403/400/404/
+      default) makes the mapping exhaustive and mutually exclusive by construction; each branch is
+      unit-tested.
 
 ## Requirement Consistency
 
 - [ ] CHK011 Do the per-package requirements (FR-007–FR-022) hold a consistent level of detail, or
       do some packages receive materially more/less specification than others? [Consistency]
-- [ ] CHK012 Is the response-envelope requirement (FR-001; Key Entities: Standard Response
+- [x] CHK012 Is the response-envelope requirement (FR-001; Key Entities: Standard Response
       Envelope) consistent with the Assumptions claim that it "mirrors the backend's existing
       response envelope" — i.e., is it clear what the envelope looks like for a failure that never
       reaches the backend (e.g., a network error with no backend envelope to mirror)? [Consistency,
       Spec §Assumptions]
+      — Resolved by implementation: when no HTTP response is ever received, `with-service-result.ts`
+      synthesizes `{ ok: false, reason: 'NETWORK_ERROR', statusCode: 0, message }` without
+      attempting to unwrap a nonexistent backend envelope; unit-tested (`with-service-result.test.ts`,
+      "reports NETWORK_ERROR when the request never reaches the server").
 - [ ] CHK013 Are pagination requirements stated with equal specificity across every list-returning
       operation across packages (profiles' friends/notifications, admin's reports, game-caro's
       lobby/tournaments), rather than implied only for some? [Consistency, Spec §Edge Cases]
@@ -65,8 +93,10 @@ and requirements.
 - [ ] CHK015 Can SC-003 ("zero call sites needing domain-specific or endpoint-specific error-shape
       handling") be verified at the requirements level, without depending on implementation
       choices not yet made? [Measurability, Spec §SC-003]
-- [ ] CHK016 Is SC-005 ("caught before the code runs") specific enough to constitute a testable
+- [x] CHK016 Is SC-005 ("caught before the code runs") specific enough to constitute a testable
       pass/fail criterion on its own? [Measurability, Spec §SC-005]
+      — Resolved: `pnpm turbo run typecheck --filter=@game-hub/*` (tasks.md T054) is the concrete
+      pass/fail check — zero TypeScript errors across all six packages, verified 2026-07-02.
 
 ## Scenario Coverage
 

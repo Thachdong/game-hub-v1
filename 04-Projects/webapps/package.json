@@ -1,6 +1,7 @@
 {
   "name": "game-hub-webapps",
   "private": true,
+  "type": "module",
   "packageManager": "pnpm@9.15.9",
   "engines": {
     "node": ">=20"
