@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { JWT } from "next-auth/jwt";
-import { refreshAccessToken } from "./token-refresh.js";
+import { refreshAccessToken } from "./token-refresh";
 
 function makeFakeJwt(expSecondsFromNow: number): string {
   const payload = { exp: Math.floor(Date.now() / 1000) + expSecondsFromNow };

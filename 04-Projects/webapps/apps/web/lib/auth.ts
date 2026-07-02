@@ -1,7 +1,7 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
-import { decodeJwtExpiryMs, parseAccount, refreshAccessToken } from "./token-refresh.js";
-import type { SessionAccount } from "./next-auth.d.ts";
+import { decodeJwtExpiryMs, parseAccount, refreshAccessToken } from "./token-refresh";
+import type { SessionAccount } from "./next-auth";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [

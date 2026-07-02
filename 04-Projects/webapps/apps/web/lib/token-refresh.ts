@@ -1,5 +1,5 @@
 import type { JWT } from "next-auth/jwt";
-import type { SessionAccount } from "./next-auth.d.ts";
+import type { SessionAccount } from "./next-auth";
 
 export function decodeJwtExpiryMs(accessToken: string): number {
   const payload = accessToken.split(".")[1];
