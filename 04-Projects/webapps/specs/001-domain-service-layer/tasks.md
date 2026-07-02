@@ -169,17 +169,17 @@ FR-016–FR-022.
 
 ### Implementation for User Story 5
 
-- [ ] T042 [P] [US5] Define shared Caro types (`BoardSize`, `MoveTimeSeconds`, `GameConfig`, `AdminGameConfig`, `LobbyMatch`, `CaroPlayerInMatch`, `CaroMove`, `MatchState`) per `contracts/caro-service.ts` in `packages/caro-service/src/types.ts`
-- [ ] T043 [P] [US5] Implement `listGameConfigs`, `listGameConfigsAdmin`, `createGameConfig`, `updateGameConfig`, `deactivateGameConfig`, `reactivateGameConfig` in `packages/caro-service/src/game-configs.ts` (depends on T042, `service-core`)
-- [ ] T044 [P] [US5] Implement `listLobbyMatches`, `createMatch`, `joinMatch`, `getMatch`, `leaveMatch`, `inviteToMatch`, `respondToMatchInvitation` in `packages/caro-service/src/matches.ts` (depends on T042)
-- [ ] T045 [P] [US5] Implement `startMatch`, `submitMove`, `surrenderMatch`, `requestDraw`, `respondToDrawRequest` in `packages/caro-service/src/gameplay.ts` (depends on T042)
-- [ ] T046 [P] [US5] Implement `requestQuickPair`, `cancelQuickPair` in `packages/caro-service/src/quick-pair.ts` (depends on T042)
-- [ ] T047 [P] [US5] Implement `listMatchChat`, `sendMatchChat`, `muteMatchViewer` in `packages/caro-service/src/chat.ts` (depends on T042)
-- [ ] T048 [P] [US5] Implement `getLeaderboard` in `packages/caro-service/src/leaderboard.ts` (depends on T042)
-- [ ] T049 [P] [US5] Implement `getMyPlayerProfile`, `getPlayerProfile`, `getMyMatchHistory`, `getPlayerMatchHistory` (both history functions return `CursorPage<CaroMatchHistoryItem>`) in `packages/caro-service/src/players.ts` (depends on T042)
-- [ ] T050 [US5] Verify the tournament endpoints' actual response schemas against the current `04-Projects/api/openapi.yml` (data-model.md flagged these as unconfirmed), then implement `requestTournamentCreatorStatus`, `createTournament`, `listTournaments`, `getTournament`, `registerForTournament`, `listTournamentParticipants`, `listTournamentChat`, `sendTournamentChat`, `listTournamentCreatorRequests`, `reviewTournamentCreatorRequest`, `revokeTournamentCreator` in `packages/caro-service/src/tournaments.ts` (depends on T042)
-- [ ] T051 [US5] Create the public entry point in `packages/caro-service/src/index.ts` (depends on T043, T044, T045, T046, T047, T048, T049, T050)
-- [ ] T052 [P] [US5] Unit tests for game-configs/matches/gameplay/quick-pair/chat/leaderboard/players modules, including a mutating-call (`submitMove`) test asserting it is NOT auto-retried on a simulated transient failure, in `packages/caro-service/src/*.test.ts`
+- [X] T042 [P] [US5] Define shared Caro types (`BoardSize`, `MoveTimeSeconds`, `GameConfig`, `AdminGameConfig`, `LobbyMatch`, `CaroPlayerInMatch`, `CaroMove`, `MatchState`) per `contracts/caro-service.ts` in `packages/caro-service/src/types.ts`
+- [X] T043 [P] [US5] Implement `listGameConfigs`, `listGameConfigsAdmin`, `createGameConfig`, `updateGameConfig`, `deactivateGameConfig`, `reactivateGameConfig` in `packages/caro-service/src/game-configs.ts` (depends on T042, `service-core`)
+- [X] T044 [P] [US5] Implement `listLobbyMatches`, `createMatch`, `joinMatch`, `getMatch`, `leaveMatch`, `inviteToMatch`, `respondToMatchInvitation` in `packages/caro-service/src/matches.ts` (depends on T042)
+- [X] T045 [P] [US5] Implement `startMatch`, `submitMove`, `surrenderMatch`, `requestDraw`, `respondToDrawRequest` in `packages/caro-service/src/gameplay.ts` (depends on T042)
+- [X] T046 [P] [US5] Implement `requestQuickPair`, `cancelQuickPair` in `packages/caro-service/src/quick-pair.ts` (depends on T042)
+- [X] T047 [P] [US5] Implement `listMatchChat`, `sendMatchChat`, `muteMatchViewer` in `packages/caro-service/src/chat.ts` (depends on T042)
+- [X] T048 [P] [US5] Implement `getLeaderboard` in `packages/caro-service/src/leaderboard.ts` (depends on T042)
+- [X] T049 [P] [US5] Implement `getMyPlayerProfile`, `getPlayerProfile`, `getMyMatchHistory`, `getPlayerMatchHistory` (both history functions return `CursorPage<CaroMatchHistoryItem>`) in `packages/caro-service/src/players.ts` (depends on T042)
+- [X] T050 [US5] Verify the tournament endpoints' actual response schemas against the current `04-Projects/api/openapi.yml` (data-model.md flagged these as unconfirmed), then implement `requestTournamentCreatorStatus`, `createTournament`, `listTournaments`, `getTournament`, `registerForTournament`, `listTournamentParticipants`, `listTournamentChat`, `sendTournamentChat`, `listTournamentCreatorRequests`, `reviewTournamentCreatorRequest`, `revokeTournamentCreator` in `packages/caro-service/src/tournaments.ts` (depends on T042)
+- [X] T051 [US5] Create the public entry point in `packages/caro-service/src/index.ts` (depends on T043, T044, T045, T046, T047, T048, T049, T050)
+- [X] T052 [P] [US5] Unit tests for game-configs/matches/gameplay/quick-pair/chat/leaderboard/players modules, including a mutating-call (`submitMove`) test asserting it is NOT auto-retried on a simulated transient failure, in `packages/caro-service/src/*.test.ts`
 
 **Checkpoint**: All five user stories are independently functional.
 
