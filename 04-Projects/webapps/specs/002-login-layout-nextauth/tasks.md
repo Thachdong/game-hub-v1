@@ -38,11 +38,11 @@ consuming the existing `packages/*` domain services via `workspace:*`.
 
 **Purpose**: Scaffold the first Next.js app in this workspace — none of it exists yet.
 
-- [ ] T001 Add `apps/*` to `pnpm-workspace.yaml`'s `packages:` glob (currently only `packages/*`) at the repository root
-- [ ] T002 Scaffold `apps/web/package.json` (name `web`, Next.js + React + `next-auth` + `tailwindcss` dependencies, `@game-hub/account-service`/`profiles-service`/`admin-service`/`caro-service` via `workspace:*`, scripts: `dev`/`build`/`start`/`lint`/`test`/`typecheck`), `apps/web/tsconfig.json` (extends root `tsconfig.base.json`, Next.js's own plugin/paths additions), `apps/web/next.config.ts`
-- [ ] T003 [P] Configure Tailwind CSS in `apps/web` (`tailwind.config.ts`, `app/globals.css`, PostCSS config per research.md §7)
-- [ ] T004 [P] Add `apps/web/.env.local.example` documenting `NEXT_PUBLIC_GAME_HUB_API_BASE_URL`, `BACKEND_URL`, `AUTH_SECRET` per quickstart.md Prerequisites
-- [ ] T005 [P] Verify/extend root `turbo.json` pipeline for Next.js build output caching (`.next/**` excluding `.next/cache/**`) if the existing `build` task definition doesn't already cover it
+- [X] T001 Add `apps/*` to `pnpm-workspace.yaml`'s `packages:` glob (currently only `packages/*`) at the repository root
+- [X] T002 Scaffold `apps/web/package.json` (name `web`, Next.js + React + `next-auth` + `tailwindcss` dependencies, `@game-hub/account-service`/`profiles-service`/`admin-service`/`caro-service` via `workspace:*`, scripts: `dev`/`build`/`start`/`lint`/`test`/`typecheck`), `apps/web/tsconfig.json` (extends root `tsconfig.base.json`, Next.js's own plugin/paths additions), `apps/web/next.config.ts`
+- [X] T003 [P] Configure Tailwind CSS in `apps/web` (`tailwind.config.ts`, `app/globals.css`, PostCSS config per research.md §7)
+- [X] T004 [P] Add `apps/web/.env.local.example` documenting `NEXT_PUBLIC_GAME_HUB_API_BASE_URL`, `BACKEND_URL`, `AUTH_SECRET` per quickstart.md Prerequisites
+- [X] T005 [P] Verify/extend root `turbo.json` pipeline for Next.js build output caching (`.next/**` excluding `.next/cache/**`) if the existing `build` task definition doesn't already cover it
 
 **Checkpoint**: `pnpm install` resolves `apps/web` alongside `packages/*`; `pnpm --filter web dev` starts an empty Next.js app with zero TypeScript errors.
 
