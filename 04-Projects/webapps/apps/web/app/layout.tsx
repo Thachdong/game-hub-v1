@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { auth } from "@/lib/auth";
 import { Providers } from "@/components/templates/Providers";
+import { AppNav } from "@/components/organisms/AppNav";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -20,7 +21,10 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body>
-        <Providers session={session}>{children}</Providers>
+        <Providers session={session}>
+          <AppNav />
+          {children}
+        </Providers>
       </body>
     </html>
   );

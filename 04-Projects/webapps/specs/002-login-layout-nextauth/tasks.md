@@ -102,11 +102,11 @@ of Stories 3/4's pages existing.
 
 ### Implementation for User Story 2
 
-- [ ] T019 [P] [US2] Create `AppNav` atoms (`Avatar`, `NavLink`) in `apps/web/components/atoms/Avatar.tsx` and `apps/web/components/atoms/NavLink.tsx` (depends on T002)
-- [ ] T020 [US2] Create the `AppNav` organism — reads `useSession()`, shows a "Sign in" affordance when `status === 'unauthenticated'` **or when `session?.error === 'RefreshFailed'`** (FR-004 — a failed-refresh session must render as signed-out, per contracts/session.ts), shows `session.account`'s username/avatar plus a sign-out affordance only when `status === 'authenticated'` and no `error` flag is set, shows a skeleton when `status === 'loading'` (FR-012) — in `apps/web/components/organisms/AppNav.tsx` (depends on T019, T009)
-- [ ] T021 [US2] Wire `AppNav` into the root layout (`apps/web/app/layout.tsx`) so it's shared across every route (depends on T020, T009)
-- [ ] T022 [US2] Implement the sign-out action (NextAuth `signOut()`, redirect to a public page per US2 Acceptance Scenario 3) inside `AppNav` in `apps/web/components/organisms/AppNav.tsx` (depends on T020)
-- [ ] T023 [P] [US2] Unit test: `AppNav` renders the signed-out, signed-in, and loading states correctly given a mocked `useSession()` return value in `apps/web/components/organisms/AppNav.test.tsx` (depends on T020)
+- [X] T019 [P] [US2] Create `AppNav` atoms (`Avatar`, `NavLink`) in `apps/web/components/atoms/Avatar.tsx` and `apps/web/components/atoms/NavLink.tsx` (depends on T002)
+- [X] T020 [US2] Create the `AppNav` organism — reads `useSession()`, shows a "Sign in" affordance when `status === 'unauthenticated'` **or when `session?.error === 'RefreshFailed'`** (FR-004 — a failed-refresh session must render as signed-out, per contracts/session.ts), shows `session.account`'s username/avatar plus a sign-out affordance only when `status === 'authenticated'` and no `error` flag is set, shows a skeleton when `status === 'loading'` (FR-012) — in `apps/web/components/organisms/AppNav.tsx` (depends on T019, T009)
+- [X] T021 [US2] Wire `AppNav` into the root layout (`apps/web/app/layout.tsx`) so it's shared across every route (depends on T020, T009)
+- [X] T022 [US2] Implement the sign-out action (NextAuth `signOut()`, redirect to a public page per US2 Acceptance Scenario 3) inside `AppNav` in `apps/web/components/organisms/AppNav.tsx` (depends on T020)
+- [X] T023 [P] [US2] Unit test: `AppNav` renders the signed-out, signed-in, and loading states correctly given a mocked `useSession()` return value in `apps/web/components/organisms/AppNav.test.tsx` (depends on T020)
 
 **Checkpoint**: User Stories 1 AND 2 both work independently — every page built so far shares
 `AppNav`'s chrome, correctly reflecting sign-in state with no loading-state flash.
