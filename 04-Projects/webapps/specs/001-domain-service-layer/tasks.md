@@ -82,15 +82,15 @@ produces a valid redirect URL, `exchangeGoogleCallback` returns `ok: true` with 
 
 ### Implementation for User Story 1
 
-- [ ] T017 [P] [US1] Define `Account`, `GoogleCallbackParams`, `ExchangeGoogleCallbackResult`, and session-related types per `contracts/auth-service.ts` in `packages/auth-service/src/types.ts`
-- [ ] T018 [US1] Implement `getGoogleLoginUrl` and the in-memory token store (`getAccessToken`/`setAccessToken`) in `packages/auth-service/src/client.ts` (depends on T017)
-- [ ] T019 [US1] Implement `refreshSession` and `logout`, calling same-origin proxy routes (configurable path, not the backend directly) in `packages/auth-service/src/client.ts` (depends on T018)
-- [ ] T020 [P] [US1] Implement the server-only `exchangeGoogleCallback`, `rotateAccessToken`, `clearSession` functions (calling the backend's `/api/auth/google/callback` and `/api/auth/refresh` directly) in `packages/auth-service/src/bff.ts` (depends on T017, and `service-core`'s `withServiceResult`)
-- [ ] T021 [US1] Wire `service-core`'s `onUnauthenticated` hook (used when constructing this package's own http client) to call `refreshSession` and retry the original request once on success in `packages/auth-service/src/client.ts` (depends on T019)
-- [ ] T022 [US1] Create the public entry point exporting only `client.ts` + shared types (never `bff.ts`, so server-only code can't be bundled into client code) in `packages/auth-service/src/index.ts` (depends on T018, T019, T020, T021)
-- [ ] T023 [P] [US1] Add the `./bff` subpath export wiring in `packages/auth-service/package.json` `exports` map so a future Route Handler can `import { exchangeGoogleCallback } from '@game-hub/auth-service/bff'` without pulling in `client.ts` (depends on T020)
-- [ ] T024 [P] [US1] Unit test: token store get/set, and `refreshSession` success/failure paths (including the "refresh also fails → UNAUTHENTICATED" edge case) in `packages/auth-service/src/client.test.ts`
-- [ ] T025 [P] [US1] Unit test: `exchangeGoogleCallback` and `rotateAccessToken` correctly map `LoginResponseDto`/`RefreshResponseDto` per data-model.md in `packages/auth-service/src/bff.test.ts`
+- [X] T017 [P] [US1] Define `Account`, `GoogleCallbackParams`, `ExchangeGoogleCallbackResult`, and session-related types per `contracts/auth-service.ts` in `packages/auth-service/src/types.ts`
+- [X] T018 [US1] Implement `getGoogleLoginUrl` and the in-memory token store (`getAccessToken`/`setAccessToken`) in `packages/auth-service/src/client.ts` (depends on T017)
+- [X] T019 [US1] Implement `refreshSession` and `logout`, calling same-origin proxy routes (configurable path, not the backend directly) in `packages/auth-service/src/client.ts` (depends on T018)
+- [X] T020 [P] [US1] Implement the server-only `exchangeGoogleCallback`, `rotateAccessToken`, `clearSession` functions (calling the backend's `/api/auth/google/callback` and `/api/auth/refresh` directly) in `packages/auth-service/src/bff.ts` (depends on T017, and `service-core`'s `withServiceResult`)
+- [X] T021 [US1] Wire `service-core`'s `onUnauthenticated` hook (used when constructing this package's own http client) to call `refreshSession` and retry the original request once on success in `packages/auth-service/src/client.ts` (depends on T019)
+- [X] T022 [US1] Create the public entry point exporting only `client.ts` + shared types (never `bff.ts`, so server-only code can't be bundled into client code) in `packages/auth-service/src/index.ts` (depends on T018, T019, T020, T021)
+- [X] T023 [P] [US1] Add the `./bff` subpath export wiring in `packages/auth-service/package.json` `exports` map so a future Route Handler can `import { exchangeGoogleCallback } from '@game-hub/auth-service/bff'` without pulling in `client.ts` (depends on T020)
+- [X] T024 [P] [US1] Unit test: token store get/set, and `refreshSession` success/failure paths (including the "refresh also fails → UNAUTHENTICATED" edge case) in `packages/auth-service/src/client.test.ts`
+- [X] T025 [P] [US1] Unit test: `exchangeGoogleCallback` and `rotateAccessToken` correctly map `LoginResponseDto`/`RefreshResponseDto` per data-model.md in `packages/auth-service/src/bff.test.ts`
 
 **Checkpoint**: User Story 1 is fully functional and independently testable — `@game-hub/auth-service` builds, typechecks, and its tests pass without any other domain package existing.
 
