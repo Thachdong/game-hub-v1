@@ -1,29 +1,45 @@
 <!--
 SYNC IMPACT REPORT
 ==================
-Version change: 1.0.0 → 1.1.0
-Bump rationale: MINOR — new mandated technology guidance added (icon library) to Coding
-Conventions; no principle redefined or removed.
+Version change: 1.1.0 → 1.2.0
+Bump rationale: MINOR — Principle VI's session-handling rule is materially expanded: it previously
+banned "server-side session cookies" outright with no elaboration; it now explicitly defines and
+permits a specific compliant pattern (a Next.js BFF session cookie carrying the JWT tokens) with
+concrete conditions, closing a literal-text ambiguity flagged by /speckit-analyze on feature
+001-domain-service-layer. No principle removed or inverted — JWT-as-sole-authentication-mechanism
+still holds; this only clarifies what "server-side session cookie" excludes.
 
-Principles added: none (this amendment touches Coding Conventions, not Core Principles)
+Principles added: none (this amendment touches Principle VI's rule text, not the set of
+principles)
 
 Sections modified:
-  - Coding Conventions — added an "Icons" convention mandating `lucide-react`.
+  - Principle VI (Client-Side Auth & Realtime Contract) — replaced the single-sentence ban on
+    server-side session cookies with an explicit definition of a compliant Next.js BFF
+    session-cookie pattern (httpOnly/Secure/SameSite cookie holding the refresh token, owned
+    exclusively by a server-side proxy layer, JWT claims remain the source of truth for
+    identity/role, access token stays client-memory-only).
 
 Templates status:
-  - .specify/templates/plan-template.md  ✅ No update required — Constitution Check gate remains
-                                            a generic placeholder; no new gate needed for a
-                                            library-choice convention.
+  - .specify/templates/plan-template.md  ✅ No update required — Constitution Check gate remains a
+                                            generic placeholder; the expanded rule is evaluated the
+                                            same way (PASS/FAIL per feature), no new gate row needed.
   - .specify/templates/spec-template.md  ✅ No update required.
   - .specify/templates/tasks-template.md ✅ No update required.
-  - CLAUDE.md                            ✅ No update required.
+  - CLAUDE.md                            ✅ No update required — points at the active plan.md, not
+                                            principle text.
   - .specify/templates/commands/*.md     ✅ N/A — directory does not exist in this workspace.
 
-Deferred items (carried over from 1.0.0):
+Deferred items (carried over from 1.1.0):
   - Testing principle: ADR-TONG has no accepted testing decisions yet (mirrors the same gap in
     the sibling API constitution). Marked with TODO(TESTING_PRINCIPLE) below.
-  - Styling library (CSS framework/engine) choice: still not mandated — only the icon library was
-    specified in this amendment. Left to each app's plan.md Technical Context.
+  - Styling library (CSS framework/engine) choice: still not mandated. Left to each app's plan.md
+    Technical Context.
+
+Follow-up (not part of this command's scope, flagged for the user):
+  - specs/001-domain-service-layer/plan.md's Constitution Check row for Principle VI was written
+    against the *previous* wording (justified via interpretation rather than an explicit rule).
+    Consider refreshing that row's note to cite this amendment directly now that the pattern is
+    formally sanctioned, closing out /speckit-analyze finding D1.
 -->
 
 # Game Hub Webapp Constitution
@@ -103,7 +119,27 @@ The webapp MUST honor the auth and realtime contracts established by the API sid
 
 **Rules:**
 - The webapp MUST treat backend-issued JWT access/refresh tokens as the sole authentication
-  mechanism; it MUST NOT implement or depend on server-side session cookies for auth state.
+  mechanism. It MUST NOT implement a traditional server-side session store (an opaque session ID
+  mapped to server-held user/session state, looked up on each request) as a substitute for the
+  JWT — identity and role/permission checks MUST always be derived from the JWT's own
+  signature/claims, never from a session-store lookup.
+- The backend's login/refresh endpoints return both the access and refresh token as plain JSON and
+  set no cookies of their own; the raw refresh token MUST NEVER be exposed to or readable by
+  client-side JavaScript. To satisfy both constraints, the webapp MUST hold the refresh token
+  behind a **Next.js BFF (Backend-for-Frontend) session-cookie layer**: a server-side proxy (Next.js
+  Route Handlers) that is the sole holder of the refresh token, storing it in a first-party
+  `httpOnly`, `Secure`, `SameSite=Strict` cookie, and the sole caller of the backend's
+  token-refresh endpoint. This cookie is a **transport/storage detail for the JWT**, not a
+  session-store auth scheme, and is compliant with the rule above only when: (a) no server-side
+  session state beyond the token itself is stored (no session table/cache keyed by the cookie),
+  (b) the JWT's own claims — not a session lookup — remain the source of truth for identity/role,
+  and (c) client-side code never reads or writes this cookie directly. The short-lived access
+  token MUST still be delivered to and held only in client-side memory (never persisted to
+  `localStorage`, `sessionStorage`, or any cookie readable by JS); the BFF layer re-issues it via
+  the refresh flow when it expires.
+  *(amended following `/speckit-analyze` on feature `001-domain-service-layer`, which surfaced a
+  literal-text ambiguity between this rule and a Next.js BFF proxy pattern already designed for
+  that feature's authentication package)*
 - Any countdown, deadline, or time-limited UI element MUST render based on the deadline timestamp
   returned by the API. The client's local clock MUST NEVER be treated as the source of truth for
   expiry/timing logic.
@@ -143,4 +179,4 @@ coverage gates), they MUST be added here and reflected in `.specify/templates/ta
 - **Complexity justification**: Any deviation from a MUST rule in this constitution requires an
   explicit justification entry in the `Complexity Tracking` table of `plan.md`.
 
-**Version**: 1.1.0 | **Ratified**: 2026-07-02 | **Last Amended**: 2026-07-02
+**Version**: 1.2.0 | **Ratified**: 2026-07-02 | **Last Amended**: 2026-07-02
