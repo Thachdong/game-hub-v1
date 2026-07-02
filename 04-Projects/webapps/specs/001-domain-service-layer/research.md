@@ -62,6 +62,18 @@ Alternatives considered.
 
 ## 5. Session storage & the BFF correction
 
+> **SUPERSEDED 2026-07-02**: The decision below (a hand-rolled Next.js BFF proxy layer) was
+> implemented as `packages/auth-service` and then removed. Decided directly with the user:
+> session/token lifecycle is now delegated to **NextAuth (Auth.js)**, configured inside the future
+> `apps/*` Next.js app via a `Credentials`-style provider wrapping the backend's own
+> Google-OAuth-and-JWT-issuance flow (NextAuth is not used as an independent Google OAuth
+> provider). Rationale: a hand-rolled cookie/session layer duplicates functionality NextAuth
+> already provides (encrypted session cookie, refresh-rotation callback, CSRF handling) with no
+> compensating benefit once the backend still owns the actual OAuth exchange either way. See
+> constitution v2.0.0 Principle VI for the current rule. The analysis below is kept for historical
+> context on the underlying constraint (backend sets no cookies, refresh token must stay
+> server-only) that any solution — hand-rolled or NextAuth — still has to satisfy.
+
 - **Decision**: The access token lives only in an in-memory client-side store (module-level, not
   persisted). The refresh token is **never held by client-side service functions at all** — it is
   owned exclusively by a small server-side proxy layer inside the webapp (Next.js Route Handlers,

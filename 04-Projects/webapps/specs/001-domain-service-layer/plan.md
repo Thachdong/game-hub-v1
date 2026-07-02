@@ -10,16 +10,21 @@
 ## Summary
 
 Build a typed TypeScript service layer that mediates all webapp ↔ backend-API communication,
-organized into five independently consumable Turborepo packages (authentication, account,
-profiles, admin, game-caro) plus a shared `service-core` package. Every exported function wraps
-an axios call through a higher-order function (`withServiceResult`) that normalizes the result
-into one discriminated-union shape (`ServiceResult<T>`), with explicit input/output types sourced
-from `04-Projects/api/openapi.yml`. Planning surfaced one correction to the spec: the refresh
-token cannot be held in a backend-set httpOnly cookie (the backend transmits it as plain JSON and
-sets no cookies) and the constitution forbids server-side session cookies as the auth mechanism —
-resolved by giving only the authentication package a small server-side proxy (BFF) layer that owns
-a first-party httpOnly cookie, keeping the refresh token out of client-side JavaScript entirely
-while leaving the backend contract untouched.
+organized into independently consumable Turborepo packages (account, profiles, admin, game-caro)
+plus a shared `service-core` package. Every exported function wraps an axios call through a
+higher-order function (`withServiceResult`) that normalizes the result into one discriminated-union
+shape (`ServiceResult<T>`), with explicit input/output types sourced from
+`04-Projects/api/openapi.yml`.
+
+> **SUPERSEDED 2026-07-02**: Planning originally surfaced a correction to the spec — the refresh
+> token cannot be held in a backend-set httpOnly cookie (the backend transmits it as plain JSON
+> and sets no cookies), resolved by a hand-rolled `auth-service` package with a small server-side
+> proxy (BFF) layer owning a first-party httpOnly cookie. That package was implemented, then
+> removed: session/token lifecycle is now delegated to **NextAuth (Auth.js)**, configured inside
+> the future `apps/*` Next.js app (via a `Credentials`-style provider wrapping the backend's own
+> Google-OAuth-and-JWT-issuance flow), decided directly with the user after the hand-rolled version
+> was already built and working. See constitution v2.0.0 Principle VI and research.md §5. This
+> feature now ships **four** domain packages (account, profiles, admin, game-caro), not five.
 
 ## Technical Context
 
@@ -65,7 +70,7 @@ consumed only by first-party webapp code in this repository, no external/public 
 | III. Atomic Design Component Architecture | **N/A for this feature** | No UI components are introduced. |
 | IV. Webapp/API Boundary via Service Interfaces | **PASS** | This feature *is* the service-interface layer: all request construction and response parsing live inside the six packages; nothing here calls `fetch`/axios from a component. |
 | V. Progressive Common Code Extraction (Rule of Two) | **PASS, justified** | `service-core` is created immediately rather than after a second consumer appears — but it already has five simultaneous consumers within this same change (the five domain packages), which is exactly the condition Principle V requires, not an anticipated future need. See Complexity Tracking (no exception needed; documented for traceability). |
-| VI. Client-Side Auth & Realtime Contract | **PASS** | The JWT access token remains the sole authentication artifact — the BFF's httpOnly cookie is a transport detail for the refresh token, not a server-side session scheme (no session state is stored, only the token itself). No countdown/deadline UI is rendered by this feature (it only returns `deadlineAt` as data). This feature is REST-only by design (spec.md Assumptions) and does not introduce polling as a realtime substitute — realtime features remain out of scope, to be built against WS/SSE in a follow-on feature. |
+| VI. Client-Side Auth & Realtime Contract | **SUPERSEDED 2026-07-02** | ~~The JWT access token remains the sole authentication artifact — the BFF's httpOnly cookie is a transport detail for the refresh token, not a server-side session scheme (no session state is stored, only the token itself).~~ `packages/auth-service` (the BFF implementation this row describes) was removed; session/token lifecycle is now delegated to NextAuth (Auth.js) per constitution v2.0.0 Principle VI. No countdown/deadline UI is rendered by this feature (it only returns `deadlineAt` as data). This feature is REST-only by design (spec.md Assumptions) and does not introduce polling as a realtime substitute — realtime features remain out of scope, to be built against WS/SSE in a follow-on feature. |
 
 No violations requiring a Complexity Tracking entry — see the table below for the one item worth
 recording for traceability even though it isn't a violation.
@@ -106,15 +111,9 @@ packages/
 │       ├── with-service-result.ts # the HOF
 │       └── retry.ts              # transient-failure retry/backoff policy
 │
-├── auth-service/
-│   ├── package.json
-│   └── src/
-│       ├── index.ts
-│       ├── client.ts             # browser-safe: getGoogleLoginUrl, getAccessToken,
-│       │                         # setAccessToken, refreshSession, logout
-│       ├── bff.ts                # server-only: exchangeGoogleCallback, rotateAccessToken,
-│       │                         # clearSession — for a future app's Route Handlers
-│       └── types.ts
+├── auth-service/                 # REMOVED 2026-07-02 — superseded by NextAuth (Auth.js),
+│                                  # delegated to the future apps/* Next.js app; see
+│                                  # constitution v2.0.0 Principle VI and research.md §5
 │
 ├── account-service/
 │   ├── package.json

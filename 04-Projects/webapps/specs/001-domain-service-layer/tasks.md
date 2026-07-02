@@ -71,7 +71,16 @@ packages can now be implemented in parallel.
 
 ---
 
-## Phase 3: User Story 1 - Authenticate and maintain a session (Priority: P1) 🎯 MVP
+## Phase 3: User Story 1 - Authenticate and maintain a session (Priority: P1) 🎯 MVP — REMOVED 2026-07-02
+
+> **REMOVED**: `@game-hub/auth-service` (T017-T025 below) was implemented, then removed. Decided
+> directly with the user: session/token lifecycle is now delegated to **NextAuth (Auth.js)**,
+> configured inside the future `apps/*` Next.js app, rather than a hand-rolled BFF package in this
+> workspace — see constitution v2.0.0 Principle VI, spec.md's Clarifications entry for
+> `2026-07-02`, and research.md §5. Checkboxes below are left `[X]` as a historical record of what
+> was built and validated (all tests passed) before removal — they do not describe current
+> workspace state. No replacement tasks are added here since NextAuth configuration belongs to
+> whichever future feature scaffolds `apps/*`.
 
 **Goal**: Deliver `@game-hub/auth-service` — Google login initiation, callback exchange, session
 refresh via the BFF proxy, and logout, per FR-007, FR-023, FR-024 and research.md §5.

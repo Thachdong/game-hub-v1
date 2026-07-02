@@ -9,7 +9,6 @@ communication for the Game Hub backend (`04-Projects/api`). See
 ```text
 packages/
 ├── service-core/       # shared: ServiceResult types, http client factory, retry policy, HOF
-├── auth-service/        # Google OAuth session flow (client.ts browser-safe, bff.ts server-only)
 ├── account-service/     # current account, games list
 ├── profiles-service/    # friends, notifications, reports, trust score
 ├── admin-service/       # game-admin assignment, report moderation (platform-wide)
@@ -17,10 +16,15 @@ packages/
 ```
 
 Each domain package depends on `@game-hub/service-core` via the pnpm `workspace:*` protocol and
-exposes exactly one public entry point (`src/index.ts`), except `auth-service`, which adds a
-`./bff` subpath export for server-only code — see its own section below. No package imports
-another domain package; a consuming app wires session state into each one independently via its
+exposes exactly one public entry point (`src/index.ts`). No package imports another domain
+package; a consuming app wires session state into each one independently via its
 `configure*Service` function (see "Wiring session state" below).
+
+**Note:** There is no `auth-service` package. Session/token lifecycle (Google login, refresh,
+logout) is delegated to **NextAuth (Auth.js)**, configured inside the future `apps/*` Next.js app
+— see `.specify/memory/constitution.md` v2.0.0 Principle VI and
+`specs/001-domain-service-layer/research.md` §5 for the history (a hand-rolled BFF package was
+built, then removed in favor of this).
 
 ## The `ServiceResult<T>` pattern
 
@@ -53,25 +57,23 @@ instead of a bare array; endpoints that don't paginate return a plain `T[]`.
 
 ## Wiring session state
 
-No `apps/*` webapp exists yet in this workspace, so each domain package (except `auth-service`,
-which owns its own token store) starts with a no-op access-token getter. A consuming app must call
-each package's `configure*Service` once at startup:
+No `apps/*` webapp exists yet in this workspace, so each domain package starts with a no-op
+access-token getter. A consuming app must call each package's `configure*Service` once at startup,
+wiring in a `getAccessToken`/`onUnauthenticated` pair sourced from **NextAuth** (e.g. `auth()` /
+`getServerSession()` server-side, or a `session` callback value client-side if a screen needs to
+call the backend directly — see constitution v2.0.0 Principle VI for the trade-offs):
 
 ```ts
-import { getAccessToken, handleSessionRefresh } from "@game-hub/auth-service";
 import { configureAccountService } from "@game-hub/account-service";
 
 configureAccountService({
   baseURL: process.env.NEXT_PUBLIC_GAME_HUB_API_BASE_URL,
-  getAccessToken,
-  onUnauthenticated: handleSessionRefresh, // renews the session on a 401, retries once
+  getAccessToken: () => session?.accessToken ?? null, // from NextAuth
+  onUnauthenticated: async () => {
+    /* trigger NextAuth's refresh-rotation flow, return the new access token or null */
+  },
 });
 ```
-
-`auth-service`'s own `refreshSession`/`logout` always call a same-origin proxy route (never the
-backend directly) so the refresh token never reaches client-side JS; `configureAuthService` from
-`@game-hub/auth-service/bff` sets the real backend base URL for the server-only exchange/rotate
-calls a Route Handler makes.
 
 ## Adding a new service function
 

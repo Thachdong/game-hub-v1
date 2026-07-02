@@ -1,5 +1,10 @@
 /**
- * Contract for `@game-hub/auth-service`.
+ * SUPERSEDED 2026-07-02: `@game-hub/auth-service` (implementing this contract) was removed.
+ * Session/token lifecycle is now delegated to NextAuth (Auth.js) inside the future `apps/*`
+ * Next.js app — see constitution v2.0.0 Principle VI and research.md §5. Kept for historical
+ * reference only; do not implement against this contract.
+ *
+ * Original contract for `@game-hub/auth-service`.
  *
  * Split in two: `client.ts` exports are safe to call from browser code. `bff.ts` exports must only
  * ever be invoked from server-side code (a Next.js Route Handler in whichever app consumes this

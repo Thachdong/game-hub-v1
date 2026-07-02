@@ -34,6 +34,18 @@
   safe `GET` requests. `POST`/`PUT`/`PATCH`/`DELETE` calls are never automatically retried by this
   policy, since several of them are not guaranteed safe to repeat (e.g., submitting a move,
   creating a match) — matching the resolution already adopted in research.md §6.
+- Q: (Revised 2026-07-02, decided directly with the user after implementation) The hand-rolled
+  Next.js BFF session-cookie layer (custom Route Handlers + a custom first-party httpOnly cookie,
+  built as the `auth-service` package's `bff.ts`/`client.ts`) was working and constitution-compliant
+  — should it stay, or be replaced? → A: Replaced with delegation to **NextAuth (Auth.js)**.
+  Rationale from the conversation: a hand-rolled cookie/session layer duplicates what NextAuth
+  already provides (encrypted session cookie, refresh-rotation callback pattern, CSRF handling),
+  and NextAuth doesn't require abandoning the backend's own Google-OAuth-and-JWT-issuance flow — it
+  wraps it via a `Credentials`-style provider rather than replacing it. Since NextAuth only runs
+  inside a Next.js app and no `apps/*` exists yet in this workspace, the `auth-service` package
+  (FR-007, FR-023 as originally written) was removed rather than reimplemented — session/token
+  wiring is deferred to whichever future feature scaffolds `apps/*`. See constitution v2.0.0,
+  Principle VI.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -56,6 +68,14 @@ that data access does not exist as a reusable layer, so each user story below re
 domain of the backend surface being made consumable through a consistent, typed service layer.
 
 ### User Story 1 - Authenticate and maintain a session (Priority: P1)
+
+> **SUPERSEDED 2026-07-02**: This story's originally-built `auth-service` package (a hand-rolled
+> BFF: `client.ts` + `bff.ts` + a custom httpOnly cookie) was removed in favor of delegating
+> session/token lifecycle to NextAuth (Auth.js) — see constitution v2.0.0, Principle VI, and the
+> Clarifications entry above. NextAuth only runs inside a Next.js app, so this story is no longer
+> satisfied by a `packages/*` package in this workspace; it will be re-scoped when a future feature
+> scaffolds `apps/*` and configures NextAuth. The story is kept below for historical context on
+> *what* needs solving, not *how*.
 
 As a webapp developer, I need a ready-made set of authentication service functions (start Google
 login, handle the OAuth callback, refresh an expired session) so that every screen in the app can
@@ -249,12 +269,16 @@ account/profiles/admin packages.
 - **FR-006**: The service layer MUST NOT require component or page code to construct request
   payloads or parse raw responses; those responsibilities live entirely inside the service
   function.
-- **FR-023**: The session's access token MUST be held only in memory at runtime on the client and
-  MUST NOT be written to `localStorage`, `sessionStorage`, or any other persistent client-side
-  storage. The refresh token MUST never be exposed to or readable by client-side JavaScript: it
-  MUST be held only behind a server-side proxy layer within the webapp, in a first-party httpOnly
-  cookie that the proxy layer alone reads to call the backend's refresh endpoint on the client's
-  behalf.
+- **FR-023** *(SUPERSEDED 2026-07-02 — see constitution v2.0.0 Principle VI)*: ~~The session's
+  access token MUST be held only in memory at runtime on the client and MUST NOT be written to
+  `localStorage`, `sessionStorage`, or any other persistent client-side storage. The refresh token
+  MUST never be exposed to or readable by client-side JavaScript: it MUST be held only behind a
+  server-side proxy layer within the webapp, in a first-party httpOnly cookie that the proxy layer
+  alone reads to call the backend's refresh endpoint on the client's behalf.~~ Session/token
+  lifecycle is now delegated to NextAuth (Auth.js); the refresh token still MUST NEVER be readable
+  by client-side JavaScript, and the access token, if ever exposed to client code via a NextAuth
+  `session` callback, MUST be treated with the same care as a plain client-memory token. See
+  constitution v2.0.0 Principle VI for the current rule.
 - **FR-024**: When a **safe (`GET`) request** fails due to a transient condition (network error,
   timeout, or 5xx response) rather than an authentication, authorization, or validation failure,
   the service layer MUST automatically retry the call a limited number of times with backoff
@@ -263,11 +287,15 @@ account/profiles/admin packages.
   not guarantee they are safe to repeat — a transient failure on a mutating call MUST be returned
   to the caller immediately as a typed failure, with no service-layer-initiated retry.
 
-**Authentication package**
+**Authentication package** *(SUPERSEDED 2026-07-02 — package removed, see constitution v2.0.0
+Principle VI)*
 
-- **FR-007**: The authentication service MUST provide functions to initiate third-party login,
+- **FR-007**: ~~The authentication service MUST provide functions to initiate third-party login,
   complete the login callback, and refresh an existing session, each typed per the corresponding
-  backend contract.
+  backend contract.~~ Session/token lifecycle (login initiation, OAuth callback handling, refresh)
+  is now delegated to NextAuth (Auth.js), configured inside the future `apps/*` Next.js app rather
+  than a standalone `packages/auth-service`. No FR-007 package exists in this workspace as of this
+  amendment.
 
 **Account package**
 
@@ -314,10 +342,11 @@ account/profiles/admin packages.
 ### Key Entities
 
 - **Session**: Represents an authenticated user's access/refresh token pair and its validity
-  state; produced by the authentication package and required by every other package's calls. The
-  access token exists only in memory on the client for the lifetime of the page/app session; the
-  refresh token is held in a first-party httpOnly cookie owned by a server-side proxy layer inside
-  the webapp and is never directly readable by client-side service functions.
+  state; required by every domain package's calls, but as of 2026-07-02 no longer produced by a
+  `packages/auth-service` in this workspace — session lifecycle is delegated to NextAuth (Auth.js)
+  inside the future `apps/*` Next.js app. The refresh token MUST remain unreadable by client-side
+  JavaScript; the access token's exposure to client code is a NextAuth `session`-callback
+  configuration choice, not an architectural given. See constitution v2.0.0 Principle VI.
 - **Account**: The signed-in user's core identity record (id, email, username, avatar).
 - **Game**: A platform-level catalog entry describing a playable game (e.g., Caro).
 - **Friend Relationship / Friend Request**: A connection or pending connection between two
@@ -366,17 +395,23 @@ account/profiles/admin packages.
   (WebSocket/SSE) required by the project constitution for notifications, live match state, and
   chat are treated as a separate, follow-on feature and are out of scope here.
 - **Session refresh is transparent to callers.** When a call fails solely due to an expired access
-  token and a valid refresh token is available, the service layer renews the session (via the
-  server-side proxy layer, see FR-023) and retries once before surfacing a failure, so individual
-  screens do not each implement retry logic.
-- **The authentication package has a server-side component.** Unlike the other four packages,
-  which are purely client-callable, the authentication package includes a small server-side proxy
-  layer within the webapp that is the sole holder of the refresh token and the only caller of the
-  backend's refresh endpoint. This was confirmed necessary during planning because the backend
-  contract transmits the refresh token as a plain JSON field with no cookie-setting mechanism, and
-  the constitution forbids the webapp from depending on server-side session cookies as the primary
-  auth mechanism — the proxy's cookie is a secure transport detail for the JWT, not a session-cookie
-  auth scheme; the JWT itself remains the sole authentication artifact.
+  token and a valid refresh token is available, the service layer renews the session and retries
+  once before surfacing a failure, so individual screens do not each implement retry logic. The
+  renewal mechanism itself (previously "via the server-side proxy layer, see FR-023") is now
+  NextAuth's refresh-rotation callback — see constitution v2.0.0 Principle VI.
+- **SUPERSEDED 2026-07-02**: ~~The authentication package has a server-side component. Unlike the
+  other four packages, which are purely client-callable, the authentication package includes a
+  small server-side proxy layer within the webapp that is the sole holder of the refresh token and
+  the only caller of the backend's refresh endpoint. This was confirmed necessary during planning
+  because the backend contract transmits the refresh token as a plain JSON field with no
+  cookie-setting mechanism, and the constitution forbids the webapp from depending on server-side
+  session cookies as the primary auth mechanism — the proxy's cookie is a secure transport detail
+  for the JWT, not a session-cookie auth scheme; the JWT itself remains the sole authentication
+  artifact.~~ Replaced by: session/token handling is delegated to NextAuth (Auth.js), configured
+  inside the future `apps/*` Next.js app — no bespoke server-side proxy package exists in this
+  workspace. NextAuth wraps, rather than replaces, the backend's own Google-OAuth-and-JWT-issuance
+  flow (via a `Credentials`-style provider), since the backend performs the actual OAuth exchange
+  and issues its own JWTs.
 - **Caro-specific admin operations live in the game-caro package, not the admin package.** The
   admin package is reserved for platform-wide administration (cross-game admin assignment, report
   moderation); Caro game-config administration and tournament-creator-request administration are

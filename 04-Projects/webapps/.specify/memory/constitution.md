@@ -1,45 +1,53 @@
 <!--
 SYNC IMPACT REPORT
 ==================
-Version change: 1.1.0 → 1.2.0
-Bump rationale: MINOR — Principle VI's session-handling rule is materially expanded: it previously
-banned "server-side session cookies" outright with no elaboration; it now explicitly defines and
-permits a specific compliant pattern (a Next.js BFF session cookie carrying the JWT tokens) with
-concrete conditions, closing a literal-text ambiguity flagged by /speckit-analyze on feature
-001-domain-service-layer. No principle removed or inverted — JWT-as-sole-authentication-mechanism
-still holds; this only clarifies what "server-side session cookie" excludes.
+Version change: 1.2.0 → 2.0.0
+Bump rationale: MAJOR — Principle VI's session-handling rule is redefined, not just expanded: the
+hand-rolled "Next.js BFF session-cookie layer" pattern (a bespoke server-side proxy owning a
+first-party httpOnly cookie, built as part of feature 001-domain-service-layer's `auth-service`
+package) is retired and replaced with a rule mandating delegation to **NextAuth (Auth.js)** for
+session/token lifecycle. This inverts the previous rule's concrete implementation (custom Route
+Handlers + custom cookie) even though the underlying constraint it serves — JWT as sole auth
+artifact, no independent session store, refresh token never client-JS-readable — is unchanged.
+Decided directly with the user in conversation on 001-domain-service-layer; the corresponding
+`packages/auth-service` implementation (client.ts, bff.ts, config.ts) was removed in the same
+change, since NextAuth cannot be configured without a Next.js app and no `apps/*` exists yet in
+this workspace — session/token wiring is deferred to whichever feature first scaffolds `apps/*`.
 
 Principles added: none (this amendment touches Principle VI's rule text, not the set of
 principles)
 
 Sections modified:
-  - Principle VI (Client-Side Auth & Realtime Contract) — replaced the single-sentence ban on
-    server-side session cookies with an explicit definition of a compliant Next.js BFF
-    session-cookie pattern (httpOnly/Secure/SameSite cookie holding the refresh token, owned
-    exclusively by a server-side proxy layer, JWT claims remain the source of truth for
-    identity/role, access token stays client-memory-only).
+  - Principle VI (Client-Side Auth & Realtime Contract) — replaced the Next.js BFF session-cookie
+    pattern (custom Route Handlers owning a first-party httpOnly cookie) with a rule delegating
+    session/token lifecycle to NextAuth (Auth.js), configured via a Credentials-style provider that
+    wraps the backend's own Google-OAuth-and-JWT-issuance flow (NextAuth is NOT used as an
+    independent Google OAuth provider, since the backend already performs that exchange and issues
+    its own JWTs). Added an explicit rule on the XSS-exposure trade-off when a NextAuth `session`
+    callback exposes the access token to client-side code.
 
 Templates status:
   - .specify/templates/plan-template.md  ✅ No update required — Constitution Check gate remains a
-                                            generic placeholder; the expanded rule is evaluated the
-                                            same way (PASS/FAIL per feature), no new gate row needed.
+                                            generic placeholder.
   - .specify/templates/spec-template.md  ✅ No update required.
   - .specify/templates/tasks-template.md ✅ No update required.
   - CLAUDE.md                            ✅ No update required — points at the active plan.md, not
                                             principle text.
   - .specify/templates/commands/*.md     ✅ N/A — directory does not exist in this workspace.
 
-Deferred items (carried over from 1.1.0):
+Deferred items (carried over from 1.2.0):
   - Testing principle: ADR-TONG has no accepted testing decisions yet (mirrors the same gap in
     the sibling API constitution). Marked with TODO(TESTING_PRINCIPLE) below.
   - Styling library (CSS framework/engine) choice: still not mandated. Left to each app's plan.md
     Technical Context.
+  - Actual NextAuth configuration (providers, callbacks, refresh-rotation logic) is not specified
+    here — it belongs in the plan.md Technical Context of whichever future feature scaffolds
+    `apps/*`, since NextAuth only runs inside a Next.js app.
 
 Follow-up (not part of this command's scope, flagged for the user):
-  - specs/001-domain-service-layer/plan.md's Constitution Check row for Principle VI was written
-    against the *previous* wording (justified via interpretation rather than an explicit rule).
-    Consider refreshing that row's note to cite this amendment directly now that the pattern is
-    formally sanctioned, closing out /speckit-analyze finding D1.
+  - specs/001-domain-service-layer/{spec,research,data-model}.md and contracts/auth-service.ts
+    were annotated with SUPERSEDED notes in the same change rather than rewritten, to preserve the
+    historical record of what was built and why it changed.
 -->
 
 # Game Hub Webapp Constitution
@@ -125,21 +133,28 @@ The webapp MUST honor the auth and realtime contracts established by the API sid
   signature/claims, never from a session-store lookup.
 - The backend's login/refresh endpoints return both the access and refresh token as plain JSON and
   set no cookies of their own; the raw refresh token MUST NEVER be exposed to or readable by
-  client-side JavaScript. To satisfy both constraints, the webapp MUST hold the refresh token
-  behind a **Next.js BFF (Backend-for-Frontend) session-cookie layer**: a server-side proxy (Next.js
-  Route Handlers) that is the sole holder of the refresh token, storing it in a first-party
-  `httpOnly`, `Secure`, `SameSite=Strict` cookie, and the sole caller of the backend's
-  token-refresh endpoint. This cookie is a **transport/storage detail for the JWT**, not a
-  session-store auth scheme, and is compliant with the rule above only when: (a) no server-side
-  session state beyond the token itself is stored (no session table/cache keyed by the cookie),
-  (b) the JWT's own claims — not a session lookup — remain the source of truth for identity/role,
-  and (c) client-side code never reads or writes this cookie directly. The short-lived access
-  token MUST still be delivered to and held only in client-side memory (never persisted to
-  `localStorage`, `sessionStorage`, or any cookie readable by JS); the BFF layer re-issues it via
-  the refresh flow when it expires.
-  *(amended following `/speckit-analyze` on feature `001-domain-service-layer`, which surfaced a
-  literal-text ambiguity between this rule and a Next.js BFF proxy pattern already designed for
-  that feature's authentication package)*
+  client-side JavaScript. To satisfy both constraints, session and token lifecycle (issuing,
+  storing, rotating, and clearing the backend's JWT access/refresh token pair) MUST be delegated
+  to **NextAuth (Auth.js)**, configured inside the Next.js app (`apps/*`) via a `Credentials`-style
+  provider that wraps the backend's own Google-OAuth-and-JWT-issuance flow. NextAuth MUST NOT be
+  configured as an independent Google OAuth provider for this purpose — the backend already
+  performs the OAuth exchange with Google and issues its own JWTs, so NextAuth's role is limited to
+  session/cookie transport for those JWTs, not identity federation. A hand-rolled BFF proxy layer
+  (bespoke Route Handlers plus a custom first-party cookie) MUST NOT be built from scratch for this
+  purpose when NextAuth already provides it. NextAuth's session cookie is a
+  **transport/storage detail for the backend's JWTs**, not an independent session-store auth
+  scheme, and remains compliant with the rule above only when the backend JWT's own claims — not a
+  NextAuth-side session lookup — remain the source of truth for identity/role.
+  Any webapp code that reads the access token out of a NextAuth `session` object (i.e. the
+  `session` callback is configured to expose it to client-side code) MUST treat that value with
+  the same care as a plain client-memory token: NextAuth's cookie encryption protects the
+  server-side session blob, not a field once copied into the client-visible session response.
+  Prefer keeping the access token server-side only (Route Handlers/Server Actions call the backend
+  on the client's behalf) unless a specific screen genuinely needs to call the backend directly
+  from client-side code.
+  *(amended 2026-07-02, superseding the 1.2.0 hand-rolled Next.js BFF session-cookie pattern
+  originally built for feature `001-domain-service-layer`'s `auth-service` package, which has been
+  removed; see that feature's spec.md/research.md for the historical record)*
 - Any countdown, deadline, or time-limited UI element MUST render based on the deadline timestamp
   returned by the API. The client's local clock MUST NEVER be treated as the source of truth for
   expiry/timing logic.
@@ -179,4 +194,4 @@ coverage gates), they MUST be added here and reflected in `.specify/templates/ta
 - **Complexity justification**: Any deviation from a MUST rule in this constitution requires an
   explicit justification entry in the `Complexity Tracking` table of `plan.md`.
 
-**Version**: 1.2.0 | **Ratified**: 2026-07-02 | **Last Amended**: 2026-07-02
+**Version**: 2.0.0 | **Ratified**: 2026-07-02 | **Last Amended**: 2026-07-02

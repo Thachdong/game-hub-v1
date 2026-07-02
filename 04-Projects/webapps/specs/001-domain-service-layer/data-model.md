@@ -21,7 +21,11 @@ feature exposes to callers (not the backend's internal persistence model).
   backend paginates; every service function's output type makes that explicit rather than
   guessing.*
 
-## Session (authentication package)
+## Session (authentication package) — SUPERSEDED 2026-07-02
+
+> The `packages/auth-service` implementation described below was removed; session/token lifecycle
+> is now delegated to NextAuth (Auth.js) inside the future `apps/*` Next.js app. See constitution
+> v2.0.0 Principle VI and research.md §5. Kept for historical reference.
 
 | Field | Type | Notes |
 |---|---|---|
