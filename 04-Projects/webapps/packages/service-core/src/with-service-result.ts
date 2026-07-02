@@ -77,6 +77,18 @@ export function withServiceResult<TInput, TOutput>(
       const response = await withRetry(spec.method, () =>
         client.request<ApiResponseEnvelope>({ method: spec.method, url, params, data: body })
       );
+
+      // A 204 (or otherwise empty body) never carries an ApiResponseDto envelope to unwrap —
+      // some backend DELETE endpoints document one despite the spec's declared output type.
+      if (response.status === 204 || !response.data) {
+        return {
+          ok: true,
+          data: undefined as TOutput,
+          statusCode: response.status,
+          message: "",
+        };
+      }
+
       return {
         ok: true,
         data: spec.mapResponse(response.data.data),

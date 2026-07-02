@@ -75,6 +75,20 @@ describe("withServiceResult", () => {
     }
   });
 
+  it("normalizes a 204 No Content response into ServiceSuccess with undefined data", async () => {
+    const { client, mock } = makeClient();
+    mock.onDelete("/things/1").reply(204);
+
+    const call = withServiceResult(client, {
+      method: "DELETE",
+      buildRequest: () => ({ url: "/things/1" }),
+      mapResponse: (data: unknown) => data,
+    });
+
+    const result = await call(undefined);
+    expect(result).toEqual({ ok: true, data: undefined, statusCode: 204, message: "" });
+  });
+
   it("reports NETWORK_ERROR when the request never reaches the server", async () => {
     const { client, mock } = makeClient();
     mock.onGet("/things/1").networkError();
