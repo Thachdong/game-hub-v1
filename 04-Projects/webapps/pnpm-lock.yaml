@@ -33,6 +33,12 @@ importers:
         specifier: workspace:*
         version: link:../service-core
     devDependencies:
+      '@types/node':
+        specifier: ^22.0.0
+        version: 22.20.0
+      axios-mock-adapter:
+        specifier: ^2.1.0
+        version: 2.1.0(axios@1.18.1)
       typescript:
         specifier: ^5.6.0
         version: 5.9.3

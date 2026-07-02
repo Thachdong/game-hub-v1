@@ -106,10 +106,10 @@ available games, per FR-008, FR-009.
 
 ### Implementation for User Story 2
 
-- [ ] T026 [P] [US2] Define `Account`, `Game` types per `contracts/account-service.ts` in `packages/account-service/src/types.ts`
-- [ ] T027 [US2] Implement `getCurrentAccount` (`GET /api/accounts/me`) using `withServiceResult` in `packages/account-service/src/index.ts` (depends on T026, `service-core`)
-- [ ] T028 [US2] Implement `listGames` (`GET /api/games`) in `packages/account-service/src/index.ts` (depends on T026)
-- [ ] T029 [P] [US2] Unit test: `getCurrentAccount`/`listGames` response mapping against mocked backend payloads in `packages/account-service/src/index.test.ts`
+- [X] T026 [P] [US2] Define `Account`, `Game` types per `contracts/account-service.ts` in `packages/account-service/src/types.ts`
+- [X] T027 [US2] Implement `getCurrentAccount` (`GET /api/accounts/me`) using `withServiceResult` in `packages/account-service/src/index.ts` (depends on T026, `service-core`)
+- [X] T028 [US2] Implement `listGames` (`GET /api/games`) in `packages/account-service/src/index.ts` (depends on T026)
+- [X] T029 [P] [US2] Unit test: `getCurrentAccount`/`listGames` response mapping against mocked backend payloads in `packages/account-service/src/index.test.ts`
 
 **Checkpoint**: User Stories 1 AND 2 both work independently.
 
