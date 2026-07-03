@@ -159,12 +159,12 @@ silently.
 
 **Purpose**: Validation and documentation spanning `apps/web`.
 
-- [ ] T034 [P] Add `apps/web/README.md` documenting the route-group structure, the NextAuth session shape, and how to add a new protected or public page
-- [ ] T035 Run `pnpm turbo run typecheck --filter=web` and fix any type errors (validates the Constitution Check's Principle IV/VI notes hold in code, not just in plan.md)
-- [ ] T036 Run `pnpm turbo run test --filter=web` and confirm every unit test passes
-- [ ] T037 Run `pnpm turbo run build --filter=web` and confirm the production build succeeds
+- [X] T034 [P] Add `apps/web/README.md` documenting the route-group structure, the NextAuth session shape, and how to add a new protected or public page
+- [X] T035 Run `pnpm turbo run typecheck --filter=web` and fix any type errors (validates the Constitution Check's Principle IV/VI notes hold in code, not just in plan.md)
+- [X] T036 Run `pnpm turbo run test --filter=web` and confirm every unit test passes
+- [X] T037 Run `pnpm turbo run build --filter=web` and confirm the production build succeeds
 - [ ] T038 Execute quickstart.md's manual smoke-test steps (§3–§6) against a running backend with the external `callbackUrl`/Google-Console config applied, and record the results
-- [ ] T039 Re-review `checklists/ux.md` (CHK001–CHK023) against the finished implementation and check off any items the implementation itself resolved beyond spec level
+- [X] T039 Re-review `checklists/ux.md` (CHK001–CHK023) against the finished implementation and check off any items the implementation itself resolved beyond spec level
 
 ---
 
