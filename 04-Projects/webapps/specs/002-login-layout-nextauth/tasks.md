@@ -146,10 +146,10 @@ silently.
 
 ### Implementation for User Story 4
 
-- [ ] T030 [P] [US4] Create the placeholder `apps/web/app/(public)/game-caro/page.tsx` (list view; renders for anonymous visitors, exposes a gated "join" action hook point per FR-009) (depends on T016)
-- [ ] T031 [P] [US4] Create the placeholder `apps/web/app/(public)/game-caro/[matchId]/page.tsx` (detail view; exposes gated "chat"/"report"/"play" action hook points per FR-009) (depends on T016)
-- [ ] T032 [US4] Implement a reusable `RequireSignIn` molecule — wraps a gated action, checks `useSession()`, and prompts sign-in (per FR-009) instead of invoking the action when anonymous **or when `session?.error === 'RefreshFailed'`** (FR-004) — in `apps/web/components/molecules/RequireSignIn.tsx`, used by T030/T031's gated actions (depends on T020)
-- [ ] T033 [P] [US4] Unit test: `RequireSignIn` prompts sign-in for an anonymous visitor and allows the wrapped action through for a signed-in visitor, given a mocked `useSession()` in `apps/web/components/molecules/RequireSignIn.test.tsx` (depends on T032)
+- [X] T030 [P] [US4] Create the placeholder `apps/web/app/(public)/game-caro/page.tsx` (list view; renders for anonymous visitors, exposes a gated "join" action hook point per FR-009) (depends on T016)
+- [X] T031 [P] [US4] Create the placeholder `apps/web/app/(public)/game-caro/[matchId]/page.tsx` (detail view; exposes gated "chat"/"report"/"play" action hook points per FR-009) (depends on T016)
+- [X] T032 [US4] Implement a reusable `RequireSignIn` molecule — wraps a gated action, checks `useSession()`, and prompts sign-in (per FR-009) instead of invoking the action when anonymous **or when `session?.error === 'RefreshFailed'`** (FR-004) — in `apps/web/components/molecules/RequireSignIn.tsx`, used by T030/T031's gated actions (depends on T020)
+- [X] T033 [P] [US4] Unit test: `RequireSignIn` prompts sign-in for an anonymous visitor and allows the wrapped action through for a signed-in visitor, given a mocked `useSession()` in `apps/web/components/molecules/RequireSignIn.test.tsx` (depends on T032)
 
 **Checkpoint**: All four user stories are independently functional — quickstart.md §3–§5 all pass.
 
