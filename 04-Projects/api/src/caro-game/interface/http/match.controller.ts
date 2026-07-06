@@ -44,6 +44,8 @@ interface AuthenticatedRequest extends Request {
   user: { sub: string };
 }
 
+type OptionallyAuthenticatedRequest = Request & { user?: { sub: string } | null };
+
 @ApiTags('Caro — Matches')
 @Controller('caro/matches')
 export class MatchController {
@@ -183,8 +185,11 @@ export class MatchController {
   @ApiOperation({ summary: 'Get full match state including moves (no authentication required for public matches)' })
   @ApiDataResponse(MatchStateDto)
   @ApiErrorResponse(HttpStatus.NOT_FOUND, 'Match not found')
-  async getState(@Param('id', ParseUUIDPipe) id: string): Promise<MatchStateDto> {
-    const { match, moves } = await this.getMatchState.execute(id);
+  async getState(
+    @Req() req: OptionallyAuthenticatedRequest,
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<MatchStateDto> {
+    const { match, moves } = await this.getMatchState.execute(id, req.user?.sub);
     return this.toMatchStateDto(match, moves);
   }
 
@@ -193,8 +198,11 @@ export class MatchController {
   @ApiOperation({ summary: 'Get all moves for a match (no authentication required for public matches)' })
   @ApiDataResponse(MoveDto, { isArray: true })
   @ApiErrorResponse(HttpStatus.NOT_FOUND, 'Match not found')
-  async getMoves(@Param('id', ParseUUIDPipe) id: string): Promise<MoveDto[]> {
-    const { moves } = await this.getMatchState.execute(id);
+  async getMoves(
+    @Req() req: OptionallyAuthenticatedRequest,
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<MoveDto[]> {
+    const { moves } = await this.getMatchState.execute(id, req.user?.sub);
     return moves.map(this.toMoveDto);
   }
 
