@@ -104,7 +104,7 @@ navigates to `/game-${slug}/profile` (quickstart.md Scenarios 3–5).
 
 ### Tests for User Story 2
 
-- [ ] T012 [US2] Write `app/(protected)/account/page.test.tsx`: mocks `getCurrentAccount` and
+- [X] T012 [US2] Write `app/(protected)/account/page.test.tsx`: mocks `getCurrentAccount` and
       `listGames`, and asserts (a) username/email/avatar render, (b) an account whose
       `listGames()` result has no `hasProfile: true` entries renders the "no profile yet" message
       and zero cards, and (c) an account with some `hasProfile: true` entries renders exactly one
@@ -112,7 +112,7 @@ navigates to `/game-${slug}/profile` (quickstart.md Scenarios 3–5).
 
 ### Implementation for User Story 2
 
-- [ ] T013 [US2] Implement `app/(protected)/account/page.tsx` (replaces the "Coming soon."
+- [X] T013 [US2] Implement `app/(protected)/account/page.tsx` (replaces the "Coming soon."
       placeholder): a Server Component that calls `ensureAccountServiceConfigured()`, then
       `getCurrentAccount()` and `listGames()`; renders the `Avatar` atom plus username/email at
       the top; filters `listGames()`'s result to `hasProfile === true` and renders `GameGrid` (via
