@@ -20,7 +20,8 @@
 
 **Purpose**: Establish the "before" baseline so the fix's effect is provable.
 
-- [ ] T001 Run [quickstart.md](quickstart.md) steps 1, 3, and 4 against the current (unmodified) app and record the actual responses — expect `401` on `GET /caro/matches/lobby`, `GET /caro/matches/:id`, and `GET /caro/matches/:id/moves` with no `Authorization` header, and `401` on the same lobby call with an expired/invalid token. This confirms the exact gap being closed.
+- [X] T001 Run [quickstart.md](quickstart.md) steps 1, 3, and 4 against the current (unmodified) app and record the actual responses — expect `401` on `GET /caro/matches/lobby`, `GET /caro/matches/:id`, and `GET /caro/matches/:id/moves` with no `Authorization` header, and `401` on the same lobby call with an expired/invalid token. This confirms the exact gap being closed.
+  - **Result (2026-07-07, live run against local app)**: `GET /api/caro/matches/lobby` → `401` (no header); `GET /api/caro/matches/:id` (any id) → `401`; `GET /api/caro/matches/lobby` with a malformed/invalid-signature token → `401`; `GET /api/caro/tournaments` → `200` (already public, as expected). Baseline confirmed.
 
 ---
 
