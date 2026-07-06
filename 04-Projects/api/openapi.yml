@@ -1211,7 +1211,7 @@ paths:
   /api/caro/matches/lobby:
     get:
       operationId: MatchController_lobby
-      summary: List open public matches in the lobby
+      summary: List open public matches in the lobby (no authentication required)
       parameters: []
       responses:
         '200':
@@ -1226,27 +1226,12 @@ paths:
                         type: array
                         items:
                           $ref: '#/components/schemas/LobbyMatchDto'
-        '401':
-          description: Missing or expired JWT
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: '#/components/schemas/ApiResponseDto'
-                  - properties:
-                      statusCode:
-                        example: 401
-                      data:
-                        nullable: true
-                        example: null
       tags:
         - Caro — Matches
-      security:
-        - bearer: []
   /api/caro/matches:
     post:
       operationId: MatchController_create
-      summary: Create a new match
+      summary: Create a new match (authentication required)
       parameters: []
       requestBody:
         required: true
@@ -1298,7 +1283,7 @@ paths:
   /api/caro/matches/{id}/join:
     post:
       operationId: MatchController_join
-      summary: Join a public lobby match
+      summary: Join a public lobby match (authentication required)
       parameters:
         - name: id
           required: true
@@ -1349,7 +1334,7 @@ paths:
   /api/caro/matches/{id}:
     delete:
       operationId: MatchController_cancel
-      summary: Cancel a match (creator only, before it starts)
+      summary: Cancel a match (creator only, before it starts; authentication required)
       parameters:
         - name: id
           required: true
@@ -1399,7 +1384,9 @@ paths:
         - bearer: []
     get:
       operationId: MatchController_getState
-      summary: Get full match state including moves
+      summary: >-
+        Get full match state including moves (no authentication required for
+        public matches)
       parameters:
         - name: id
           required: true
@@ -1432,12 +1419,10 @@ paths:
                         example: null
       tags:
         - Caro — Matches
-      security:
-        - bearer: []
   /api/caro/matches/{id}/leave:
     post:
       operationId: MatchController_leave
-      summary: Leave a match before it starts (second player)
+      summary: Leave a match before it starts (second player; authentication required)
       parameters:
         - name: id
           required: true
@@ -1488,7 +1473,7 @@ paths:
   /api/caro/matches/{id}/invite:
     post:
       operationId: MatchController_invite
-      summary: Invite a friend to a private match
+      summary: Invite a friend to a private match (authentication required)
       parameters:
         - name: id
           required: true
@@ -1545,7 +1530,7 @@ paths:
   /api/caro/matches/{id}/invitation/respond:
     put:
       operationId: MatchController_respondToInvitation
-      summary: Accept or decline a match invitation
+      summary: Accept or decline a match invitation (authentication required)
       parameters:
         - name: id
           required: true
@@ -1602,7 +1587,9 @@ paths:
   /api/caro/matches/{id}/moves:
     get:
       operationId: MatchController_getMoves
-      summary: Get all moves for a match
+      summary: >-
+        Get all moves for a match (no authentication required for public
+        matches)
       parameters:
         - name: id
           required: true
@@ -1637,8 +1624,6 @@ paths:
                         example: null
       tags:
         - Caro — Matches
-      security:
-        - bearer: []
     post:
       operationId: GameplayController_move
       summary: Place a move on the board

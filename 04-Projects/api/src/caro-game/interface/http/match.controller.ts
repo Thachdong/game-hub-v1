@@ -15,6 +15,7 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
 import { ApiDataResponse, ApiErrorResponse } from '@common/decorators/api-response.decorator';
 import { JwtAuthGuard } from '../../../shared-auth/jwt-auth.guard';
+import { OptionalJwtGuard } from '../../../shared-auth/optional-jwt.guard';
 import { CreateMatchUseCase } from '../../application/use-cases/create-match.use-case';
 import { CancelMatchUseCase } from '../../application/use-cases/cancel-match.use-case';
 import { InvitePlayerUseCase } from '../../application/use-cases/invite-player.use-case';
@@ -44,8 +45,6 @@ interface AuthenticatedRequest extends Request {
 }
 
 @ApiTags('Caro — Matches')
-@ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
 @Controller('caro/matches')
 export class MatchController {
   constructor(
@@ -62,9 +61,9 @@ export class MatchController {
   // ── Lobby ─────────────────────────────────────────────────────────────────
 
   @Get('lobby')
-  @ApiOperation({ summary: 'List open public matches in the lobby' })
+  @UseGuards(OptionalJwtGuard)
+  @ApiOperation({ summary: 'List open public matches in the lobby (no authentication required)' })
   @ApiDataResponse(LobbyMatchDto, { isArray: true })
-  @ApiErrorResponse(HttpStatus.UNAUTHORIZED, 'Missing or expired JWT')
   async lobby(): Promise<LobbyMatchDto[]> {
     const matches = await this.getLobby.execute();
     return matches.map(this.toLobbyDto);
@@ -73,7 +72,9 @@ export class MatchController {
   // ── Create / join ─────────────────────────────────────────────────────────
 
   @Post()
-  @ApiOperation({ summary: 'Create a new match' })
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Create a new match (authentication required)' })
   @ApiDataResponse(CreateMatchResponseDto)
   @ApiErrorResponse(HttpStatus.CONFLICT, 'Player already in active match')
   @ApiErrorResponse(HttpStatus.NOT_FOUND, 'Config not found')
@@ -90,7 +91,9 @@ export class MatchController {
   }
 
   @Post(':id/join')
-  @ApiOperation({ summary: 'Join a public lobby match' })
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Join a public lobby match (authentication required)' })
   @ApiDataResponse(JoinMatchResponseDto)
   @ApiErrorResponse(HttpStatus.CONFLICT, 'Match not open or player already active')
   @ApiErrorResponse(HttpStatus.NOT_FOUND, 'Match not found')
@@ -104,7 +107,9 @@ export class MatchController {
   // ── Cancel / leave ────────────────────────────────────────────────────────
 
   @Delete(':id')
-  @ApiOperation({ summary: 'Cancel a match (creator only, before it starts)' })
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Cancel a match (creator only, before it starts; authentication required)' })
   @ApiDataResponse(CancelOrLeaveResponseDto)
   @ApiErrorResponse(HttpStatus.FORBIDDEN, 'Not the match creator')
   @ApiErrorResponse(HttpStatus.CONFLICT, 'Match cannot be cancelled in current status')
@@ -117,7 +122,9 @@ export class MatchController {
   }
 
   @Post(':id/leave')
-  @ApiOperation({ summary: 'Leave a match before it starts (second player)' })
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Leave a match before it starts (second player; authentication required)' })
   @ApiDataResponse(CancelOrLeaveResponseDto)
   @ApiErrorResponse(HttpStatus.FORBIDDEN, 'Not a participant')
   @ApiErrorResponse(HttpStatus.CONFLICT, 'Match not in waiting_for_start status')
@@ -132,7 +139,9 @@ export class MatchController {
   // ── Invite ────────────────────────────────────────────────────────────────
 
   @Post(':id/invite')
-  @ApiOperation({ summary: 'Invite a friend to a private match' })
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Invite a friend to a private match (authentication required)' })
   @ApiDataResponse(InviteResponseDto)
   @ApiErrorResponse(HttpStatus.UNPROCESSABLE_ENTITY, 'Not friends with target player')
   @ApiErrorResponse(HttpStatus.FORBIDDEN, 'Not the match creator')
@@ -149,7 +158,9 @@ export class MatchController {
   }
 
   @Put(':id/invitation/respond')
-  @ApiOperation({ summary: 'Accept or decline a match invitation' })
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Accept or decline a match invitation (authentication required)' })
   @ApiDataResponse(InvitationRespondResponseDto)
   @ApiErrorResponse(HttpStatus.CONFLICT, 'Player already in active match')
   @ApiErrorResponse(HttpStatus.NOT_FOUND, 'Match not found')
@@ -168,7 +179,8 @@ export class MatchController {
   // ── State / moves ─────────────────────────────────────────────────────────
 
   @Get(':id')
-  @ApiOperation({ summary: 'Get full match state including moves' })
+  @UseGuards(OptionalJwtGuard)
+  @ApiOperation({ summary: 'Get full match state including moves (no authentication required for public matches)' })
   @ApiDataResponse(MatchStateDto)
   @ApiErrorResponse(HttpStatus.NOT_FOUND, 'Match not found')
   async getState(@Param('id', ParseUUIDPipe) id: string): Promise<MatchStateDto> {
@@ -177,7 +189,8 @@ export class MatchController {
   }
 
   @Get(':id/moves')
-  @ApiOperation({ summary: 'Get all moves for a match' })
+  @UseGuards(OptionalJwtGuard)
+  @ApiOperation({ summary: 'Get all moves for a match (no authentication required for public matches)' })
   @ApiDataResponse(MoveDto, { isArray: true })
   @ApiErrorResponse(HttpStatus.NOT_FOUND, 'Match not found')
   async getMoves(@Param('id', ParseUUIDPipe) id: string): Promise<MoveDto[]> {
