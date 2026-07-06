@@ -216,8 +216,11 @@ no matches (the only legitimate remaining reference is `LoginCard.tsx`'s OAuth r
 **Purpose**: Final end-to-end validation across all four stories.
 
 - [ ] T018 Run quickstart.md Scenarios 1–5 end-to-end against a running backend, and confirm both
-  of its `grep`-based verification commands return no matches
-- [ ] T019 [P] Run `pnpm turbo run typecheck lint test --filter=web --filter=account-service
+  of its `grep`-based verification commands return no matches (**not run** — no live backend/browser
+  available in the implementing environment; the `grep`-based checks were run directly and pass —
+  see the Phase 6 commit — but the 5 manual browser scenarios need a human or a running backend to
+  execute)
+- [X] T019 [P] Run `pnpm turbo run typecheck lint test --filter=web --filter=account-service
   --filter=profiles-service --filter=admin-service --filter=caro-service` and fix any failures
   surfaced by the above changes
 
