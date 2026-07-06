@@ -111,7 +111,7 @@ body, or the `/api/auth/session` payload.
 
 ### Implementation for User Story 1
 
-- [ ] T014 [US1] Update `apps/web/app/(public)/login/page.tsx`'s already-signed-in redirect check
+- [X] T014 [US1] Update `apps/web/app/(public)/login/page.tsx`'s already-signed-in redirect check
   to use `getSessionStatus()` instead of `auth()` (depends on T013)
 
 **Checkpoint**: User Story 1 is functional and independently testable per quickstart.md Scenario 1
@@ -132,17 +132,17 @@ exercised end to end.
 
 ### Implementation for User Story 2
 
-- [ ] T015 [US2] Replace `useSession`/`signOut` in `apps/web/components/organisms/AppNav.tsx` with
+- [X] T015 [US2] Replace `useSession`/`signOut` in `apps/web/components/organisms/AppNav.tsx` with
   `useAuthSession()` (`isSignedIn`/`account`) and a `logout()` call (depends on T013)
-- [ ] T016 [P] [US2] Update `apps/web/components/organisms/AppNav.test.tsx` to mock
+- [X] T016 [P] [US2] Update `apps/web/components/organisms/AppNav.test.tsx` to mock
   `useAuthSession()` instead of `useSession()` (depends on T015)
-- [ ] T017 [US2] Replace `useSession` in `apps/web/components/molecules/RequireSignIn.tsx` with
+- [X] T017 [US2] Replace `useSession` in `apps/web/components/molecules/RequireSignIn.tsx` with
   `useAuthSession()` (depends on T013)
-- [ ] T018 [P] [US2] Update `apps/web/components/molecules/RequireSignIn.test.tsx` to mock
+- [X] T018 [P] [US2] Update `apps/web/components/molecules/RequireSignIn.test.tsx` to mock
   `useAuthSession()` instead of `useSession()` (depends on T017)
-- [ ] T019 [US2] Update `apps/web/app/(protected)/layout.tsx`'s redirect gate to call
+- [X] T019 [US2] Update `apps/web/app/(protected)/layout.tsx`'s redirect gate to call
   `getSessionStatus()` instead of `auth()` (depends on T013)
-- [ ] T020 [P] [US2] Update `apps/web/app/(protected)/layout.test.tsx` to mock
+- [X] T020 [P] [US2] Update `apps/web/app/(protected)/layout.test.tsx` to mock
   `getSessionStatus()` instead of `auth()` (depends on T019)
 
 **Checkpoint**: User Stories 1 and 2 both work independently — quickstart.md Scenarios 1–2 pass.

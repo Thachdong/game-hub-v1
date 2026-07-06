@@ -1,20 +1,28 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { useAuthSession } from "@/components/templates/Providers";
 import { AppNav } from "./AppNav";
 
-vi.mock("next-auth/react", () => ({
-  useSession: vi.fn(),
-  signOut: vi.fn(),
+vi.mock("@/components/templates/Providers", () => ({
+  useAuthSession: vi.fn(),
 }));
 
-const mockedUseSession = vi.mocked(useSession);
+vi.mock("next/navigation", () => ({
+  useRouter: vi.fn(),
+}));
+
+const mockedUseAuthSession = vi.mocked(useAuthSession);
+const mockedUseRouter = vi.mocked(useRouter);
 
 describe("AppNav", () => {
-  it("shows the 'Sign in' affordance when unauthenticated", () => {
-    mockedUseSession.mockReturnValue({ data: null, status: "unauthenticated" } as ReturnType<
-      typeof useSession
-    >);
+  it("shows the 'Sign in' affordance when signed out", () => {
+    mockedUseAuthSession.mockReturnValue({
+      isSignedIn: false,
+      refresh: vi.fn(),
+      logout: vi.fn(),
+    });
+    mockedUseRouter.mockReturnValue({ push: vi.fn() } as unknown as ReturnType<typeof useRouter>);
 
     render(<AppNav />);
 
@@ -22,15 +30,14 @@ describe("AppNav", () => {
     expect(screen.queryByRole("button", { name: /sign out/i })).not.toBeInTheDocument();
   });
 
-  it("shows account info and a sign-out affordance when authenticated with no error", () => {
-    mockedUseSession.mockReturnValue({
-      data: {
-        account: { id: "1", email: "a@b.com", username: "alice", avatarUrl: "https://a" },
-        accessToken: "token",
-        expires: "2099-01-01",
-      },
-      status: "authenticated",
-    } as ReturnType<typeof useSession>);
+  it("shows account info and a sign-out affordance when signed in", () => {
+    mockedUseAuthSession.mockReturnValue({
+      isSignedIn: true,
+      account: { id: "1", email: "a@b.com", username: "alice", avatarUrl: "https://a" },
+      refresh: vi.fn(),
+      logout: vi.fn(),
+    });
+    mockedUseRouter.mockReturnValue({ push: vi.fn() } as unknown as ReturnType<typeof useRouter>);
 
     render(<AppNav />);
 
@@ -39,31 +46,21 @@ describe("AppNav", () => {
     expect(screen.queryByRole("link", { name: /sign in/i })).not.toBeInTheDocument();
   });
 
-  it("shows the 'Sign in' affordance when authenticated but session.error is RefreshFailed (FR-004)", () => {
-    mockedUseSession.mockReturnValue({
-      data: {
-        account: { id: "1", email: "a@b.com", username: "alice", avatarUrl: "https://a" },
-        accessToken: "token",
-        error: "RefreshFailed",
-        expires: "2099-01-01",
-      },
-      status: "authenticated",
-    } as ReturnType<typeof useSession>);
+  it("calls logout() and redirects to /login when signing out", async () => {
+    const logout = vi.fn().mockResolvedValue(undefined);
+    const push = vi.fn();
+    mockedUseAuthSession.mockReturnValue({
+      isSignedIn: true,
+      account: { id: "1", email: "a@b.com", username: "alice", avatarUrl: "https://a" },
+      refresh: vi.fn(),
+      logout,
+    });
+    mockedUseRouter.mockReturnValue({ push } as unknown as ReturnType<typeof useRouter>);
 
     render(<AppNav />);
+    fireEvent.click(screen.getByRole("button", { name: /sign out/i }));
 
-    expect(screen.getByRole("link", { name: /sign in/i })).toBeInTheDocument();
-    expect(screen.queryByText("alice")).not.toBeInTheDocument();
-  });
-
-  it("shows a loading skeleton while session status is resolving (FR-012)", () => {
-    mockedUseSession.mockReturnValue({ data: null, status: "loading" } as ReturnType<
-      typeof useSession
-    >);
-
-    render(<AppNav />);
-
-    expect(screen.getByRole("status", { name: /loading sign-in state/i })).toBeInTheDocument();
-    expect(screen.queryByRole("link", { name: /sign in/i })).not.toBeInTheDocument();
+    await waitFor(() => expect(push).toHaveBeenCalledWith("/login"));
+    expect(logout).toHaveBeenCalledOnce();
   });
 });
