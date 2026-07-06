@@ -20,11 +20,14 @@ exposes exactly one public entry point (`src/index.ts`). No package imports anot
 package; a consuming app wires session state into each one independently via its
 `configure*Service` function (see "Wiring session state" below).
 
-**Note:** There is no `auth-service` package. Session/token lifecycle (Google login, refresh,
-logout) is delegated to **NextAuth (Auth.js)**, configured inside the future `apps/*` Next.js app
-— see `.specify/memory/constitution.md` v2.0.0 Principle VI and
-`specs/001-domain-service-layer/research.md` §5 for the history (a hand-rolled BFF package was
-built, then removed in favor of this).
+**Note:** There is no `auth-service` package. Session/token lifecycle (login, refresh, logout) is
+implemented as hand-rolled Next.js Route Handlers inside each `apps/*` Next.js app: a login route
+calls the backend's `/login` API and sets the returned access/refresh tokens as first-party
+httpOnly cookies, and a proxy route reads the access token from that cookie server-side to call
+backend resource endpoints on the client's behalf. NextAuth (Auth.js) is NOT used — see
+`.specify/memory/constitution.md` v3.0.0 Principle VI and
+`specs/001-domain-service-layer/research.md` §5 for the history of prior approaches that were
+tried and retired.
 
 ## The `ServiceResult<T>` pattern
 
@@ -57,20 +60,19 @@ instead of a bare array; endpoints that don't paginate return a plain `T[]`.
 
 ## Wiring session state
 
-No `apps/*` webapp exists yet in this workspace, so each domain package starts with a no-op
-access-token getter. A consuming app must call each package's `configure*Service` once at startup,
-wiring in a `getAccessToken`/`onUnauthenticated` pair sourced from **NextAuth** (e.g. `auth()` /
-`getServerSession()` server-side, or a `session` callback value client-side if a screen needs to
-call the backend directly — see constitution v2.0.0 Principle VI for the trade-offs):
+Each domain package starts with a no-op access-token getter. A consuming app must call each
+package's `configure*Service` once at startup, wiring in a `getAccessToken`/`onUnauthenticated`
+pair sourced from the webapp's own httpOnly cookie — read server-side inside a proxy Route Handler,
+never exposed to client-side code (see constitution v3.0.0 Principle VI):
 
 ```ts
 import { configureAccountService } from "@game-hub/account-service";
 
 configureAccountService({
   baseURL: process.env.NEXT_PUBLIC_GAME_HUB_API_BASE_URL,
-  getAccessToken: () => session?.accessToken ?? null, // from NextAuth
+  getAccessToken: () => readAccessTokenCookie(), // server-side only, from the httpOnly cookie
   onUnauthenticated: async () => {
-    /* trigger NextAuth's refresh-rotation flow, return the new access token or null */
+    /* call the webapp's own refresh route, which rotates the cookies; return the new access token or null */
   },
 });
 ```
