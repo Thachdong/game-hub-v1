@@ -57,31 +57,31 @@ the catalog empty, confirm the empty-state message renders instead (quickstart.m
 
 ### Tests for User Story 1
 
-- [ ] T004 [P] [US1] Write `components/molecules/GameCard.test.tsx`: renders a game's banner and
+- [X] T004 [P] [US1] Write `components/molecules/GameCard.test.tsx`: renders a game's banner and
       name, renders as a link to the `href` prop, and still renders the name (and stays a link)
       when the banner image errors (spec.md Edge Cases)
-- [ ] T005 [P] [US1] Write `components/molecules/EmptyState.test.tsx`: renders the given message
+- [X] T005 [P] [US1] Write `components/molecules/EmptyState.test.tsx`: renders the given message
       text
-- [ ] T006 [P] [US1] Write `components/organisms/GameGrid.test.tsx`: renders one `GameCard` per
+- [X] T006 [P] [US1] Write `components/organisms/GameGrid.test.tsx`: renders one `GameCard` per
       item in a non-empty `games` prop (using each game's `entryPath` as `href`), and renders
       `EmptyState` instead when `games` is empty
-- [ ] T007 [US1] Write `app/(public)/page.test.tsx`: mocks `listGames`, asserts the page renders a
+- [X] T007 [US1] Write `app/(public)/page.test.tsx`: mocks `listGames`, asserts the page renders a
       `GameGrid` populated from its result, and separately asserts an empty result renders the
       empty-state path
 
 ### Implementation for User Story 1
 
-- [ ] T008 [P] [US1] Implement `components/molecules/GameCard.tsx`: a `next/link` `Link` (given an
+- [X] T008 [P] [US1] Implement `components/molecules/GameCard.tsx`: a `next/link` `Link` (given an
       `href` prop) wrapping a banner `<img>` (plain `<img>`, per research.md §3 — mirrors the
       `Avatar` atom) and the game's name text
-- [ ] T009 [P] [US1] Implement `components/molecules/EmptyState.tsx`: a single centered text
+- [X] T009 [P] [US1] Implement `components/molecules/EmptyState.tsx`: a single centered text
       message component taking a `message: string` prop, styled per the constitution's fixed
       palette (`--color-text-secondary`)
-- [ ] T010 [US1] Implement `components/organisms/GameGrid.tsx`: takes a `games: Array<{ name:
+- [X] T010 [US1] Implement `components/organisms/GameGrid.tsx`: takes a `games: Array<{ name:
       string; bannerUrl: string; href: string }>` prop and an `emptyMessage: string` prop; renders
       a responsive grid of `GameCard` when `games` is non-empty, otherwise renders `EmptyState`
       with `emptyMessage` (depends on T008, T009)
-- [ ] T011 [US1] Implement `app/(public)/page.tsx` (new file — currently `/` 404s): a Server
+- [X] T011 [US1] Implement `app/(public)/page.tsx` (new file — currently `/` 404s): a Server
       Component that calls `ensureAccountServiceConfigured()` then `listGames()`, maps each result
       through `getGameLinkTarget(game).entryPath`, and renders `GameGrid` with an empty-state
       message for "no games available" (depends on T002, T003, T010)
