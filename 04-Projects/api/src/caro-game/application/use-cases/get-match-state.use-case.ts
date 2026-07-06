@@ -15,12 +15,22 @@ export class GetMatchStateUseCase {
     @Inject(MATCH_REPOSITORY_PORT) private readonly matchRepo: IMatchRepositoryPort,
   ) {}
 
-  async execute(matchId: string): Promise<MatchStateResult> {
+  async execute(matchId: string, requesterId?: string): Promise<MatchStateResult> {
     const [match, moves] = await Promise.all([
       this.matchRepo.findById(matchId),
       this.matchRepo.findMovesByMatchId(matchId),
     ]);
     if (!match) throw new MatchNotFoundError();
+
+    const isParticipant =
+      requesterId === match.creatorId ||
+      requesterId === match.playerXId ||
+      requesterId === match.playerOId;
+    if (match.visibility === 'private' && !isParticipant) {
+      // Same error as a genuinely missing match — never confirm a private match's existence.
+      throw new MatchNotFoundError();
+    }
+
     return { match, moves };
   }
 }
