@@ -123,11 +123,11 @@ out rather than seeing a raw/ambiguous error.
 
 ### Implementation for User Story 2
 
-- [ ] T008 [US2] Add a test case asserting that several concurrent `forwardToBackend` calls at the
+- [X] T008 [US2] Add a test case asserting that several concurrent `forwardToBackend` calls at the
   moment of token expiry result in exactly one `refreshSession()` call (reusing the existing
   refresh-token-keyed `inFlightRefreshes` dedup from `apps/web/lib/session.ts`, FR-008 carried over
   from `003`), in `apps/web/lib/proxy.test.ts` (depends on T006)
-- [ ] T009 [US2] Add a test case explicitly asserting that when `refreshSession()` resolves `null`,
+- [X] T009 [US2] Add a test case explicitly asserting that when `refreshSession()` resolves `null`,
   `forwardToBackend` returns the *synthesized* `401 { message: "Not signed in" }` rather than
   relaying the backend's own (possibly differently-shaped) `401` body — distinguishing "not signed
   in" from any other backend error, per FR-004 — in `apps/web/lib/proxy.test.ts` (depends on T006)
