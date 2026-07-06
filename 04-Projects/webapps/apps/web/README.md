@@ -1,9 +1,10 @@
 # web
 
-First `apps/*` package in this Turborepo workspace. Next.js App Router webapp with Google sign-in
-via NextAuth (Auth.js), delegating session/token lifecycle per
-`.specify/memory/constitution.md` v2.0.0 Principle VI. See
-`specs/002-login-layout-nextauth/` for the full spec, plan, and research behind this package.
+First `apps/*` package in this Turborepo workspace. Next.js App Router webapp with Google sign-in,
+session/token lifecycle implemented as hand-rolled Route Handlers plus first-party httpOnly
+cookies (constitution `.specify/memory/constitution.md` v3.1.0 Principle VI — **NextAuth (Auth.js)
+is NOT used**). See `specs/003-cookie-auth-migration/` for the migration off NextAuth and
+`specs/005-auth-proxy-refactor/` for the generic proxy-route mechanism described below.
 
 ## Route structure
 
@@ -17,9 +18,15 @@ app/
 │   ├── account/
 │   ├── tournament/
 │   └── admin/           # plain sign-in gate only — no Platform Admin role check yet
-└── api/auth/
-    ├── [...nextauth]/   # NextAuth's own handler
-    └── google/callback/ # proxies Google's OAuth callback to the backend (research.md §1)
+└── api/
+    ├── auth/
+    │   ├── google/callback/ # the sole login entry point — forwards Google's OAuth callback to
+    │   │                     # the backend, sets access_token/refresh_token as httpOnly cookies
+    │   ├── session/          # GET — client revalidation endpoint (SessionStatus)
+    │   └── logout/            # POST — clears both cookies
+    └── proxy/
+        └── [...path]/         # catch-all — the only way browser-initiated code reaches an
+                                 # authenticated backend resource (see below)
 ```
 
 `account`, `tournament`, `admin`, and the real content of `game-caro`/`game-caro/[matchId]` are
@@ -27,47 +34,59 @@ placeholders — their business logic ships in separate, future features (spec.m
 
 ## Session shape
 
-`useSession()` (client) / `auth()` (server) return:
+`getSessionStatus()` (server-only, `lib/session.ts`) is the single source of truth for "is this
+visitor signed in, and as whom":
 
 ```ts
-{
-  user: { name?, email?, image? },
-  account: { id, email, username, avatarUrl },
-  accessToken: string,       // exposed to client code — attach as `Authorization: Bearer` yourself
-  error?: "RefreshFailed",   // treat as signed-out if present (FR-004) — see below
-  expires: string,
+interface SessionStatus {
+  isSignedIn: boolean;
+  account?: { id: string; email: string; username: string; avatarUrl: string };
 }
 ```
 
-**Important**: `session.error === "RefreshFailed"` means the backend's refresh token is no longer
-valid, but NextAuth's own `status` still reports `"authenticated"` (it only reflects whether a
-session object exists, not this app-specific flag). Every place that branches on sign-in state
-(`AppNav`, `(protected)/layout.tsx`, `RequireSignIn`) checks `!session?.error` in addition to
-`status`/session presence — copy this pattern for any new component that needs to know if the
-visitor is really signed in.
+Neither the access token nor the refresh token is ever part of this shape, or of any other
+client-visible response — both live only as `httpOnly` cookies (`access_token`, `refresh_token`),
+read exclusively by server-side code (`lib/session.ts`, `lib/proxy.ts`). `GET /api/auth/session`
+returns this same shape as JSON for client-side revalidation; `POST /api/auth/logout` clears both
+cookies.
 
-`refreshToken` is never present on the client-visible session — only inside NextAuth's
-server-only encrypted token (see `lib/auth.ts`'s `jwt` callback).
+## Reaching an authenticated backend resource
 
-## Wiring a new domain-service call from a Client Component
+There are two supported ways for `apps/web` code to reach a backend resource on a signed-in
+visitor's behalf — pick based on where the call originates, never invent a third:
 
-The existing packages (`@game-hub/account-service`, `@game-hub/profiles-service`,
-`@game-hub/admin-service`, `@game-hub/caro-service`) are **Client-Component-only** — they hold
-session/config state in module-level variables, which is safe in the browser (one JS instance per
-tab) but would leak between users if ever called from a Server Component in this shared Node.js
-process. Always call them from a `"use client"` component, wiring the session in once:
+**From a Server Component** (e.g. the account page's data fetching): read the `access_token`
+cookie, call the matching `ensure*ServiceConfigured()` helper from `lib/session.ts` (currently
+`ensureAccountServiceConfigured` — see that file for the pattern), then call the domain-service
+package's typed function directly:
+
+```ts
+import { cookies } from "next/headers";
+import { getCurrentAccount } from "@game-hub/account-service";
+import { ACCESS_COOKIE_NAME, ensureAccountServiceConfigured } from "@/lib/session";
+
+const accessToken = (await cookies()).get(ACCESS_COOKIE_NAME)?.value ?? null;
+await ensureAccountServiceConfigured(accessToken);
+const result = await getCurrentAccount();
+```
+
+**From a Client Component**: never call a domain-service package with a client-held token —
+instead configure it once to point at the catch-all proxy route, with no token attached
+client-side at all (the proxy attaches the real one server-side):
 
 ```ts
 "use client";
-import { useSession } from "next-auth/react";
 import { configureAccountService, getCurrentAccount } from "@game-hub/account-service";
 
-const { data: session } = useSession();
-configureAccountService({
-  baseURL: process.env.NEXT_PUBLIC_GAME_HUB_API_BASE_URL,
-  getAccessToken: () => session?.accessToken ?? null,
-});
+configureAccountService({ baseURL: "/api/proxy", getAccessToken: () => null });
+const result = await getCurrentAccount(); // → forwarded through /api/proxy/[...path]
 ```
+
+Every domain-service package (`account-service`, `profiles-service`, `admin-service`,
+`caro-service`) accepts this identically — see
+`specs/005-auth-proxy-refactor/contracts/proxy-routes.md` for the full contract and
+`specs/005-auth-proxy-refactor/research.md` §4–§8 for why the proxy route itself is allowed to
+`fetch` the backend directly while every other route/component in this app is not.
 
 ## Adding a new protected or public page
 

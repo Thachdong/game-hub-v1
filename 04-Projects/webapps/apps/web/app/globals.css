@@ -1,3 +1,13 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Fixed color palette (constitution Coding Conventions — Styling & Visual Language) */
+:root {
+  --color-background: #0f0f0f;
+  --color-surface: #181818;
+  --color-text-primary: #f5f5f5;
+  --color-text-secondary: #a3a3a3;
+  --color-border: #2a2a2a;
+  --color-accent: #ffffff;
+}

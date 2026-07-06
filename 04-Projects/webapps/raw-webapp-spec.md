@@ -22,7 +22,12 @@ hiển thị button "Login with google"
 
 1. Nội dung page danh sách game: chưa các card (game banner + tên game) => click vào card => navigate đến game
 
-2. Nội dung page game caro:
+1.1 Nội dung page account:
+- hiển thị thông tin cơ bản của account như username, email, avatar + danh sách profiles
+- account mới chưa chơi game nào: hiển thị text chưa có profile
+- account đã chơi game thì sẽ hiển thị game dưới dạng card => click vào card => navigate user đến page profile tương ứng
+
+1. Nội dung page game caro:
    - Tab với 3 items: Lobby(1), Tournament(2), Quick pair(3)
    - bên phải là leader board với 10 player có điểm Elo cao nhất (dạng card với các thông tin Avatar + username (phần tên trước @ của email) + Elo  + highlight cho top 1, 2 ,3 + badge "bạn" nếu bản thân có trên top 10)
    - (1) list các card với các thông tin: username + elo + type của game + buttons join/view (nếu chưa đăng nhập => click join => navigate đến page login) + button tạo game (4)
@@ -30,7 +35,7 @@ hiển thị button "Login with google"
    - (3) danh sách type của game: card với thông tin: số bàn cờ + time => click tìm và match game tương ứng
    - (4) modal tạo game với các thông tin tương ứng
   
-3. Nội dung page gameboard:
+2. Nội dung page gameboard:
    - bên trái: hiển thị bàn cờ với số ô tương ứng với setting
    - bên phải chứa danh sách các components ứng với các trạng thái:
         - chưa có đối thủ: 
@@ -57,13 +62,13 @@ hiển thị button "Login with google"
           - button xem lại các nước đã chơi
           - chat box
 
-4. Nội dung page tournament:
+3. Nội dung page tournament:
     - countdown thời gian (kết thúc - bắt đầu) + button pause để tạm dừng bắt cập
     - danh sách player xấp xếp theo điểm giảm dần + có phân trang
     - player ở page này khi được match với player khác thì sẽ navigate vào page gameboard => game bắt đầu ngay sau 5s
     - sau khi kêt thúc 1 game + user + button back về tournament => player được navigate về page tournament => tiếp tục ghép cập
 
-5. Nội dung page profile game caro
+4. Nội dung page profile game caro
     - số bàn thắng/thua/hoà
     - chart thắng/thua/hoà theo thời gian
     - danh sách game đã chơi (phân trang, dạng card, click card => xem game đã chơi)

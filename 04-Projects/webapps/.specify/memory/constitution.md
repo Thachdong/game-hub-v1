@@ -1,65 +1,45 @@
 <!--
 SYNC IMPACT REPORT
 ==================
-Version change: 2.0.0 → 3.0.0
-Bump rationale: MAJOR — Principle VI's session-handling rule is redefined a second time. The
-2.0.0 rule mandating delegation to **NextAuth (Auth.js)** is retired and replaced with a
-hand-rolled Next.js Route Handler + first-party httpOnly cookie pattern: a webapp-owned login
-route calls the backend's `/login` API directly (the backend returns the access/refresh token pair
-as plain JSON, as before) and sets both tokens as httpOnly cookies itself; a webapp-owned proxy
-route reads the access token out of that cookie server-side and attaches it when calling backend
-resource endpoints on the client's behalf. NextAuth is no longer used anywhere in the webapp. This
-is a direct reversal of 2.0.0's decision, made directly with the user in conversation — the
-underlying constraint the rule serves (JWT as sole auth artifact, no independent session store,
-raw refresh token never client-JS-readable) is unchanged; only the concrete implementation
-inverts, back to (a variant of) the pattern 2.0.0 itself had retired.
+Version change: 3.0.0 → 3.1.0
+Bump rationale: MINOR — Two new, previously-unstated constraints are ratified: (1) this project
+has no visual-design-tool workflow (no Figma/mockups/wireframes as a source of truth) — specs
+describe features and per-page component layout in text only; (2) a fixed CSS color palette and a
+"classic and vintage" visual direction are mandated for all styling. Both are additive: no
+existing principle is redefined or removed, so this is not a MAJOR bump; it is more than a wording
+clarification (a new principle plus new mandatory coding-convention rules), so it is not a PATCH.
 
-Principles added: none (this amendment touches Principle VI's rule text, not the set of
-principles)
+Principles added:
+  - VII. Text-Only Feature & Layout Specifications (No Visual Design Assets) — new principle
 
 Sections modified:
-  - Principle VI (Client-Side Auth & Realtime Contract) — replaced the NextAuth (Auth.js)
-    delegation rule with a rule mandating hand-rolled Next.js Route Handlers: one login route that
-    calls the backend's `/login` API and sets the returned access/refresh tokens as httpOnly
-    cookies, and one (or more) proxy route(s) that read the access token from that cookie
-    server-side and forward it to backend resource endpoints. NextAuth (Auth.js) MUST NOT be used
-    for session/token lifecycle. Removed the prior XSS-exposure trade-off rule about a NextAuth
-    `session` callback exposing the access token to client code — under this pattern the access
-    token never leaves the server, so that trade-off no longer applies.
+  - Coding Conventions — added a "Styling & Visual Language" rule: mandated color palette (as CSS
+    custom properties) and a classic/vintage visual direction requirement.
+
+Sections removed: none
 
 Templates status:
   - .specify/templates/plan-template.md  ✅ No update required — Constitution Check gate remains a
-                                            generic placeholder.
-  - .specify/templates/spec-template.md  ✅ No update required.
-  - .specify/templates/tasks-template.md ✅ No update required.
+                                            generic placeholder; Technical Context still has no
+                                            dedicated design-asset or styling field to reconcile.
+  - .specify/templates/spec-template.md  ✅ No update required — template is already
+                                            technology/visual-agnostic prose; no mockup/design-file
+                                            section exists to remove.
+  - .specify/templates/tasks-template.md ✅ No update required — no design-asset-producing task
+                                            category exists to rename or remove.
   - CLAUDE.md                            ✅ No update required — points at the active plan.md, not
                                             principle text.
   - .specify/templates/commands/*.md     ✅ N/A — directory does not exist in this workspace.
-  - README.md                            ✅ Updated — removed NextAuth references in "Package
-                                            layout" and "Wiring session state" sections, replaced
-                                            with the Route Handler + cookie pattern.
+  - README.md                            ⚠ Pending — no color-palette/styling-convention section
+                                            exists yet; add one when README is next touched (not
+                                            required to unblock this amendment).
 
-Deferred items (carried over from 2.0.0):
+Deferred items (carried over from 3.0.0):
   - Testing principle: ADR-TONG has no accepted testing decisions yet (mirrors the same gap in
     the sibling API constitution). Marked with TODO(TESTING_PRINCIPLE) below.
-  - Styling library (CSS framework/engine) choice: still not mandated. Left to each app's plan.md
+  - CSS framework/engine (e.g. Tailwind vs. CSS Modules vs. vanilla-extract) is still not
+    mandated — only the token values and aesthetic direction are. Left to each app's plan.md
     Technical Context.
-  - Exact cookie names, expiry, rotation timing, and Secure/SameSite flag values are not specified
-    here — they belong in the plan.md Technical Context of whichever feature implements/refactors
-    this.
-
-Follow-up (not part of this command's scope, flagged for the user):
-  - `apps/web` already has a real NextAuth-based implementation from feature
-    002-login-layout-nextauth (`lib/auth.ts`, `app/api/auth/[...nextauth]/route.ts`,
-    `app/api/auth/google/callback/route.ts`, `components/templates/Providers.tsx`'s
-    SessionProvider, `lib/next-auth.d.ts`, `lib/token-refresh.ts`, and NextAuth-aware call sites in
-    `AppNav.tsx`/`RequireSignIn.tsx`). This code is now non-compliant with Principle VI v3.0.0 and
-    was NOT modified by this command — replacing it with the login-route + proxy-route cookie
-    pattern is a dedicated implementation task (recommend a new feature via `/speckit-specify`),
-    not a side effect of a constitution amendment.
-  - `specs/001-domain-service-layer/*` and `specs/002-login-layout-nextauth/*` still document the
-    now-superseded NextAuth decision as current; recommend annotating them with SUPERSEDED notes
-    (as was done for the 1.2.0 → 2.0.0 auth-service reversal) once the replacement feature lands.
 -->
 
 # Game Hub Webapp Constitution
@@ -173,6 +153,24 @@ The webapp MUST honor the auth and realtime contracts established by the API sid
   consume the API's WebSocket/SSE transport through the service-interface layer — polling MUST
   NOT be used as a substitute.
 
+### VII. Text-Only Feature & Layout Specifications (No Visual Design Assets)
+
+This project does not use a visual design tool (Figma, mockups, wireframes, etc.) as a source of
+truth. Each page/screen is specified through prose: a feature description plus a description of
+the component layout on that page.
+
+**Rules:**
+- Feature specs (`spec.md`) MUST describe each page/screen's layout in text — which components
+  appear, their relative position/grouping (e.g. "Header: logo left, primary nav center, account
+  menu right"), and how they respond to state/interaction — instead of linking to or embedding a
+  visual mockup or design-tool artifact.
+- Component breakdown and Atomic Design layering (Principle III) MUST be derived from these
+  textual layout descriptions; a design file MUST NOT be treated as an authoritative input to
+  implementation.
+- If a visual reference is ever attached to a feature (e.g. a screenshot for inspiration), it is
+  supplementary only. The textual spec remains the binding source of truth for implementation and
+  review; conflicts MUST be resolved in favor of the text.
+
 ## Coding Conventions
 
 - **Language**: TypeScript across all apps and packages, for consistency with the API codebase
@@ -184,6 +182,24 @@ The webapp MUST honor the auth and realtime contracts established by the API sid
 - **Icons**: `lucide-react` is the mandated icon library across all apps and packages. A second
   icon library (e.g. `react-icons`, `heroicons`, inline custom SVGs for anything lucide already
   covers) MUST NOT be introduced without an ADR superseding this convention.
+- **Styling & Visual Language**: All apps MUST use the following fixed color palette, defined as
+  CSS custom properties (design tokens) at the root/theme level, and MUST NOT introduce ad-hoc hex
+  colors outside it:
+  - `--color-background: #0F0F0F` — page background
+  - `--color-surface: #181818` — cards, panels, elevated surfaces
+  - `--color-text-primary: #F5F5F5` — primary text
+  - `--color-text-secondary: #A3A3A3` — secondary/muted text
+  - `--color-border: #2A2A2A` — dividers, borders, outlines
+  - `--color-accent: #FFFFFF` — primary accent (CTAs, active/focus states, key highlights)
+
+  A component MUST reference these tokens rather than hard-coding the hex values or introducing
+  new colors; a new color requires an ADR superseding this convention.
+
+  The overall visual language MUST read as **classic and vintage**: restrained, high-contrast
+  monochrome-first UI (dark surface + off-white text + a single white accent, per the palette
+  above), serif or slab-serif display type for headings, subtle borders/rules over
+  shadows-and-gradients, and deliberate, understated motion — not a modern flat/neon/gradient-heavy
+  SaaS look.
 
 ## Testing
 
@@ -205,4 +221,4 @@ coverage gates), they MUST be added here and reflected in `.specify/templates/ta
 - **Complexity justification**: Any deviation from a MUST rule in this constitution requires an
   explicit justification entry in the `Complexity Tracking` table of `plan.md`.
 
-**Version**: 3.0.0 | **Ratified**: 2026-07-02 | **Last Amended**: 2026-07-06
+**Version**: 3.1.0 | **Ratified**: 2026-07-02 | **Last Amended**: 2026-07-06

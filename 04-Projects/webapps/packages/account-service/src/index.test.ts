@@ -36,7 +36,7 @@ describe("account-service", () => {
     mock.onGet("/api/games").reply(200, {
       statusCode: 200,
       message: "ok",
-      data: [{ id: "g1", name: "Caro", slug: "caro", hasProfile: true }],
+      data: [{ id: "g1", name: "Caro", slug: "caro", bannerUrl: "https://cdn.test/caro.png", hasProfile: true }],
     });
 
     const result = await listGames();
@@ -45,7 +45,7 @@ describe("account-service", () => {
       ok: true,
       statusCode: 200,
       message: "ok",
-      data: [{ id: "g1", name: "Caro", slug: "caro", hasProfile: true }],
+      data: [{ id: "g1", name: "Caro", slug: "caro", bannerUrl: "https://cdn.test/caro.png", hasProfile: true }],
     });
   });
 });

@@ -128,7 +128,7 @@ export async function refreshSession(): Promise<string | null> {
  * code that needs the visitor's identity/backend access MUST go through (FR-011) — a future proxy
  * route for tournament/admin/Caro actions should call this same function, not reimplement it.
  */
-async function configureAccountServiceFromCookies(accessToken: string | null): Promise<void> {
+export async function ensureAccountServiceConfigured(accessToken: string | null): Promise<void> {
   configureAccountService({
     getAccessToken: () => accessToken,
     onUnauthenticated: refreshSession,
@@ -141,7 +141,7 @@ export async function getSessionStatus(): Promise<SessionStatus> {
   const accessToken = store.get(ACCESS_COOKIE_NAME)?.value ?? null;
   if (!accessToken) return { isSignedIn: false };
 
-  await configureAccountServiceFromCookies(accessToken);
+  await ensureAccountServiceConfigured(accessToken);
   const result = await getCurrentAccount();
   if (!result.ok) return { isSignedIn: false };
 
