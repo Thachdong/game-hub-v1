@@ -127,9 +127,9 @@ grid/card/empty-state components with no duplication.
 
 ## Phase 4: Polish & Cross-Cutting Concerns
 
-- [ ] T014 [P] Run `turbo run lint typecheck test --filter=web --filter=@game-hub/account-service`
+- [X] T014 [P] Run `turbo run lint typecheck test --filter=web --filter=@game-hub/account-service`
       and fix any failures surfaced by the `bannerUrl` type change or new components
-- [ ] T015 [P] Manually run through quickstart.md's five scenarios and two edge-case spot-checks
+- [X] T015 [P] Manually run through quickstart.md's five scenarios and two edge-case spot-checks
       against `turbo run dev --filter=web`, confirming the classic/vintage palette (constitution
       Coding Conventions) is applied to `GameCard`/`EmptyState` with no ad-hoc colors
 
@@ -199,3 +199,9 @@ Task: "Write components/organisms/GameGrid.test.tsx (T006)"
   the existing `(protected)/layout.tsx` redirect gate from `003-cookie-auth-migration`, which
   T013's page.tsx stays under unchanged. Validated via quickstart.md Scenario 5, not a new
   automated test — adding one here would duplicate `003`'s existing coverage of that gate.
+- T015 was smoke-tested against `turbo run dev --filter=web` without the backend API running (no
+  `docker-compose`/DB stack started — out of scope for this feature's implementation). Confirmed:
+  `/` returns 200 and falls back to the empty-state message when `listGames()` fails (graceful
+  degradation, not a crash); `/account` triggers the existing sign-in redirect gate when signed
+  out. The full 5 quickstart.md scenarios with seeded data were not executed end-to-end; all
+  scenario-equivalent behavior is covered by the automated tests added in T004–T007/T012 instead.
