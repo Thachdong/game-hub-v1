@@ -73,7 +73,8 @@
 
 **Independent Test**: Request `GET /caro/tournaments/:id` and `GET /caro/tournaments/:id/participants` with no credentials; both return `200`.
 
-- [ ] T008 [US3] Confirm no code change is needed: `GET /caro/tournaments/:tournamentId` and `GET /caro/tournaments/:tournamentId/participants` in `src/caro-game/interface/http/tournament.controller.ts` are already guard-free. Validate via [quickstart.md](quickstart.md) step 1's tournament requests.
+- [X] T008 [US3] Confirm no code change is needed: `GET /caro/tournaments/:tournamentId` and `GET /caro/tournaments/:tournamentId/participants` in `src/caro-game/interface/http/tournament.controller.ts` are already guard-free. Validate via [quickstart.md](quickstart.md) step 1's tournament requests.
+  - **Result (2026-07-07, live run, seeded tournament)**: `GET /api/caro/tournaments` → `200`; `GET /api/caro/tournaments/:id` → `200`; `GET /api/caro/tournaments/:id/participants` → `200`, all with no `Authorization` header.
 
 **Checkpoint**: All three viewing stories (US1, US2, US3) are independently functional.
 
@@ -85,7 +86,8 @@
 
 **Independent Test**: Attempt each restricted action with no credentials; every attempt returns `401`.
 
-- [ ] T009 [US4] Validate [quickstart.md](quickstart.md) step 3: `POST /caro/matches`, `POST /caro/matches/:id/join`, `POST /caro/quick-pair`, `POST /caro/tournaments/:tournamentId/registrations`, `POST /caro/matches/:id/chat`, and `POST /caro/tournaments/:tournamentId/chat` all return `401` for a guest (exercises T003's per-route `JwtAuthGuard` placement, plus the already-unchanged guards on `QuickPairController`, `ChatController`, and `TournamentController`'s mutating routes, including its tournament-chat routes). Confirm each `401` is distinguishable from the `404`s produced in T007, satisfying FR-013.
+- [X] T009 [US4] Validate [quickstart.md](quickstart.md) step 3: `POST /caro/matches`, `POST /caro/matches/:id/join`, `POST /caro/quick-pair`, `POST /caro/tournaments/:tournamentId/registrations`, `POST /caro/matches/:id/chat`, and `POST /caro/tournaments/:tournamentId/chat` all return `401` for a guest (exercises T003's per-route `JwtAuthGuard` placement, plus the already-unchanged guards on `QuickPairController`, `ChatController`, and `TournamentController`'s mutating routes, including its tournament-chat routes). Confirm each `401` is distinguishable from the `404`s produced in T007, satisfying FR-013.
+  - **Result (2026-07-07, live run)**: all six restricted actions → `401` for a guest, vs. `404` for a nonexistent match and `400` for an authenticated-but-invalid create payload — clearly distinguishable per FR-013.
 
 **Checkpoint**: All four user stories are independently functional. No previously-restricted action has become accessible to a guest.
 
