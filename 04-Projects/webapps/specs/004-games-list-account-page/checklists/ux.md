@@ -13,7 +13,7 @@ the implementation (does it work?).
 
 ## Requirement Completeness
 
-- [ ] CHK001 Are the exact visual contents of a Game Card (banner + name) fully enumerated, with
+- [x] CHK001 Are the exact visual contents of a Game Card (banner + name) fully enumerated, with
       no additional expected elements (e.g., description, category, price) left unstated?
       [Completeness, Spec §FR-001]
 - [ ] CHK002 Are requirements defined for what a Game Card displays when a game has no banner
@@ -23,16 +23,16 @@ the implementation (does it work?).
       or only that some such message must exist? [Completeness, Spec §FR-003]
 - [ ] CHK004 Is the exact wording/content of the Account page's "no profile yet" message
       specified, or only that some such message must exist? [Completeness, Spec §FR-005]
-- [ ] CHK005 Are requirements defined for how the grid behaves as the number of games/profiles
+- [x] CHK005 Are requirements defined for how the grid behaves as the number of games/profiles
       grows large (pagination, scrolling, or an unbounded grid), or only for the current
       single-game catalog? [Gap, Spec §Assumptions]
 
 ## Requirement Clarity
 
-- [ ] CHK006 Is the Game Card's internal arrangement ("top to bottom, or as a layered banner with
+- [x] CHK006 Is the Game Card's internal arrangement ("top to bottom, or as a layered banner with
       the name below/overlaid") specific enough to yield one consistent presentation, or does it
       leave two materially different layouts open? [Ambiguity, Spec §User Story 1 Layout]
-- [ ] CHK007 Is "responsive grid" quantified with any column-count or breakpoint expectation, or
+- [x] CHK007 Is "responsive grid" quantified with any column-count or breakpoint expectation, or
       left fully to interpretation? [Clarity, Spec §User Story 1 Layout]
 - [ ] CHK008 Is the relative placement of avatar vs. username/email ("avatar on one side, with
       username above email stacked beside it") specific about which side the avatar sits on?
@@ -42,10 +42,10 @@ the implementation (does it work?).
 
 ## Requirement Consistency
 
-- [ ] CHK010 Do the Games List page's and the Account page's Game Card requirements agree on
+- [x] CHK010 Do the Games List page's and the Account page's Game Card requirements agree on
       every visual attribute (banner + name only), with no extra attribute introduced in one
       page's Layout description but not the other's? [Consistency, Spec §User Story 1 & 2 Layout]
-- [ ] CHK011 Are the two distinct "navigate to X" requirements (FR-002: Games List → game entry,
+- [x] CHK011 Are the two distinct "navigate to X" requirements (FR-002: Games List → game entry,
       FR-007: Account → profile page) worded so implementers cannot conflate the two destinations
       for the same game? [Consistency, Spec §FR-002, §FR-007]
 
@@ -60,17 +60,17 @@ the implementation (does it work?).
 
 ## Edge Case Coverage
 
-- [ ] CHK015 Does the spec define expected behavior when an account has a large number of played
+- [x] CHK015 Does the spec define expected behavior when an account has a large number of played
       games, beyond the general "wrapping to multiple rows"? [Edge Case, Spec §Edge Cases]
 - [ ] CHK016 Does the spec define whether a long game name truncates, wraps, or resizes the card
       when it would otherwise overflow? [Gap, Edge Case]
 
 ## Dependencies & Assumptions
 
-- [ ] CHK017 Is the assumption that "played/profile status is derived from existing data already
+- [x] CHK017 Is the assumption that "played/profile status is derived from existing data already
       tracked elsewhere" tied to a named source, or left as an unverified assumption? [Assumption,
       Spec §Assumptions]
-- [ ] CHK018 Is the out-of-scope boundary (destination game/profile pages not built by this
+- [x] CHK018 Is the out-of-scope boundary (destination game/profile pages not built by this
       feature) worded so a reader cannot mistake "the link is wired up" for "the link resolves to
       a working page today"? [Ambiguity, Spec §Assumptions]
 

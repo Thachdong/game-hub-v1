@@ -9,5 +9,6 @@ export interface Game {
   id: string;
   name: string;
   slug: string;
+  bannerUrl: string;
   hasProfile?: boolean;
 }

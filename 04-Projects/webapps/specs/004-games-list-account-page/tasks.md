@@ -29,15 +29,15 @@ each can be implemented and validated independently.
 
 **⚠️ CRITICAL**: No user story task may start until this phase is complete
 
-- [ ] T001 Add `bannerUrl: string` to the `Game` interface in
+- [X] T001 Add `bannerUrl: string` to the `Game` interface in
       `packages/account-service/src/types.ts`, and update the `listGames` mock fixture (and its
       expected assertion) in `packages/account-service/src/index.test.ts` to include a
       `bannerUrl` value (research.md §4, data-model.md Game)
-- [ ] T002 [P] Create `lib/game-routes.ts` exporting `getGameLinkTarget(game: Pick<Game, "slug">):
+- [X] T002 [P] Create `lib/game-routes.ts` exporting `getGameLinkTarget(game: Pick<Game, "slug">):
       { entryPath: string; profilePath: string }`, implementing `entryPath = "/game-${slug}"` and
       `profilePath = "${entryPath}/profile"` (research.md §1, data-model.md GameLinkTarget), with
       a colocated `lib/game-routes.test.ts` covering both fields for a sample slug
-- [ ] T003 In `lib/session.ts`, rename the existing private `configureAccountServiceFromCookies`
+- [X] T003 In `lib/session.ts`, rename the existing private `configureAccountServiceFromCookies`
       to `ensureAccountServiceConfigured` and export it; update `getSessionStatus()`'s internal
       call site to the new name; update `lib/session.test.ts` if it references the old name
       (research.md §2)
