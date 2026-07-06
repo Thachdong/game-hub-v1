@@ -180,17 +180,18 @@ mechanism and its client-side wiring pattern.
 
 ### Implementation for User Story 4
 
-- [ ] T011 [P] [US4] In `packages/account-service/src/http-client.ts`, change `defaultBaseUrl()`
+- [X] T011 [P] [US4] In `packages/account-service/src/http-client.ts`, change `defaultBaseUrl()`
   to read `process.env.BACKEND_URL` instead of `process.env.NEXT_PUBLIC_GAME_HUB_API_BASE_URL`
   (research.md §3)
-- [ ] T012 [P] [US4] Same one-line change in `packages/profiles-service/src/http-client.ts`
-- [ ] T013 [P] [US4] Same one-line change in `packages/admin-service/src/http-client.ts`
-- [ ] T014 [P] [US4] Same one-line change in `packages/caro-service/src/http-client.ts`
-- [ ] T015 [US4] Remove the `NEXT_PUBLIC_GAME_HUB_API_BASE_URL` line and its comment from
-  `apps/web/.env.local.example`, leaving `BACKEND_URL` as the single backend-origin variable with
-  an updated comment reflecting it's read only server-side (research.md §3) (depends on
-  T011-T014)
-- [ ] T016 [US4] Rewrite `apps/web/README.md`: remove the NextAuth-era content (the `useSession()`/
+- [X] T012 [P] [US4] Same one-line change in `packages/profiles-service/src/http-client.ts`
+- [X] T013 [P] [US4] Same one-line change in `packages/admin-service/src/http-client.ts`
+- [X] T014 [P] [US4] Same one-line change in `packages/caro-service/src/http-client.ts`
+- [X] T015 [US4] Re-scope (not remove) `NEXT_PUBLIC_GAME_HUB_API_BASE_URL`'s comment in
+  `apps/web/.env.local.example`: it is `LoginCard.tsx`'s OAuth-initiation redirect target only,
+  no longer a domain-package default (`BACKEND_URL` is, per T011–T014); update `BACKEND_URL`'s
+  comment to describe its server-only role (research.md §3, corrected after finding
+  `LoginCard.tsx`'s real client-side usage) (depends on T011-T014)
+- [X] T016 [US4] Rewrite `apps/web/README.md`: remove the NextAuth-era content (the `useSession()`/
   `auth()` "Session shape" section, the `[...nextauth]` route-structure entry, and the "Wiring a
   new domain-service call from a Client Component" section's `useSession`-based example) and
   replace it with (a) a description of the actual cookie-based session (`lib/session.ts`,
@@ -198,13 +199,15 @@ mechanism and its client-side wiring pattern.
   `app/api/proxy/[...path]/route.ts`) plus its client-side wiring example
   (`configureAccountService({ baseURL: "/api/proxy", getAccessToken: () => null })`), pointing
   readers at `contracts/proxy-routes.md` (research.md §2, §5)
-- [ ] T017 [US4] Update the root `README.md`'s "Wiring session state" example to configure with
+- [X] T017 [US4] Update the root `README.md`'s "Wiring session state" example to configure with
   `baseURL: process.env.BACKEND_URL` for server-side (SSR) usage, and add the client-side
   `baseURL: "/api/proxy"` variant alongside it so the section covers both wiring patterns
   (research.md §2, §5)
 
-**Checkpoint**: `grep -rn "NEXT_PUBLIC_GAME_HUB_API_BASE_URL\|useSession\|next-auth" apps/web
-packages README.md` returns no matches (quickstart.md's verification commands).
+**Checkpoint**: `grep -rln "useSession\|next-auth" apps/web/README.md README.md` returns no
+matches, and `grep -n "NEXT_PUBLIC_GAME_HUB_API_BASE_URL" packages/*/src/http-client.ts` returns
+no matches (the only legitimate remaining reference is `LoginCard.tsx`'s OAuth redirect and
+`apps/web/.env.local.example`'s re-scoped comment — quickstart.md's verification commands).
 
 ---
 

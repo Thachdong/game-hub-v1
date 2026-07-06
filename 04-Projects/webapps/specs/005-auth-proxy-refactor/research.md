@@ -42,27 +42,36 @@
   a separate feature, since it's a direct instance of "no lingering interface/documentation should
   invite a client-held token."
 
-## 3. Env var consolidation: `NEXT_PUBLIC_GAME_HUB_API_BASE_URL` → `BACKEND_URL`
+## 3. Env var scope correction: `NEXT_PUBLIC_GAME_HUB_API_BASE_URL` narrowed, not removed
 
 - **Finding**: All four domain-service packages' `http-client.ts` define an identical
   `defaultBaseUrl()` that falls back to `process.env.NEXT_PUBLIC_GAME_HUB_API_BASE_URL` if no
   explicit `baseURL` override is passed to `configure*Service`. The `NEXT_PUBLIC_` prefix is a
   Next.js-specific convention whose only purpose is inlining a value into the client JS bundle —
-  but per `003` and this feature's own design (research.md §4 below), every real call site that
-  configures these packages runs server-side only (inside `lib/session.ts` today, and inside proxy
-  Route Handlers going forward). The var's very name documents a capability (client-bundle
-  availability) the packages are no longer meant to use.
-- **Decision**: Change `defaultBaseUrl()` in all four packages to read `process.env.BACKEND_URL`
-  instead — the same server-only variable `apps/web` already uses directly in
-  `app/api/auth/google/callback/route.ts` and `lib/session.ts`'s `refreshSession()`. Remove
-  `NEXT_PUBLIC_GAME_HUB_API_BASE_URL` from `apps/web/.env.local.example` entirely; `BACKEND_URL`
-  becomes the single source of truth for the backend's origin.
-- **Rationale**: One env var instead of two removes the possibility of the two ever drifting
-  (e.g., a deployment setting `BACKEND_URL` but forgetting the `NEXT_PUBLIC_` twin, or vice versa),
-  and the remaining name no longer implies browser-reachability that isn't actually needed.
-- **Alternatives considered**: Keeping both vars and just fixing the documentation — rejected;
-  the var's continued existence is itself the "lingering interface" User Story 4 asks to remove,
-  independent of what the docs say about it.
+  but per `003` and this feature's own design (research.md §4), every real call site that
+  configures these packages server-side runs inside `lib/session.ts` or the proxy route, and every
+  client-side call site (§5) now points `baseURL` at the same-origin `/api/proxy` instead. So the
+  packages' *default* fallback should never need to be browser-reachable.
+- **A second, genuinely client-side use of the same variable exists**: `LoginCard.tsx` (the "Sign
+  in with Google" button) reads `process.env.NEXT_PUBLIC_GAME_HUB_API_BASE_URL` to build a
+  top-level `window.location.href` redirect straight to the backend's `/api/auth/google` endpoint
+  — a full-page browser navigation, not a `fetch`/axios call, so it carries no token and is not
+  the anti-pattern Principle VI guards against. This use is unrelated to the domain-service
+  packages' `defaultBaseUrl()` and must keep the `NEXT_PUBLIC_` prefix, since the browser
+  genuinely needs to read this value to navigate.
+- **Decision**: Change `defaultBaseUrl()` in all four domain-service packages to read
+  `process.env.BACKEND_URL` instead (the existing server-only variable `apps/web` already uses in
+  `app/api/auth/google/callback/route.ts` and `lib/session.ts`'s `refreshSession()`) — but *keep*
+  `NEXT_PUBLIC_GAME_HUB_API_BASE_URL` in `apps/web/.env.local.example`, re-documented as
+  `LoginCard`'s redirect target specifically, not as a domain-package default.
+- **Rationale**: This is a narrowing of an over-broad default (which happened to be readable from
+  either place, inviting exactly the "point a package at it from the client" mistake this feature
+  guards against), not a wholesale removal — `LoginCard`'s redirect is a legitimate, different use
+  case that must keep working. Two vars remain, but now each has exactly one, correctly-scoped
+  purpose instead of one var serving two purposes (one of which was actually unwanted).
+- **Alternatives considered**: Removing `NEXT_PUBLIC_GAME_HUB_API_BASE_URL` entirely (the
+  original plan for this section, before this correction) — rejected once `LoginCard.tsx`'s real
+  usage was found; doing so would have broken the "Sign in with Google" button.
 
 ## 4. Shape of the proxy mechanism (revised during `/speckit-clarify`): a single catch-all route
 

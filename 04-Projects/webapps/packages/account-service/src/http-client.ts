@@ -10,11 +10,11 @@ type ConfigOverrides = Partial<HttpClientConfig>;
 let overrides: ConfigOverrides = {};
 let cachedClient: ReturnType<typeof createHttpClient> | undefined;
 
+// Server-only var (no NEXT_PUBLIC_ prefix) — every real caller configures this package from
+// server-side code (a Route Handler, directly or via the shared proxy route). See
+// specs/005-auth-proxy-refactor/research.md §3.
 function defaultBaseUrl(): string {
-  return (
-    (typeof process !== "undefined" ? process.env.NEXT_PUBLIC_GAME_HUB_API_BASE_URL : undefined) ??
-    ""
-  );
+  return (typeof process !== "undefined" ? process.env.BACKEND_URL : undefined) ?? "";
 }
 
 /**

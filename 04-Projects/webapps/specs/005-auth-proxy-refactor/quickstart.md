@@ -69,13 +69,15 @@
 
 **Expected**: zero regression to the account page (SC-005).
 
-## Verifying the env var consolidation (research.md §3)
+## Verifying the env var scope correction (research.md §3)
 
 ```bash
-grep -rn "NEXT_PUBLIC_GAME_HUB_API_BASE_URL" apps/web packages README.md
+grep -n "NEXT_PUBLIC_GAME_HUB_API_BASE_URL" packages/*/src/http-client.ts
 ```
 
-**Expected**: no matches — only `BACKEND_URL` remains as the backend-origin variable.
+**Expected**: no matches — all four domain-service packages now default to `BACKEND_URL`.
+`NEXT_PUBLIC_GAME_HUB_API_BASE_URL` itself still exists (`LoginCard.tsx`'s OAuth-initiation
+redirect, `apps/web/.env.local.example`) — that is expected, not a regression (research.md §3).
 
 ## Verifying stale documentation was corrected (research.md §2)
 

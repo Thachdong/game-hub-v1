@@ -137,8 +137,10 @@ apps/
     │                                          #   cookie + catch-all proxy-route mechanism,
     │                                          #   including the client-side "point a package at
     │                                          #   /api/proxy" wiring pattern (research.md §5)
-    ├── .env.local.example                     # MODIFIED: drop NEXT_PUBLIC_GAME_HUB_API_BASE_URL,
-    │                                          #   BACKEND_URL becomes the single backend-origin var
+    ├── .env.local.example                     # MODIFIED: re-scope NEXT_PUBLIC_GAME_HUB_API_BASE_URL's
+    │                                          #   comment to LoginCard.tsx's redirect only (kept,
+    │                                          #   not removed — research.md §3); BACKEND_URL is the
+    │                                          #   domain-service packages' backend-origin var
     ├── app/
     │   └── api/
     │       └── proxy/

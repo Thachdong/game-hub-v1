@@ -23,11 +23,11 @@ package; a consuming app wires session state into each one independently via its
 **Note:** There is no `auth-service` package. Session/token lifecycle (login, refresh, logout) is
 implemented as hand-rolled Next.js Route Handlers inside each `apps/*` Next.js app: a login route
 calls the backend's `/login` API and sets the returned access/refresh tokens as first-party
-httpOnly cookies, and a proxy route reads the access token from that cookie server-side to call
-backend resource endpoints on the client's behalf. NextAuth (Auth.js) is NOT used — see
-`.specify/memory/constitution.md` v3.0.0 Principle VI and
-`specs/001-domain-service-layer/research.md` §5 for the history of prior approaches that were
-tried and retired.
+httpOnly cookies, and a catch-all proxy route reads the access token from that cookie server-side
+to call backend resource endpoints on the client's behalf. NextAuth (Auth.js) is NOT used — see
+`.specify/memory/constitution.md` v3.1.0 Principle VI, `specs/001-domain-service-layer/research.md`
+§5 for the history of prior approaches that were tried and retired, and
+`specs/005-auth-proxy-refactor/` for the proxy route itself.
 
 ## The `ServiceResult<T>` pattern
 
@@ -60,21 +60,34 @@ instead of a bare array; endpoints that don't paginate return a plain `T[]`.
 
 ## Wiring session state
 
-Each domain package starts with a no-op access-token getter. A consuming app must call each
-package's `configure*Service` once at startup, wiring in a `getAccessToken`/`onUnauthenticated`
-pair sourced from the webapp's own httpOnly cookie — read server-side inside a proxy Route Handler,
-never exposed to client-side code (see constitution v3.0.0 Principle VI):
+Each domain package starts with a no-op access-token getter. A consuming app calls each package's
+`configure*Service` once, in one of two ways depending on where the call originates — never expose
+a token to client-side code either way (constitution v3.1.0 Principle VI,
+`specs/005-auth-proxy-refactor/`):
+
+**Server-side** (Server Component or Route Handler — e.g. an SSR page's data fetching):
 
 ```ts
 import { configureAccountService } from "@game-hub/account-service";
 
 configureAccountService({
-  baseURL: process.env.NEXT_PUBLIC_GAME_HUB_API_BASE_URL,
+  baseURL: process.env.BACKEND_URL,
   getAccessToken: () => readAccessTokenCookie(), // server-side only, from the httpOnly cookie
   onUnauthenticated: async () => {
     /* call the webapp's own refresh route, which rotates the cookies; return the new access token or null */
   },
 });
+```
+
+**Client-side** (a Client Component): point the package at the app's own catch-all proxy route
+instead of the real backend origin, with no token attached client-side at all — the proxy route
+attaches the real one server-side (`specs/005-auth-proxy-refactor/contracts/proxy-routes.md`):
+
+```ts
+"use client";
+import { configureAccountService } from "@game-hub/account-service";
+
+configureAccountService({ baseURL: "/api/proxy", getAccessToken: () => null });
 ```
 
 ## Adding a new service function
