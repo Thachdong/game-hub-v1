@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { auth } from "@/lib/auth";
+import { getSessionStatus } from "@/lib/session";
 import { Providers } from "@/components/templates/Providers";
 import { AppNav } from "@/components/organisms/AppNav";
 import "./globals.css";
@@ -14,9 +14,9 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // Fetched once, server-side, and seeded into the client SessionProvider so useSession()
-  // hydrates with the correct status immediately — no loading flash (FR-012/SC-006, research.md §5).
-  const session = await auth();
+  // Fetched once, server-side, and seeded into the client Providers so useAuthSession()
+  // hydrates with the correct status immediately — no loading flash (FR-012/SC-006, research.md §3).
+  const session = await getSessionStatus();
 
   return (
     <html lang="en">

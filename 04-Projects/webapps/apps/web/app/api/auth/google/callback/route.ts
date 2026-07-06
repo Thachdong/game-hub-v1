@@ -1,18 +1,14 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { signIn } from "@/lib/auth";
-
-interface LoginResponseDto {
-  accessToken: string;
-  refreshToken: string;
-  account: { id: string; email: string; username: string; avatarUrl: string };
-}
+import { setAuthCookies, type LoginResult } from "@/lib/session";
 
 const CALLBACK_COOKIE = "oauth_callback_url";
 
 // Typed as plain Request (not NextRequest) so this handler only relies on standard Fetch API
 // surface — easier to unit test, and NextRequest offers nothing extra we need here.
-// See contracts/auth-callback-route.md for the full behavior contract.
+// See contracts/auth-routes.md for the full behavior contract. This is the webapp's single
+// Principle-VI login entry point (research.md §1) — the only code path that calls the backend's
+// login-completing API.
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const code = searchParams.get("code");
@@ -37,15 +33,8 @@ export async function GET(request: Request) {
     return NextResponse.redirect(new URL("/login?error=oauth_failed", request.url));
   }
 
-  const body = (await backendResponse.json()) as { data: LoginResponseDto };
-  const { accessToken, refreshToken, account } = body.data;
-
-  await signIn("credentials", {
-    accessToken,
-    refreshToken,
-    account: JSON.stringify(account),
-    redirect: false,
-  });
+  const body = (await backendResponse.json()) as { data: LoginResult };
+  await setAuthCookies(body.data);
 
   const cookieStore = await cookies();
   const destination = cookieStore.get(CALLBACK_COOKIE)?.value || "/";

@@ -38,7 +38,7 @@ in this feature).
 
 **Purpose**: Lay down the shared types/constants every later task imports.
 
-- [ ] T001 Create `apps/web/lib/session.ts` with `ACCESS_COOKIE_NAME`/`REFRESH_COOKIE_NAME`
+- [X] T001 Create `apps/web/lib/session.ts` with `ACCESS_COOKIE_NAME`/`REFRESH_COOKIE_NAME`
   constants and the `SessionStatus`/`LoginResult`/`RefreshResult` types per data-model.md and
   `contracts/session-status.ts`
 
@@ -53,44 +53,44 @@ story depends on to be independently demonstrable at all.
 
 **⚠️ CRITICAL**: No user story (Phase 3+) can begin until this phase is complete.
 
-- [ ] T002 Implement `decodeJwtExpiryMs()` in `apps/web/lib/session.ts`, generalized from the
+- [X] T002 Implement `decodeJwtExpiryMs()` in `apps/web/lib/session.ts`, generalized from the
   existing `apps/web/lib/token-refresh.ts` (depends on T001)
-- [ ] T003 Implement `getSessionStatus()` in `apps/web/lib/session.ts` — reads the `access_token`
+- [X] T003 Implement `getSessionStatus()` in `apps/web/lib/session.ts` — reads the `access_token`
   cookie via `next/headers`'s `cookies()`, returns `{ isSignedIn: false }` when absent, otherwise
   configures `@game-hub/account-service` with a synchronous `getAccessToken` closure over the
   already-resolved cookie value and a stub `onUnauthenticated: async () => null` (real refresh
   lands in US3, T021–T022), calls the package's existing `getCurrentAccount()`, and returns a
   `SessionStatus` (research.md §3, §5) (depends on T001, T002)
-- [ ] T004 [P] Unit test: `getSessionStatus()` returns `{ isSignedIn: false }` with no cookie,
+- [X] T004 [P] Unit test: `getSessionStatus()` returns `{ isSignedIn: false }` with no cookie,
   returns `{ isSignedIn: false }` when only an unrelated/legacy cookie (e.g. a leftover
   NextAuth `next-auth.session-token`) is present but `access_token` is absent (FR-009/SC-005), and
   returns `{ isSignedIn: true, account }` given a mocked `getCurrentAccount()` success, in
   `apps/web/lib/session.test.ts` (depends on T003)
-- [ ] T005 Modify `apps/web/app/api/auth/google/callback/route.ts` to set `access_token`/
+- [X] T005 Modify `apps/web/app/api/auth/google/callback/route.ts` to set `access_token`/
   `refresh_token` as `httpOnly`/`Secure`(prod)/`SameSite=Lax` cookies directly from the backend's
   `LoginResult`, replacing the `signIn("credentials", ...)` call — redirect/error branches (declined
   consent, backend failure) are unchanged (research.md §2) (depends on T001)
-- [ ] T006 [P] Update `apps/web/app/api/auth/google/callback/route.test.ts` to assert the cookies
+- [X] T006 [P] Update `apps/web/app/api/auth/google/callback/route.test.ts` to assert the cookies
   are set with the correct name/flags and that no token value appears anywhere in the response,
   replacing the mocked-`signIn` assertions (depends on T005)
-- [ ] T007 Implement `GET /api/auth/session` wrapping `getSessionStatus()` in
+- [X] T007 Implement `GET /api/auth/session` wrapping `getSessionStatus()` in
   `apps/web/app/api/auth/session/route.ts` per `contracts/auth-routes.md` (depends on T003)
-- [ ] T008 [P] Unit test for the session route (always `200`, correct body for signed-in/signed-out)
+- [X] T008 [P] Unit test for the session route (always `200`, correct body for signed-in/signed-out)
   in `apps/web/app/api/auth/session/route.test.ts` (depends on T007)
-- [ ] T009 Implement `POST /api/auth/logout` in `apps/web/app/api/auth/logout/route.ts`, clearing
+- [X] T009 Implement `POST /api/auth/logout` in `apps/web/app/api/auth/logout/route.ts`, clearing
   both cookies and returning `{ isSignedIn: false }` — no backend call (research.md §7) (depends on
   T001)
-- [ ] T010 [P] Unit test for the logout route (clears both cookies) in
+- [X] T010 [P] Unit test for the logout route (clears both cookies) in
   `apps/web/app/api/auth/logout/route.test.ts` (depends on T009)
-- [ ] T011 Implement a first-party `SessionProvider` React Context + `useAuthSession()` hook
+- [X] T011 Implement a first-party `SessionProvider` React Context + `useAuthSession()` hook
   (accepts an initial `SessionStatus`, exposes `refresh()` via `GET /api/auth/session` and
   `logout()` via `POST /api/auth/logout` followed by `refresh()`) in
   `apps/web/components/templates/Providers.tsx`, replacing NextAuth's `SessionProvider` (depends on
   T007, T009)
-- [ ] T012 [P] Unit test for `Providers`/`useAuthSession` (seeds initial value, `refresh()`/
+- [X] T012 [P] Unit test for `Providers`/`useAuthSession` (seeds initial value, `refresh()`/
   `logout()` update context state) in `apps/web/components/templates/Providers.test.tsx` (depends
   on T011)
-- [ ] T013 Update `apps/web/app/layout.tsx` to call `getSessionStatus()` instead of `auth()` and
+- [X] T013 Update `apps/web/app/layout.tsx` to call `getSessionStatus()` instead of `auth()` and
   seed `<Providers>` with the result, preserving the no-loading-flash guarantee (spec 002 FR-012)
   (depends on T003, T011)
 
@@ -160,15 +160,15 @@ confirm the next action succeeds transparently with a rotated cookie.
 
 ### Implementation for User Story 3
 
-- [ ] T021 [US3] Implement `refreshSession()` in `apps/web/lib/session.ts` — reads the
+- [X] T021 [US3] Implement `refreshSession()` in `apps/web/lib/session.ts` — reads the
   `refresh_token` cookie, calls `POST {BACKEND_URL}/api/auth/refresh`, re-sets the `access_token`
   cookie on the current response on success and returns the new token, returns `null` on failure;
   memoizes its in-flight `Promise` for the lifetime of one request-handling invocation (research.md
   §4) (depends on T002)
-- [ ] T022 [US3] Wire `refreshSession()` as the real `onUnauthenticated` callback in
+- [X] T022 [US3] Wire `refreshSession()` as the real `onUnauthenticated` callback in
   `getSessionStatus()`'s `account-service` configuration, replacing Foundational's stub (`apps/web/
   lib/session.ts`) (depends on T021, T003)
-- [ ] T023 [P] [US3] Unit test: an expired `access_token` with a valid `refresh_token`
+- [X] T023 [P] [US3] Unit test: an expired `access_token` with a valid `refresh_token`
   transparently renews and `getSessionStatus()` still returns `isSignedIn: true`; an expired
   `access_token` with an invalid `refresh_token` returns `isSignedIn: false`; concurrent calls
   within one invocation trigger only one mocked backend refresh call — in
@@ -189,12 +189,12 @@ function — no second, parallel implementation.
 
 ### Implementation for User Story 4
 
-- [ ] T024 [US4] Extract the "resolve the `access_token` cookie and configure
+- [X] T024 [US4] Extract the "resolve the `access_token` cookie and configure
   `@game-hub/account-service`" logic in `apps/web/lib/session.ts` into one small, explicitly named
   function that `getSessionStatus()` calls internally and that a doc comment marks as the pattern
   any future proxy route (e.g., for `tournament`/`admin`/Caro actions, once those pages get real
   content) MUST reuse rather than reimplement (depends on T022)
-- [ ] T025 [P] [US4] Unit test asserting `getSessionStatus()` (server-render call site) and
+- [X] T025 [P] [US4] Unit test asserting `getSessionStatus()` (server-render call site) and
   `GET /api/auth/session` (client-revalidation call site, T007) both resolve through the same
   underlying function in `apps/web/lib/session.test.ts` (depends on T024, T007)
 

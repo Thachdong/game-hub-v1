@@ -1,10 +1,16 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-const signInMock = vi.fn();
+function makeFakeJwt(expSecondsFromNow: number): string {
+  const payload = { exp: Math.floor(Date.now() / 1000) + expSecondsFromNow };
+  const encoded = Buffer.from(JSON.stringify(payload)).toString("base64url");
+  return `header.${encoded}.signature`;
+}
+
+const setAuthCookiesMock = vi.fn();
 const cookieStore = new Map<string, string>();
 
-vi.mock("@/lib/auth", () => ({
-  signIn: signInMock,
+vi.mock("@/lib/session", () => ({
+  setAuthCookies: setAuthCookiesMock,
 }));
 
 vi.mock("next/headers", () => ({
@@ -24,7 +30,7 @@ describe("GET /api/auth/google/callback", () => {
   beforeEach(() => {
     process.env.BACKEND_URL = "https://api.test";
     cookieStore.clear();
-    signInMock.mockReset();
+    setAuthCookiesMock.mockReset();
   });
 
   afterEach(() => {
@@ -36,22 +42,21 @@ describe("GET /api/auth/google/callback", () => {
 
     expect(response.status).toBe(307);
     expect(response.headers.get("location")).toBe("https://web.test/login?error=access_denied");
-    expect(signInMock).not.toHaveBeenCalled();
+    expect(setAuthCookiesMock).not.toHaveBeenCalled();
   });
 
-  it("forwards code/state to the backend and redirects to the cookie's destination on success", async () => {
+  it("forwards code/state to the backend, sets auth cookies, and redirects to the cookie's destination on success", async () => {
     cookieStore.set("oauth_callback_url", "/account");
+    const loginResult = {
+      accessToken: makeFakeJwt(3600),
+      refreshToken: "r",
+      account: { id: "1", email: "a@b.com", username: "alice", avatarUrl: "https://a" },
+    };
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue({
         ok: true,
-        json: async () => ({
-          data: {
-            accessToken: "a",
-            refreshToken: "r",
-            account: { id: "1", email: "a@b.com", username: "alice", avatarUrl: "https://a" },
-          },
-        }),
+        json: async () => ({ data: loginResult }),
       })
     );
 
@@ -63,22 +68,23 @@ describe("GET /api/auth/google/callback", () => {
       expect.objectContaining({ href: expect.stringContaining("code=abc") }),
       { method: "GET" }
     );
-    expect(signInMock).toHaveBeenCalledWith(
-      "credentials",
-      expect.objectContaining({ accessToken: "a", refreshToken: "r", redirect: false })
-    );
+    expect(setAuthCookiesMock).toHaveBeenCalledWith(loginResult);
     expect(response.headers.get("location")).toBe("https://web.test/account");
     expect(cookieStore.has("oauth_callback_url")).toBe(false); // cleared
+    // No token value ever appears in the redirect response itself (FR-002, SC-002).
+    expect(JSON.stringify(Object.fromEntries(response.headers.entries()))).not.toContain(
+      loginResult.accessToken
+    );
   });
 
-  it("redirects to /login?error=oauth_failed on backend failure, without calling signIn", async () => {
+  it("redirects to /login?error=oauth_failed on backend failure, without setting cookies", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: false, status: 503 }));
 
     const response = await GET(
       makeRequest("https://web.test/api/auth/google/callback?code=abc&state=xyz")
     );
 
-    expect(signInMock).not.toHaveBeenCalled();
+    expect(setAuthCookiesMock).not.toHaveBeenCalled();
     expect(response.headers.get("location")).toBe("https://web.test/login?error=oauth_failed");
   });
 
@@ -89,7 +95,7 @@ describe("GET /api/auth/google/callback", () => {
         ok: true,
         json: async () => ({
           data: {
-            accessToken: "a",
+            accessToken: makeFakeJwt(3600),
             refreshToken: "r",
             account: { id: "1", email: "a@b.com", username: "alice", avatarUrl: "https://a" },
           },
