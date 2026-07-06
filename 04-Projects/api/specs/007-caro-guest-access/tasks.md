@@ -45,7 +45,8 @@
 
 **Independent Test**: Request `GET /caro/matches/lobby` and `GET /caro/tournaments` with no credentials; both return `200` with the same data an authenticated player would see.
 
-- [ ] T004 [US1] Validate [quickstart.md](quickstart.md) step 1's lobby and tournament-list requests both return `200` with no `Authorization` header (exercises T002 + T003 for the lobby route; confirms `src/caro-game/interface/http/tournament.controller.ts` needed no change since `GET /caro/tournaments` was already guard-free). Then re-run [quickstart.md](quickstart.md) step 4 post-fix: the same lobby request with an expired/invalid token must now return `200` (guest) — the inverse of the `401` recorded as the T001 baseline. Closes the loop opened by T002 for FR-015.
+- [X] T004 [US1] Validate [quickstart.md](quickstart.md) step 1's lobby and tournament-list requests both return `200` with no `Authorization` header (exercises T002 + T003 for the lobby route; confirms `src/caro-game/interface/http/tournament.controller.ts` needed no change since `GET /caro/tournaments` was already guard-free). Then re-run [quickstart.md](quickstart.md) step 4 post-fix: the same lobby request with an expired/invalid token must now return `200` (guest) — the inverse of the `401` recorded as the T001 baseline. Closes the loop opened by T002 for FR-015.
+  - **Result (2026-07-07, live run)**: `GET /api/caro/matches/lobby` → `200` (no header); `GET /api/caro/tournaments` → `200` (no header); `GET /api/caro/matches/lobby` with an invalid/expired-shaped token → `200`. All confirmed against the running app.
 
 **Checkpoint**: User Story 1 is fully functional and independently demonstrable.
 
