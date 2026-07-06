@@ -43,7 +43,7 @@ modified by this feature.
 
 **Purpose**: Lay down the proxy helper's cookie-gate — the first branch every later task builds on.
 
-- [ ] T001 Create `apps/web/lib/proxy.ts` exporting `forwardToBackend(request: Request, pathSegments:
+- [X] T001 Create `apps/web/lib/proxy.ts` exporting `forwardToBackend(request: Request, pathSegments:
   string[]): Promise<Response>`: reads the `access_token` cookie via `next/headers`'s `cookies()`
   (reusing the existing `ACCESS_COOKIE_NAME` constant from `apps/web/lib/session.ts` — no change to
   that file), and returns `NextResponse.json({ message: "Not signed in" }, { status: 401 })`
@@ -60,24 +60,24 @@ either exercises or depends on to be independently demonstrable at all.
 
 **⚠️ CRITICAL**: No user story (Phase 3+) can begin until this phase is complete.
 
-- [ ] T002 Extend `forwardToBackend()` (`apps/web/lib/proxy.ts`) to build the target URL from
+- [X] T002 Extend `forwardToBackend()` (`apps/web/lib/proxy.ts`) to build the target URL from
   `process.env.BACKEND_URL` plus `pathSegments` plus the incoming request's query string, and
   forward the request's method, body (for non-`GET`/`HEAD`), and `Content-Type` header with
   `Authorization: Bearer <access_token>` attached — ignoring any `Authorization` header the
   incoming request itself carries (contracts/proxy-routes.md, research.md §4 step 3) (depends on
   T001)
-- [ ] T003 Extend `forwardToBackend()` to relay the backend's response status, body, and
+- [X] T003 Extend `forwardToBackend()` to relay the backend's response status, body, and
   `Content-Type` verbatim to the caller on any non-`401` response (data-model.md, research.md §6)
   (depends on T002)
-- [ ] T004 Extend `forwardToBackend()` so that a `401` from the backend triggers a call to the
+- [X] T004 Extend `forwardToBackend()` so that a `401` from the backend triggers a call to the
   existing `refreshSession()` (`apps/web/lib/session.ts`, unchanged) and, on success, retries the
   forward once with the rotated access token and relays that response; on failure (`null`), returns
   `NextResponse.json({ message: "Not signed in" }, { status: 401 })` without a further backend call
   (research.md §4 step 4, FR-003/FR-004) (depends on T003)
-- [ ] T005 Create the catch-all Route Handler `apps/web/app/api/proxy/[...path]/route.ts` exporting
+- [X] T005 Create the catch-all Route Handler `apps/web/app/api/proxy/[...path]/route.ts` exporting
   `GET`, `POST`, `PUT`, `PATCH`, `DELETE`, each delegating to `forwardToBackend(request,
   params.path)` per `contracts/proxy-routes.md` (depends on T004)
-- [ ] T006 [P] Unit tests for `forwardToBackend` in `apps/web/lib/proxy.test.ts` (mocking
+- [X] T006 [P] Unit tests for `forwardToBackend` in `apps/web/lib/proxy.test.ts` (mocking
   `next/headers` and global `fetch`, mirroring `apps/web/lib/session.test.ts`'s mocking style):
   no `access_token` cookie → `401`, `fetch` never called; valid token → backend's mocked
   status/body relayed verbatim, request forwarded with the correct `Authorization` header and
@@ -100,7 +100,7 @@ a clean, distinguishable failure instead of a silent success or unhandled error.
 
 ### Implementation for User Story 1
 
-- [ ] T007 [US1] Add a test case in `apps/web/lib/proxy.test.ts` exercising the real
+- [X] T007 [US1] Add a test case in `apps/web/lib/proxy.test.ts` exercising the real
   `GET /api/proxy/accounts/me` → backend `GET /api/accounts/me` path specifically (not just a
   generic/fake path), asserting the account identity payload is relayed verbatim on success and a
   clean `401` is returned when signed out — this is the concrete proof spec.md's Independent Test
