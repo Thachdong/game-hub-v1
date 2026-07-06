@@ -207,17 +207,17 @@ plus the reuse assertion all pass.
 
 **Purpose**: Remove the now-dead NextAuth code and validate the whole feature end to end.
 
-- [ ] T026 Delete `apps/web/lib/auth.ts`, `apps/web/lib/next-auth.d.ts`,
+- [X] T026 Delete `apps/web/lib/auth.ts`, `apps/web/lib/next-auth.d.ts`,
   `apps/web/lib/token-refresh.ts`, `apps/web/lib/token-refresh.test.ts`, and
   `apps/web/app/api/auth/[...nextauth]/route.ts` — fully superseded by `lib/session.ts` and the new
   Route Handlers (depends on Phases 3–6 complete)
-- [ ] T027 Remove the `next-auth` dependency from `apps/web/package.json` (depends on T026)
-- [ ] T028 Run `grep -rn "next-auth" apps/web/package.json apps/web/app apps/web/lib
+- [X] T027 Remove the `next-auth` dependency from `apps/web/package.json` (depends on T026)
+- [X] T028 Run `grep -rn "next-auth" apps/web/package.json apps/web/app apps/web/lib
   apps/web/components` and confirm zero matches (SC-006, quickstart.md "Verifying NextAuth
   removal") (depends on T026, T027)
-- [ ] T029 Run `pnpm turbo run typecheck --filter=web` and fix any type errors
-- [ ] T030 Run `pnpm turbo run test --filter=web` and confirm every unit test passes
-- [ ] T031 Run `pnpm turbo run build --filter=web` and confirm the production build succeeds
+- [X] T029 Run `pnpm turbo run typecheck --filter=web` and fix any type errors
+- [X] T030 Run `pnpm turbo run test --filter=web` and confirm every unit test passes
+- [X] T031 Run `pnpm turbo run build --filter=web` and confirm the production build succeeds
 - [ ] T032 Execute quickstart.md's manual Scenarios 1–5 against a running backend and record the
   results
 
