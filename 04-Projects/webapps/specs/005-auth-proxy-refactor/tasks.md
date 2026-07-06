@@ -151,7 +151,7 @@ request carries no `Authorization` header and succeeds against the mock — iden
 
 ### Implementation for User Story 3
 
-- [ ] T010 [US3] Add a test in `packages/profiles-service/src/index.test.ts` (or a new
+- [X] T010 [US3] Add a test in `packages/profiles-service/src/index.test.ts` (or a new
   `packages/profiles-service/src/http-client.test.ts`, following the package's existing
   `axios-mock-adapter` test convention) that configures `configureProfilesService({ baseURL:
   "<mock-origin>", getAccessToken: () => null })`, calls an existing exported function (e.g.
