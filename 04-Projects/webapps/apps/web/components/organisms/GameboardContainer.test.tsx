@@ -60,6 +60,7 @@ function makeMatch(overrides: Partial<MatchState> = {}): MatchState {
     visibility: "public",
     status: "looking_for_opponent",
     creatorId: "c1",
+    tournamentId: null,
     playerX: { id: "c1", username: "creator", elo: 1500, winRate: 0.5 },
     playerO: null,
     currentTurnPlayerId: null,

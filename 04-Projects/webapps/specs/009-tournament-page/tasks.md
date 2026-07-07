@@ -82,52 +82,52 @@ paginated, score-descending standings list.
 standings render correctly (including the pre-start "starts in" state) with no pairing/Pause
 controls available to act on (spec.md US1).
 
-- [ ] T009 [US1] Add pagination to the repository port:
+- [X] T009 [US1] Add pagination to the repository port:
   `04-Projects/api/src/caro-game/domain/ports/tournament-registration.repository.port.ts`
   (`findAllByTournament(tournamentId, { page, pageSize }): Promise<{ items, total }>`)
-- [ ] T010 [US1] Implement the paginated query in
+- [X] T010 [US1] Implement the paginated query in
   `04-Projects/api/src/caro-game/infrastructure/persistence/tournament-registration.typeorm-repository.ts`
   (keep existing `tournament_points DESC, registered_at ASC` ordering; add `COUNT(*)`) (depends on T009)
-- [ ] T011 [US1] Thread pagination through
+- [X] T011 [US1] Thread pagination through
   `04-Projects/api/src/caro-game/application/queries/get-tournament-participant-list.use-case.ts`
   (depends on T010)
-- [ ] T012 [US1] Add a `page`/`pageSize` query DTO and wire the participants endpoint:
+- [X] T012 [US1] Add a `page`/`pageSize` query DTO and wire the participants endpoint:
   `04-Projects/api/src/caro-game/interface/dto/tournament.dto.ts` and
   `04-Projects/api/src/caro-game/interface/http/tournament.controller.ts`
   (`GET /api/caro/tournaments/{tournamentId}/participants` returns
   `{ items, page, pageSize, total }` per contracts/tournament-endpoints-addendum.md) (depends on T011)
-- [ ] T013 [P] [US1] Type and paginate the client calls in `packages/caro-service/src/tournaments.ts`
+- [X] T013 [P] [US1] Type and paginate the client calls in `packages/caro-service/src/tournaments.ts`
   (`getTournament` returns `TournamentDetails`; `listTournamentParticipants` accepts
   `{ page, pageSize }` and returns `StandingsPage`) and `packages/caro-service/src/tournaments.test.ts`
   (depends on T005, T012)
-- [ ] T014 [P] [US1] Create the `TournamentCountdown` molecule (+test):
+- [X] T014 [P] [US1] Create the `TournamentCountdown` molecule (+test):
   `apps/web/components/molecules/TournamentCountdown.tsx`,
   `apps/web/components/molecules/TournamentCountdown.test.tsx` — renders "starts in Ns" before
   `startAt`, "ends in Ns" after it, always driven by the server `startAt`/`endAt` timestamps (never a
   client-computed duration)
-- [ ] T015 [P] [US1] Create the `TournamentStandingRow` molecule (+test):
+- [X] T015 [P] [US1] Create the `TournamentStandingRow` molecule (+test):
   `apps/web/components/molecules/TournamentStandingRow.tsx`,
   `apps/web/components/molecules/TournamentStandingRow.test.tsx` — rank, username, score, streak,
   pause badge
-- [ ] T016 [P] [US1] Create the `Pagination` molecule (+test):
+- [X] T016 [P] [US1] Create the `Pagination` molecule (+test):
   `apps/web/components/molecules/Pagination.tsx`, `apps/web/components/molecules/Pagination.test.tsx`
   — page-number control (prev/next + current/total page)
-- [ ] T017 [US1] Create the `TournamentStandingsList` organism (+test) composing
+- [X] T017 [US1] Create the `TournamentStandingsList` organism (+test) composing
   `TournamentStandingRow` rows and `Pagination`:
   `apps/web/components/organisms/TournamentStandingsList.tsx`,
   `apps/web/components/organisms/TournamentStandingsList.test.tsx` (depends on T015, T016)
-- [ ] T018 [US1] Create the `TournamentTemplate` (+test):
+- [X] T018 [US1] Create the `TournamentTemplate` (+test):
   `apps/web/components/templates/TournamentTemplate.tsx`,
   `apps/web/components/templates/TournamentTemplate.test.tsx` — countdown header, standings list
   below (depends on T014, T017)
-- [ ] T019 [US1] Create the `TournamentContainer` organism (+test):
+- [X] T019 [US1] Create the `TournamentContainer` organism (+test):
   `apps/web/components/organisms/TournamentContainer.tsx`,
   `apps/web/components/organisms/TournamentContainer.test.tsx` — fetches tournament details +
   standings page via `packages/caro-service`, subscribes to `tournament:status-changed` and
   `tournament:participant-updated` via `useCaroRealtimeEvent(..., tournamentId)` to keep the
   countdown/status and standings live (merging each `participant-updated` delta into standings state
   and re-sorting), renders `TournamentTemplate` (depends on T013, T018, T007, T008)
-- [ ] T020 [US1] Wire the route:
+- [X] T020 [US1] Wire the route:
   `apps/web/app/(public)/game-caro/tournament/[tournamentId]/page.tsx` (+`page.test.tsx`) — replace
   the "Full detail view coming soon" placeholder with `TournamentContainer` (depends on T019)
 
@@ -144,19 +144,19 @@ match's gameboard, and the game auto-starts 5 seconds after the gameboard opens.
 both land on the correct gameboard, which begins play automatically 5 seconds later with no manual
 Start click (spec.md US2).
 
-- [ ] T021 [US2] Extend the claim query's signature in
+- [X] T021 [US2] Extend the claim query's signature in
   `04-Projects/api/src/caro-game/domain/ports/tournament-registration.repository.port.ts`
   (`claimTwoIdlePlayers(tournamentId, presentPlayerIds: string[])`) (builds on T009's file)
-- [ ] T022 [US2] Implement the presence+pause-filtered `SKIP LOCKED` query in
+- [X] T022 [US2] Implement the presence+pause-filtered `SKIP LOCKED` query in
   `04-Projects/api/src/caro-game/infrastructure/persistence/tournament-registration.typeorm-repository.ts`
   (`AND is_paused = false AND player_id = ANY($presentPlayerIds)`) (depends on T021; builds on T010's
   file)
-- [ ] T023 [US2] Update the matchmaking service signature in
+- [X] T023 [US2] Update the matchmaking service signature in
   `04-Projects/api/src/caro-game/infrastructure/matchmaking/tournament-matchmaking.service.ts`
   (`pairNextTwo(tournamentId, presentPlayerIds)`) (depends on T022)
-- [ ] T024 [US2] Update `04-Projects/api/src/caro-game/application/commands/pair-idle-players.use-case.ts`
+- [X] T024 [US2] Update `04-Projects/api/src/caro-game/application/commands/pair-idle-players.use-case.ts`
   to read present player IDs from the gateway (T006) before calling `pairNextTwo` (depends on T023, T006)
-- [ ] T025 [US2] Emit the presence-join event from
+- [X] T025 [US2] Emit the presence-join event from
   `04-Projects/api/src/realtime/realtime.gateway.ts`'s `handleJoinRoom` for `tournament:` rooms
   (builds on T006's file)
 - [ ] T026 [P] [US2] Create the presence-join handler:
@@ -230,10 +230,10 @@ persists across page visits.
 **Independent Test**: Click Pause, confirm no new pairing occurs while paused (including after
 closing and reopening the tournament page), then Resume and confirm eligibility returns (spec.md US4).
 
-- [ ] T036 [US4] Add `setPaused` to the repository port:
+- [X] T036 [US4] Add `setPaused` to the repository port:
   `04-Projects/api/src/caro-game/domain/ports/tournament-registration.repository.port.ts` (builds on
   T021's file)
-- [ ] T037 [US4] Implement `setPaused` in
+- [X] T037 [US4] Implement `setPaused` in
   `04-Projects/api/src/caro-game/infrastructure/persistence/tournament-registration.typeorm-repository.ts`
   (builds on T022's file; depends on T036)
 - [ ] T038 [P] [US4] Create the pause use-case:
@@ -245,7 +245,7 @@ closing and reopening the tournament page), then Resume and confirm eligibility 
   `04-Projects/api/src/caro-game/interface/http/tournament.controller.ts`
   (`PATCH /api/caro/tournaments/{tournamentId}/registrations/pause` per
   contracts/tournament-endpoints-addendum.md) (builds on T012's file; depends on T038, T039)
-- [ ] T041 [P] [US4] Add the client call:
+- [X] T041 [P] [US4] Add the client call:
   `packages/caro-service/src/tournaments.ts`, `packages/caro-service/src/tournaments.test.ts`
   (`setTournamentPause`) (builds on T013's file; depends on T040)
 - [ ] T042 [P] [US4] Create the `TournamentPauseControl` molecule (+test):

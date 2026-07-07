@@ -19,7 +19,7 @@ import { RequestTournamentCreatorRoleUseCase } from '../../application/commands/
 import { CreateTournamentUseCase } from '../../application/commands/create-tournament.use-case';
 import { ListTournamentsUseCase } from '../../application/queries/list-tournaments.use-case';
 import { GetTournamentDetailsUseCase } from '../../application/queries/get-tournament-details.use-case';
-import { CreateTournamentDto, ListTournamentsQueryDto } from '../dto/tournament.dto';
+import { CreateTournamentDto, ListTournamentsQueryDto, ListParticipantsQueryDto } from '../dto/tournament.dto';
 import { RegisterForTournamentUseCase } from '../../application/commands/register-for-tournament.use-case';
 import { GetTournamentParticipantListUseCase } from '../../application/queries/get-tournament-participant-list.use-case';
 import { SendTournamentChatMessageUseCase } from '../../application/commands/send-tournament-chat-message.use-case';
@@ -134,19 +134,34 @@ export class TournamentController {
   }
 
   @Get('tournaments/:tournamentId/participants')
-  @ApiOperation({ summary: 'Get tournament participant list ordered by score (public)' })
-  async getParticipants(@Param('tournamentId', ParseUUIDPipe) tournamentId: string) {
-    const registrations = await this.getParticipantListUseCase.execute(tournamentId);
-    return registrations.map((r, idx) => ({
-      rank: idx + 1,
-      registrationId: r.id,
-      playerId: r.playerId,
-      tournamentPoints: r.tournamentPoints,
-      winStreak: r.winStreak,
-      status: r.status,
-      eloAtRegistration: r.eloAtRegistration,
-      registeredAt: r.registeredAt,
-    }));
+  @ApiOperation({ summary: 'Get tournament participant list ordered by score, paginated (public)' })
+  async getParticipants(
+    @Param('tournamentId', ParseUUIDPipe) tournamentId: string,
+    @Query() query: ListParticipantsQueryDto,
+  ) {
+    const page = query.page ?? 1;
+    const pageSize = query.pageSize ?? 20;
+    const { items, total } = await this.getParticipantListUseCase.execute({
+      tournamentId,
+      page,
+      pageSize,
+    });
+    return {
+      items: items.map((r, idx) => ({
+        rank: (page - 1) * pageSize + idx + 1,
+        registrationId: r.id,
+        playerId: r.playerId,
+        tournamentPoints: r.tournamentPoints,
+        winStreak: r.winStreak,
+        isPaused: r.isPaused,
+        status: r.status,
+        eloAtRegistration: r.eloAtRegistration,
+        registeredAt: r.registeredAt,
+      })),
+      page,
+      pageSize,
+      total,
+    };
   }
 
   // ── US7: Tournament chat ──────────────────────────────────────────────────

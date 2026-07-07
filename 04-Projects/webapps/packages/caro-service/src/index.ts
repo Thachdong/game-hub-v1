@@ -39,6 +39,7 @@ export {
   reviewTournamentCreatorRequest,
   revokeTournamentCreator,
   sendTournamentChat,
+  setTournamentPause,
 } from "./tournaments.js";
 export type {
   AdminGameConfig,
@@ -56,4 +57,8 @@ export type {
   MoveTimeSeconds,
   PlaceMoveResult,
   QuickPairResult,
+  StandingsPage,
+  TournamentDetails,
+  TournamentStanding,
+  TournamentStatus,
 } from "./types.js";

@@ -45,10 +45,10 @@ export class TournamentMatchmakingService {
    * Returns null if fewer than 2 idle players are available.
    * The SKIP LOCKED claim and match creation happen inside a single transaction (C1 fix).
    */
-  async pairNextTwo(tournamentId: string): Promise<PairResult | null> {
+  async pairNextTwo(tournamentId: string, presentPlayerIds: string[]): Promise<PairResult | null> {
     return this.dataSource.transaction(async () => {
       // ADR-CARO-GAME-003: SKIP LOCKED inside transaction
-      const claimed = await this.registrationRepo.claimTwoIdlePlayers(tournamentId);
+      const claimed = await this.registrationRepo.claimTwoIdlePlayers(tournamentId, presentPlayerIds);
       if (claimed.length < 2) return null;
 
       const [white, black] = claimed;

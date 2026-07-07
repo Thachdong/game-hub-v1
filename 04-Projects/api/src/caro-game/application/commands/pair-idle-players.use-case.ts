@@ -24,7 +24,8 @@ export class PairIdlePlayersUseCase {
     if (!tournament || tournament.status !== 'in_progress') return;
 
     while (true) {
-      const result = await this.matchmakingService.pairNextTwo(tournamentId);
+      const presentPlayerIds = this.realtimeRoom.getPresentPlayerIds(`tournament:${tournamentId}`);
+      const result = await this.matchmakingService.pairNextTwo(tournamentId, presentPlayerIds);
       if (!result) break;
 
       const { match, tournamentMatch } = result;

@@ -1,6 +1,11 @@
 import { withServiceResult, type ServiceResult } from "@game-hub/service-core";
 import { getClient } from "./http-client.js";
-import type { ChatMessage, CreateTournamentInput } from "./types.js";
+import type {
+  ChatMessage,
+  CreateTournamentInput,
+  StandingsPage,
+  TournamentDetails,
+} from "./types.js";
 
 // The live OpenAPI contract documents no named response schemas for this entire group (every
 // response is `description: ''` with no `content`) — data-model.md flagged this gap and tasks.md
@@ -47,13 +52,13 @@ export function listTournaments(input?: {
 }
 
 /** GET /api/caro/tournaments/{tournamentId} */
-export function getTournament(input: { tournamentId: string }): Promise<ServiceResult<unknown>> {
+export function getTournament(input: { tournamentId: string }): Promise<ServiceResult<TournamentDetails>> {
   return withServiceResult(getClient(), {
     method: "GET",
     buildRequest: (data: { tournamentId: string }) => ({
       url: `/api/caro/tournaments/${data.tournamentId}`,
     }),
-    mapResponse: (data) => data,
+    mapResponse: (data) => data as TournamentDetails,
   })(input);
 }
 
@@ -71,13 +76,32 @@ export function registerForTournament(input: { tournamentId: string }): Promise<
 /** GET /api/caro/tournaments/{tournamentId}/participants */
 export function listTournamentParticipants(input: {
   tournamentId: string;
-}): Promise<ServiceResult<unknown[]>> {
+  page?: number;
+  pageSize?: number;
+}): Promise<ServiceResult<StandingsPage>> {
   return withServiceResult(getClient(), {
     method: "GET",
-    buildRequest: (data: { tournamentId: string }) => ({
+    buildRequest: (data: { tournamentId: string; page?: number; pageSize?: number }) => ({
       url: `/api/caro/tournaments/${data.tournamentId}/participants`,
+      params: { page: data.page, pageSize: data.pageSize },
     }),
-    mapResponse: (data) => data as unknown[],
+    mapResponse: (data) => data as StandingsPage,
+  })(input);
+}
+
+/** PATCH /api/caro/tournaments/{tournamentId}/registrations/pause */
+export function setTournamentPause(input: {
+  tournamentId: string;
+  paused: boolean;
+}): Promise<ServiceResult<{ registrationId: string; tournamentId: string; playerId: string; isPaused: boolean }>> {
+  return withServiceResult(getClient(), {
+    method: "PATCH",
+    buildRequest: (data: { tournamentId: string; paused: boolean }) => ({
+      url: `/api/caro/tournaments/${data.tournamentId}/registrations/pause`,
+      body: { paused: data.paused },
+    }),
+    mapResponse: (data) =>
+      data as { registrationId: string; tournamentId: string; playerId: string; isPaused: boolean },
   })(input);
 }
 

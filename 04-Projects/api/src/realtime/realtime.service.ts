@@ -39,4 +39,8 @@ export class RealtimeService implements IRealtimePushPort, IRealtimeRoomPort {
   clearRoomViewers(room: string): void {
     this.gateway.clearRoomViewers(room);
   }
+
+  getPresentPlayerIds(room: string): string[] {
+    return this.gateway.getPresentPlayerIds(room);
+  }
 }

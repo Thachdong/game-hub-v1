@@ -4,14 +4,17 @@ import { cookies } from "next/headers";
 import {
   createMatch,
   getMatch,
+  getTournament,
   joinMatch,
   listMatchChat,
+  listTournamentParticipants,
   muteMatchViewer,
   registerForTournament,
   requestDraw,
   requestQuickPair,
   respondToDrawRequest,
   sendMatchChat,
+  setTournamentPause,
   startMatch,
   submitMove,
   surrenderMatch,
@@ -42,6 +45,24 @@ export async function createMatchAction(input: { configId: string; visibility: "
 
 export async function registerForTournamentAction(tournamentId: string) {
   return withCaroService(() => registerForTournament({ tournamentId }));
+}
+
+// --- Tournament page (spec 009) ----------------------------------------------
+
+export async function getTournamentAction(tournamentId: string) {
+  return withCaroService(() => getTournament({ tournamentId }));
+}
+
+export async function listTournamentParticipantsAction(input: {
+  tournamentId: string;
+  page?: number;
+  pageSize?: number;
+}) {
+  return withCaroService(() => listTournamentParticipants(input));
+}
+
+export async function setTournamentPauseAction(input: { tournamentId: string; paused: boolean }) {
+  return withCaroService(() => setTournamentPause(input));
 }
 
 export async function requestQuickPairAction(configId: string) {
