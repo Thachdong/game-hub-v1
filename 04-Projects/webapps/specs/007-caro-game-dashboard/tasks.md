@@ -168,8 +168,8 @@ short wait via the realtime bridge.
 
 **Purpose**: Verify the whole feature end-to-end and keep documentation honest
 
-- [ ] T050 [P] Run `turbo run test --filter=@game-hub/web` for the full suite (every task above plus all pre-existing tests) and confirm all pass
-- [ ] T051 Update the doc comment atop `OPTIONAL_AUTH_ROUTES` in `apps/web/lib/proxy.ts` to mention the three new tournament-read exceptions and point at `contracts/proxy-auth-policy-addendum.md`
+- [X] T050 [P] Run `turbo run test --filter=@game-hub/web` for the full suite (every task above plus all pre-existing tests) and confirm all pass
+- [X] T051 Update the doc comment atop `OPTIONAL_AUTH_ROUTES` in `apps/web/lib/proxy.ts` to mention the three new tournament-read exceptions and point at `contracts/proxy-auth-policy-addendum.md`
 - [ ] T052 Walk through quickstart.md's manual/live validation steps against a running backend, if available; explicitly confirm and note the two documented, expected-today limitations (leaderboard/Quick Pair guest 401s per research.md §2 rows 2/4, and no live Lobby update from another session per row 5) rather than treating them as bugs
 
 ---
