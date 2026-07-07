@@ -193,7 +193,7 @@ prev/next steps the board through every recorded move in the correct order (quic
 - [ ] T056 [P] Run `turbo run lint --filter=@game-hub/web` and fix any findings across this feature's new/modified files
 - [ ] T057 [P] Run `turbo run test --filter=@game-hub/web` and confirm the full suite is green
 - [ ] T058 Execute quickstart.md's manual/live validation steps 2–8 against a running `apps/web` + `04-Projects/api` pair
-- [ ] T059 Review spec.md against `checklists/permissions.md`; resolve CHK003/CHK007/CHK020 (whether the non-creator's inert Start control is disabled or hidden — pick one and reflect it in `StartCountdown`) and CHK021 (confirm "kick" and "mute" are the same single action, per `MuteViewerUseCase`, and align spec.md's wording)
+- [ ] T059 Verify implementation matches the permissions decisions already resolved in spec.md/`checklists/permissions.md` (2026-07-07 review): `StartCountdown` renders the non-creator's Start control visibly disabled, not hidden (FR-004/CHK003/CHK007/CHK020); `ViewerListItem`'s mute/kick control maps to the single `muteMatchViewer` action, matching FR-016/CHK021's "kick and mute are the same action" conclusion
 
 ---
 

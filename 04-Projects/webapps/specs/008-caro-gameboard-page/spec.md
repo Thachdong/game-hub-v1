@@ -105,8 +105,8 @@ Start and confirming the match ends for both.
    creator clicks Start before the countdown reaches zero, **Then** the match transitions to
    in-progress for both players and the CTA area switches to Request Draw/Surrender.
 2. **Given** two signed-in players present in a not-yet-started match, **When** the non-creator
-   participant attempts to click Start, **Then** the attempt has no effect — only the creator can
-   start the match.
+   participant views the Start control, **Then** it is rendered visibly disabled and clicking it
+   has no effect — only the creator can start the match.
 3. **Given** two signed-in players present in a not-yet-started match, **When** the 15-second
    countdown reaches zero with the creator not having clicked Start, **Then** the match ends
    automatically with no winner, and both players see the ended state without further action.
@@ -168,8 +168,8 @@ in the correct order.
   (state 2, before the countdown expires)? The match reverts to the "waiting for opponent" state
   (state 1) rather than ending, since no game has begun yet.
 - What happens when the non-creator participant clicks Start? Nothing happens — Start only takes
-  effect for the match's creator; the non-creator sees the same countdown but no enabled control
-  (or a disabled one) rather than an error.
+  effect for the match's creator; the non-creator sees the same countdown with the Start control
+  rendered visibly disabled, rather than an error, a hidden control, or a usable one.
 - What happens when a signed-in spectator (not one of the two match participants) tries to click
   Start, Request Draw, Surrender, or place a move? The action is rejected the same way a guest's
   would be, since those actions are reserved for the two match participants (and Start further
@@ -179,10 +179,40 @@ in the correct order.
 - What happens when a match ends because a player surrendered, disconnected, or ran out of time on
   a move, rather than by checkmate or accepted draw? The gameboard still shows the ended state
   (both cards, viewer list, Review Moves, chat) regardless of which ending reason applies.
-- What happens when a viewer who has been kicked/muted by a participant tries to send another chat
-  message? Their message is rejected the same way a guest's would be.
+- What happens when a viewer who has been muted/kicked by a participant tries to send another chat
+  message? Their message is rejected the same way a guest's would be, while they continue to see
+  the board, player cards, viewer list, and existing chat history — "kick" and "mute" refer to the
+  same single moderation action (blocking future chat sends), not a removal from viewing.
 - What happens when there are no spectators at all? The viewer list area is omitted or shown empty
   rather than as an error.
+- What happens when a signed-in spectator's seat "opens up" (e.g., a participant disconnects)? Out
+  of scope for this feature — a spectator never becomes a match participant during the same
+  session; only the original two participants can occupy those seats.
+- What happens when one participant surrenders at nearly the same moment the other sends a draw
+  request (or any two match-ending/mutating actions race each other)? The server enforces a single
+  authoritative state transition; whichever action the server processes first ends (or advances)
+  the match, and any conflicting action that arrives after MUST be rejected as a no-op because the
+  match is no longer in the state that action requires.
+- What happens when a participant's session expires or their sign-in becomes invalid mid-match?
+  Their next attempt at any gated action (Start, Request Draw, Surrender, placing a move, Report,
+  chat, viewer kick/mute) MUST be treated the same as a guest's — redirected to the login page —
+  rather than silently failing or being treated as still-authorized.
+
+### Actor Definitions
+
+Every viewer of the gameboard page falls into exactly one of these categories:
+
+- **Guest**: No active session. Full read access; every gated action redirects to login.
+- **Signed-in spectator**: An authenticated user who is not one of the match's two participants.
+  Same read access as a guest; chat and Report are available (sign-in is sufficient); Start,
+  Request Draw, Surrender, move placement, and viewer kick/mute are not — attempting any of them is
+  rejected the same way a guest's attempt would be.
+- **Match participant**: One of the two players seated in the match (the creator or the player who
+  joined). Can chat, Report, place moves (when it's their turn and the match is in progress),
+  request a draw, surrender, and kick/mute viewer-list entries. Cannot start the match unless they
+  are also the creator.
+- **Match creator**: The participant who created the match. The only actor who can click Start to
+  effect the transition out of the pre-start countdown.
 
 ## Requirements *(mandatory)*
 
@@ -199,15 +229,19 @@ in the correct order.
   list (when non-empty), and the chat box.
 - **FR-004**: When a second player has joined but the match hasn't started, the right column MUST
   show: both player cards, the viewer list (when non-empty), a Start control with a 15-second
-  countdown, and the chat box. The Start control MUST only take effect for the match's creator; the
-  other participant sees the same countdown but cannot start the match themselves.
+  countdown, and the chat box. The Start control MUST only take effect for the match's creator; for
+  the other participant it MUST be rendered visibly disabled (present but non-interactive) rather
+  than hidden or silently inert, so the difference between "not my turn to start" and "broken
+  control" is visually clear.
 - **FR-005**: The 15-second countdown MUST be computed from a server-provided deadline timestamp;
   the viewer's local clock MUST NEVER be treated as the source of truth for its remaining time.
 - **FR-006**: If the creator does not click Start before the countdown reaches zero, the match MUST
   end automatically with no winner, and both players MUST see the ended state without further
   action from either of them.
 - **FR-007**: Once the match is in progress, the right column MUST show: both player cards, the
-  viewer list (when non-empty), "Request Draw" and "Surrender" CTAs, and the chat box.
+  viewer list (when non-empty), "Request Draw" and "Surrender" CTAs, and the chat box. Once a draw
+  request is sent, the accept/decline prompt it produces MUST be actionable only by the other match
+  participant; no spectator, guest, or the requester themselves may accept or decline it.
 - **FR-008**: Once the match has ended (by completion, draw, surrender, or automatic cancellation),
   the right column MUST show: both player cards, the viewer list (when non-empty), a "Review
   Moves" control, and the chat box.
@@ -220,12 +254,17 @@ in the correct order.
 - **FR-012**: Guests (no active session) MUST be able to view the gameboard — the board, both
   player cards or the waiting placeholder, the viewer list, and the chat history — for a match in
   any of the four states, matching the app's existing guest read-access convention (spec
-  006-caro-guest-access).
-- **FR-013**: Guests MUST see the same Start, Request Draw, Surrender, move-placement, Report, and
-  viewer-kick controls a signed-in participant would see; clicking any of them MUST redirect the
-  guest to the login page instead of performing the action, matching the app's existing
-  redirect-to-login convention (spec 002-login-layout-nextauth FR-009; spec
-  007-caro-game-dashboard FR-008/FR-009/FR-013/FR-015).
+  006-caro-guest-access). Signed-in spectators (non-participants) MUST have this same full
+  read-access across all four states — sign-in never restricts what can be viewed, only which
+  actions can be performed.
+- **FR-013**: Guests MUST see the same Start, Request Draw, Surrender, move-placement, chat-send,
+  Report, and viewer-kick/mute controls a signed-in participant would see, and only in the match
+  state(s) where that control exists at all (e.g., Start only appears during the pre-start
+  countdown; Request Draw/Surrender/move-placement only while in progress); clicking or submitting
+  any of them MUST redirect the guest to the login page instead of performing the action, with the
+  redirect including a callback back to this match's gameboard so the guest returns to it after
+  signing in, matching the app's existing redirect-to-login convention (spec
+  002-login-layout-nextauth FR-009; spec 007-caro-game-dashboard FR-008/FR-009/FR-013/FR-015).
 - **FR-014**: Requesting a draw, surrendering, and placing a move MUST be restricted to the match's
   two participants; a signed-in visitor who is not one of the two participants MUST be redirected
   the same way a guest would be when attempting any of these. Starting the match MUST be further
@@ -233,9 +272,13 @@ in the correct order.
   match participant, MUST NOT be able to start it.
 - **FR-015**: Sending a chat message and using Report MUST be available to any signed-in viewer
   (a participant or a spectator), not just the two match participants; only sign-in status gates
-  these two actions.
-- **FR-016**: Kicking or muting an entry in the viewer list MUST be available only to the match's
-  two participants; guests and spectators MUST NOT have this control produce any effect.
+  these two actions. Report's target is the match's other player shown on the gameboard (a
+  participant reports their opponent; a spectator reports either player), not other spectators or
+  viewers.
+- **FR-016**: "Kicking" and "muting" a viewer-list entry both refer to the same single moderation
+  action — blocking that viewer's ability to send chat messages, while they continue to view the
+  match — available only to the match's two participants. This control MUST be visible to every
+  viewer per FR-013, but MUST NOT produce any effect for guests and non-participant spectators.
 - **FR-017**: Every state transition (opponent joining, match starting, moves being placed, the
   match ending), every new chat message, and every viewer list change MUST be reflected for all
   current viewers live, via the platform's realtime transport, without requiring a manual refresh
@@ -253,7 +296,8 @@ in the correct order.
 - **Waiting-for-Opponent Placeholder**: Shown in place of the Opponent Player Card before a second
   player has joined.
 - **Viewer List / Viewer Entry**: The set of spectators currently watching the match; each entry
-  may be muted/kicked by a match participant.
+  may be muted/kicked by a match participant — one single moderation action (blocks future chat
+  sends; viewing is unaffected), regardless of which of the two words is used to refer to it.
 - **Pre-Start Countdown**: The 15-second window, anchored to a server-provided deadline, during
   which the match's creator may click Start before the match is automatically cancelled.
 - **In-Game Actions**: The Request Draw and Surrender controls available to the two participants
@@ -270,8 +314,9 @@ in the correct order.
 - **SC-001**: A guest opening a match's gameboard link sees the board, player cards (or waiting
   placeholder), viewer list, and chat history for that match's current state immediately, with no
   sign-in prompt blocking any of that read-only content.
-- **SC-002**: 100% of guest or non-participant attempts to Start, Request Draw, Surrender, place a
-  move, Report, or kick/mute a viewer redirect to the login page instead of performing the action.
+- **SC-002**: 100% of guest or non-participant attempts to perform each of the following redirect
+  to the login page instead of performing the action, measured independently per action: (a) Start,
+  (b) Request Draw, (c) Surrender, (d) placing a move, (e) Report, (f) kicking or muting a viewer.
 - **SC-003**: When a second player joins a waiting match, both players see the opponent's card and
   the Start countdown appear within a few seconds, with no manual refresh.
 - **SC-004**: If the creator does not click Start within the 15-second window, the match ends
@@ -282,6 +327,9 @@ in the correct order.
   few seconds, with no manual refresh.
 - **SC-007**: After a match ends, any viewer can step through 100% of the match's recorded moves,
   in the exact order they were played.
+- **SC-008**: 0% of Start clicks by anyone other than the match's creator (the other participant,
+  a spectator, or a guest) ever transition the match out of the pre-start countdown; the control
+  renders as visibly disabled/inert for all of them, every time.
 
 ## Assumptions
 
@@ -310,3 +358,6 @@ in the correct order.
   additional sizing control exists on this page.
 - Chat message history remains visible to every viewer, including guests, in all four states; only
   sending a new message requires sign-in.
+- A signed-in spectator never becomes a match participant during the same session (e.g., by filling
+  a seat vacated by a disconnected player); reseating/rejoining as a participant is out of scope for
+  this feature.
