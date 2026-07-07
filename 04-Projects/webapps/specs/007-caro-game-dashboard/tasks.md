@@ -141,8 +141,8 @@ settings, and confirm the new match appears at the top of the Lobby list immedia
 **Independent Test**: Signed in, click "Register" on a tournament card and confirm
 `registerForTournament` is called and the card's registered count updates.
 
-- [ ] T046 [US4] In `apps/web/components/molecules/TournamentCard.tsx`, wire the "Register" button's `onAction` to call `registerForTournament({ tournamentId })` and update the displayed registered count on success (depends on T028)
-- [ ] T047 [P] [US4] Add a test in `apps/web/components/molecules/TournamentCard.test.tsx`: signed-in click on "Register" calls `registerForTournament` and the registered count updates (quickstart.md item 3)
+- [X] T046 [US4] In `apps/web/components/molecules/TournamentCard.tsx`, wire the "Register" button's `onAction` to call `registerForTournament({ tournamentId })` and update the displayed registered count on success (depends on T028)
+- [X] T047 [P] [US4] Add a test in `apps/web/components/molecules/TournamentCard.test.tsx`: signed-in click on "Register" calls `registerForTournament` and the registered count updates (quickstart.md item 3)
 
 **Checkpoint**: Tournament registration works end-to-end; US1–US3 are unaffected.
 
