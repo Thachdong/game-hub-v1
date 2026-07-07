@@ -1,7 +1,20 @@
 "use server";
 
 import { cookies } from "next/headers";
-import { createMatch, joinMatch, registerForTournament, requestQuickPair } from "@game-hub/caro-service";
+import {
+  createMatch,
+  joinMatch,
+  listMatchChat,
+  muteMatchViewer,
+  registerForTournament,
+  requestDraw,
+  requestQuickPair,
+  respondToDrawRequest,
+  sendMatchChat,
+  startMatch,
+  submitMove,
+  surrenderMatch,
+} from "@game-hub/caro-service";
 import { ACCESS_COOKIE_NAME, ensureCaroServiceConfigured } from "@/lib/session";
 
 /**
@@ -32,4 +45,38 @@ export async function registerForTournamentAction(tournamentId: string) {
 
 export async function requestQuickPairAction(configId: string) {
   return withCaroService(() => requestQuickPair({ configId }));
+}
+
+// --- Gameboard (spec 008) ---------------------------------------------------
+
+export async function startMatchAction(id: string) {
+  return withCaroService(() => startMatch({ id }));
+}
+
+export async function submitMoveAction(input: { id: string; row: number; col: number }) {
+  return withCaroService(() => submitMove(input));
+}
+
+export async function surrenderMatchAction(id: string) {
+  return withCaroService(() => surrenderMatch({ id }));
+}
+
+export async function requestDrawAction(id: string) {
+  return withCaroService(() => requestDraw({ id }));
+}
+
+export async function respondToDrawRequestAction(input: { id: string; action: "accept" | "decline" }) {
+  return withCaroService(() => respondToDrawRequest(input));
+}
+
+export async function listMatchChatAction(matchId: string) {
+  return withCaroService(() => listMatchChat({ matchId }));
+}
+
+export async function sendMatchChatAction(input: { matchId: string; content: string }) {
+  return withCaroService(() => sendMatchChat(input));
+}
+
+export async function muteMatchViewerAction(input: { matchId: string; viewerId: string }) {
+  return withCaroService(() => muteMatchViewer(input));
 }

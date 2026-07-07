@@ -37,6 +37,30 @@ describe("RequireSignIn", () => {
     expect(push).toHaveBeenCalledWith("/login?callbackUrl=%2Fgame-caro%2Fm1");
   });
 
+  it("redirects a signed-in but unauthorized visitor to login instead of invoking the action (spec 008 FR-014)", () => {
+    mockedUseAuthSession.mockReturnValue({
+      isSignedIn: true,
+      account: { id: "1", email: "a@b.com", username: "alice", avatarUrl: "https://a" },
+      refresh: vi.fn(),
+      logout: vi.fn(),
+    });
+    const push = vi.fn();
+    mockedUseRouter.mockReturnValue({ push } as unknown as ReturnType<typeof useRouter>);
+    mockedUsePathname.mockReturnValue("/game-caro/m1");
+
+    const onAction = vi.fn();
+    render(
+      <RequireSignIn onAction={onAction} authorized={false}>
+        {({ onClick }) => <button onClick={onClick}>Start</button>}
+      </RequireSignIn>
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /start/i }));
+
+    expect(onAction).not.toHaveBeenCalled();
+    expect(push).toHaveBeenCalledWith("/login?callbackUrl=%2Fgame-caro%2Fm1");
+  });
+
   it("invokes the action for a signed-in visitor without redirecting", () => {
     mockedUseAuthSession.mockReturnValue({
       isSignedIn: true,

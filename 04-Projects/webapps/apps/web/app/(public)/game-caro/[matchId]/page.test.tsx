@@ -16,6 +16,12 @@ vi.mock("@/lib/session", () => ({
 
 vi.mock("next/headers", () => ({ cookies: vi.fn(async () => ({ get: () => undefined })) }));
 
+vi.mock("@/lib/actions/caro", () => ({
+  muteMatchViewerAction: vi.fn(),
+}));
+vi.mock("@/lib/useCaroRealtime", () => ({
+  useCaroRealtimeEvent: vi.fn(),
+}));
 vi.mock("@/components/templates/Providers", () => ({
   useAuthSession: vi.fn(() => ({ isSignedIn: false })),
 }));
@@ -23,8 +29,11 @@ vi.mock("next/navigation", () => ({
   useRouter: vi.fn(() => ({ push: vi.fn() })),
   usePathname: vi.fn(() => "/game-caro/m1"),
 }));
-vi.mock("@/lib/useCaroRealtime", () => ({
-  useCaroRealtimeEvent: vi.fn(),
+vi.mock("@/components/organisms/ChatBox", () => ({
+  ChatBox: () => <div data-testid="chat-box" />,
+}));
+vi.mock("@/components/molecules/ReportPlayerForm", () => ({
+  ReportPlayerForm: () => <button type="button">Report</button>,
 }));
 
 const { default: GameCaroDetailPage } = await import("./page.js");

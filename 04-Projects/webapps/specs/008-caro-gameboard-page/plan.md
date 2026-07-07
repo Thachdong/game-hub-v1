@@ -177,14 +177,24 @@ apps/web/
 │   │   ├── MoveReplayControls.tsx            # NEW — "Review Moves" control + prev/next stepping
 │   │   ├── MoveReplayControls.test.tsx       # NEW
 │   │   ├── GameboardSidePanel.tsx            # NEW — composes cards + viewer list + state CTA area + chat
-│   │   └── GameboardSidePanel.test.tsx       # NEW
+│   │   ├── GameboardSidePanel.test.tsx       # NEW
+│   │   ├── GameboardContainer.tsx            # NEW (added during Phase 3, not in original plan) —
+│   │   │                                     #   owns live match/viewers/replayIndex state and
+│   │   │                                     #   composes GameboardTemplate; needed because
+│   │   │                                     #   GameboardTemplate is a pure two-slot layout and
+│   │   │                                     #   page.tsx (a Server Component) can't hold React
+│   │   │                                     #   state or realtime subscriptions itself
+│   │   └── GameboardContainer.test.tsx       # NEW
 │   └── templates/
 │       ├── GameboardTemplate.tsx             # NEW — board left, GameboardSidePanel right
 │       └── GameboardTemplate.test.tsx        # NEW
 └── lib/
     ├── proxy.ts                              # MODIFIED: +1 OPTIONAL_AUTH_ROUTES entry (chat history GET)
     ├── proxy.test.ts                         # MODIFIED
-    └── useCaroRealtimeEvent.ts               # UNCHANGED — shared EventSource hook, reused as-is
+    └── useCaroRealtime.ts                    # MODIFIED (plan said UNCHANGED; the addendum's own
+                                               #   "Client usage" section requires matchId threaded
+                                               #   through the shared EventSource URL) — the file is
+                                               #   useCaroRealtime.ts, not useCaroRealtimeEvent.ts
 
 packages/caro-service/                        # UNCHANGED — getMatch, startMatch, submitMove,
                                                #   surrenderMatch, requestDraw, respondToDrawRequest,
