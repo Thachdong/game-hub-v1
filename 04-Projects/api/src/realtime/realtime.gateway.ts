@@ -95,6 +95,7 @@ export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect
         viewers.add(data.matchViewerUsername);
         this.server.to(room).emit('match:viewer_joined', {
           matchId: room.replace('match:', ''),
+          viewerId: client.userId,
           viewerUsername: data.matchViewerUsername,
         });
       }
@@ -115,6 +116,7 @@ export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect
         viewers.delete(data.matchViewerUsername);
         this.server.to(room).emit('match:viewer_left', {
           matchId: room.replace('match:', ''),
+          viewerId: client.userId,
           viewerUsername: data.matchViewerUsername,
         });
       }
