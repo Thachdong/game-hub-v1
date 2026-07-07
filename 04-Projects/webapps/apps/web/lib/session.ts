@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { configureAccountService, getCurrentAccount } from "@game-hub/account-service";
+import { configureCaroService } from "@game-hub/caro-service";
 
 export const ACCESS_COOKIE_NAME = "access_token";
 export const REFRESH_COOKIE_NAME = "refresh_token";
@@ -130,6 +131,17 @@ export async function refreshSession(): Promise<string | null> {
  */
 export async function ensureAccountServiceConfigured(accessToken: string | null): Promise<void> {
   configureAccountService({
+    getAccessToken: () => accessToken,
+    onUnauthenticated: refreshSession,
+  });
+}
+
+/**
+ * Same wiring as ensureAccountServiceConfigured, for @game-hub/caro-service (specs/007-caro-game-dashboard).
+ * Any Server Component/Route Handler fetching Caro data MUST call this first.
+ */
+export async function ensureCaroServiceConfigured(accessToken: string | null): Promise<void> {
+  configureCaroService({
     getAccessToken: () => accessToken,
     onUnauthenticated: refreshSession,
   });
