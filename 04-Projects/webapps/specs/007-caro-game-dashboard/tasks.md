@@ -157,8 +157,8 @@ short wait via the realtime bridge.
 `"matched"` response navigates straight to the match, and a `"waiting"` response followed by a
 `quick_pair:matched` event also navigates to the match.
 
-- [ ] T048 [US5] In `apps/web/components/molecules/QuickPairCard.tsx`, wire "Find Match"'s `onAction` to call `requestQuickPair({ configId })`; on `status: "matched"` navigate immediately to `/game-caro/{matchId}`; on `status: "waiting"`, subscribe via T015's `useCaroRealtimeEvent("quick_pair:matched", ...)` and navigate once it fires (depends on T032, T015, data-model.md "QuickPairOptionView")
-- [ ] T049 [P] [US5] Add a test in `apps/web/components/molecules/QuickPairCard.test.tsx` covering both the immediate-match and waiting-then-matched-via-SSE paths (quickstart.md item 6)
+- [X] T048 [US5] In `apps/web/components/molecules/QuickPairCard.tsx`, wire "Find Match"'s `onAction` to call `requestQuickPair({ configId })`; on `status: "matched"` navigate immediately to `/game-caro/{matchId}`; on `status: "waiting"`, subscribe via T015's `useCaroRealtimeEvent("quick_pair:matched", ...)` and navigate once it fires (depends on T032, T015, data-model.md "QuickPairOptionView")
+- [X] T049 [P] [US5] Add a test in `apps/web/components/molecules/QuickPairCard.test.tsx` covering both the immediate-match and waiting-then-matched-via-SSE paths (quickstart.md item 6)
 
 **Checkpoint**: All five user stories are independently functional.
 

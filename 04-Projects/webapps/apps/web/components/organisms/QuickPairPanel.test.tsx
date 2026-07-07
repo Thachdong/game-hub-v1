@@ -11,6 +11,12 @@ vi.mock("next/navigation", () => ({
   useRouter: vi.fn(),
   usePathname: vi.fn(),
 }));
+vi.mock("@/lib/actions/caro", () => ({
+  requestQuickPairAction: vi.fn(),
+}));
+vi.mock("@/lib/useCaroRealtime", () => ({
+  useCaroRealtimeEvent: vi.fn(),
+}));
 
 describe("QuickPairPanel", () => {
   beforeEach(() => {
