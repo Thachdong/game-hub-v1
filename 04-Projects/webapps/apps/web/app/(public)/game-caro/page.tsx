@@ -31,7 +31,12 @@ export default async function GameCaroPage() {
       <h1 className="text-xl font-semibold text-[var(--color-text-primary)]">Caro Games</h1>
       <div className="mt-6">
         <GameDashboardTemplate
-          lobby={<LobbyPanel initialMatches={lobbyResult.ok ? lobbyResult.data : []} />}
+          lobby={
+            <LobbyPanel
+              initialMatches={lobbyResult.ok ? lobbyResult.data : []}
+              gameConfigs={gameConfigsResult.ok ? gameConfigsResult.data : []}
+            />
+          }
           tournament={
             <TournamentPanel
               tournaments={tournamentsResult.ok ? tournamentsResult.data : []}

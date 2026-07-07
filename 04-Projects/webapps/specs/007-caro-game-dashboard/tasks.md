@@ -123,12 +123,12 @@ without a page reload.
 **Independent Test**: Signed in, open the Create Game modal from the Lobby tab, submit valid
 settings, and confirm the new match appears at the top of the Lobby list immediately.
 
-- [ ] T040 [P] [US3] Create the generic `Modal` molecule (overlay + dialog container, closes on backdrop click / Escape) in `apps/web/components/molecules/Modal.tsx`
-- [ ] T041 [P] [US3] Add a test for `Modal` in `apps/web/components/molecules/Modal.test.tsx`
-- [ ] T042 [US3] Create `CreateGameModal` organism in `apps/web/components/organisms/CreateGameModal.tsx`: fetches `listGameConfigs()` for the game-type select, a visibility (`public`/`private`) select, and on submit calls `createMatch({ configId, visibility })` (data-model.md "CreateGameSubmission") (depends on T040)
-- [ ] T043 [P] [US3] Add a test for `CreateGameModal` in `apps/web/components/organisms/CreateGameModal.test.tsx` covering the game-type/visibility selection and a successful submit calling `createMatch`
-- [ ] T044 [US3] In `apps/web/components/organisms/LobbyPanel.tsx`, add a "Create Game" button (wrapped in `RequireSignIn`) that opens `CreateGameModal`, and on the modal's successful submit, prepend the returned match to local Lobby state with no reload (depends on T026, T042, spec.md SC-004)
-- [ ] T045 [P] [US3] Add a test in `apps/web/components/organisms/LobbyPanel.test.tsx`: guest click on "Create Game" redirects to login; signed-in click opens the modal, and a successful submit adds a new card to the list without a reload (quickstart.md item 2 second half + item 4)
+- [X] T040 [P] [US3] Create the generic `Modal` molecule (overlay + dialog container, closes on backdrop click / Escape) in `apps/web/components/molecules/Modal.tsx`
+- [X] T041 [P] [US3] Add a test for `Modal` in `apps/web/components/molecules/Modal.test.tsx`
+- [X] T042 [US3] Create `CreateGameModal` organism in `apps/web/components/organisms/CreateGameModal.tsx`: fetches `listGameConfigs()` for the game-type select, a visibility (`public`/`private`) select, and on submit calls `createMatch({ configId, visibility })` (data-model.md "CreateGameSubmission") (depends on T040)
+- [X] T043 [P] [US3] Add a test for `CreateGameModal` in `apps/web/components/organisms/CreateGameModal.test.tsx` covering the game-type/visibility selection and a successful submit calling `createMatch`
+- [X] T044 [US3] In `apps/web/components/organisms/LobbyPanel.tsx`, add a "Create Game" button (wrapped in `RequireSignIn`) that opens `CreateGameModal`, and on the modal's successful submit, prepend the returned match to local Lobby state with no reload (depends on T026, T042, spec.md SC-004)
+- [X] T045 [P] [US3] Add a test in `apps/web/components/organisms/LobbyPanel.test.tsx`: guest click on "Create Game" redirects to login; signed-in click opens the modal, and a successful submit adds a new card to the list without a reload (quickstart.md item 2 second half + item 4)
 
 **Checkpoint**: Players can both join and create matches; the Lobby loop (US2 + US3) is complete.
 
