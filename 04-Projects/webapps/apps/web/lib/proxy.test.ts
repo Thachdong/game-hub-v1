@@ -184,6 +184,230 @@ describe("forwardToBackend", () => {
     expect(refreshCalls).toBe(1);
   });
 
+  describe("006-caro-guest-access: optional-auth routes", () => {
+    it("forwards GET caro/matches/lobby with no cookie and relays the backend's response (US1)", async () => {
+      const fetchMock = vi
+        .fn()
+        .mockResolvedValue(jsonResponse(200, { statusCode: 200, message: "ok", data: [] }));
+      vi.stubGlobal("fetch", fetchMock);
+
+      const response = await forwardToBackend(
+        makeRequest("https://web.test/api/proxy/caro/matches/lobby"),
+        ["caro", "matches", "lobby"]
+      );
+
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      const [calledUrl, options] = fetchMock.mock.calls[0];
+      expect(calledUrl).toBe("https://api.test/api/caro/matches/lobby");
+      expect(options.headers.Authorization).toBeUndefined();
+      expect(response.status).toBe(200);
+      expect(await response.json()).toEqual({ statusCode: 200, message: "ok", data: [] });
+    });
+
+    it("still attaches the Bearer header for caro/matches/lobby when a valid cookie is present (no regression)", async () => {
+      cookieStore.set(ACCESS_COOKIE_NAME, makeFakeJwt(3600));
+      const fetchMock = vi
+        .fn()
+        .mockResolvedValue(jsonResponse(200, { statusCode: 200, message: "ok", data: [] }));
+      vi.stubGlobal("fetch", fetchMock);
+
+      const response = await forwardToBackend(
+        makeRequest("https://web.test/api/proxy/caro/matches/lobby"),
+        ["caro", "matches", "lobby"]
+      );
+
+      const [, options] = fetchMock.mock.calls[0];
+      expect(options.headers.Authorization).toMatch(/^Bearer header\./);
+      expect(response.status).toBe(200);
+    });
+
+    it("forwards GET caro/matches/{id} with no cookie and relays the backend's response (US2)", async () => {
+      const fetchMock = vi
+        .fn()
+        .mockResolvedValue(jsonResponse(200, { statusCode: 200, message: "ok", data: { id: "m1" } }));
+      vi.stubGlobal("fetch", fetchMock);
+
+      const response = await forwardToBackend(
+        makeRequest("https://web.test/api/proxy/caro/matches/m1"),
+        ["caro", "matches", "m1"]
+      );
+
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      const [calledUrl, options] = fetchMock.mock.calls[0];
+      expect(calledUrl).toBe("https://api.test/api/caro/matches/m1");
+      expect(options.headers.Authorization).toBeUndefined();
+      expect(response.status).toBe(200);
+    });
+
+    it("still 401s DELETE caro/matches/{id} (creator-cancel) with no cookie — same path shape, different method", async () => {
+      const fetchMock = vi.fn();
+      vi.stubGlobal("fetch", fetchMock);
+
+      const response = await forwardToBackend(
+        makeRequest("https://web.test/api/proxy/caro/matches/m1", { method: "DELETE" }),
+        ["caro", "matches", "m1"]
+      );
+
+      expect(response.status).toBe(401);
+      expect(await response.json()).toEqual({ message: "Not signed in" });
+      expect(fetchMock).not.toHaveBeenCalled();
+    });
+
+    it("forwards GET caro/matches/{id}/chat with no cookie and relays the backend's response (spec 008)", async () => {
+      const fetchMock = vi
+        .fn()
+        .mockResolvedValue(jsonResponse(200, { statusCode: 200, message: "ok", data: [] }));
+      vi.stubGlobal("fetch", fetchMock);
+
+      const response = await forwardToBackend(
+        makeRequest("https://web.test/api/proxy/caro/matches/m1/chat"),
+        ["caro", "matches", "m1", "chat"]
+      );
+
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      const [calledUrl, options] = fetchMock.mock.calls[0];
+      expect(calledUrl).toBe("https://api.test/api/caro/matches/m1/chat");
+      expect(options.headers.Authorization).toBeUndefined();
+      expect(response.status).toBe(200);
+    });
+
+    it("still 401s POST caro/matches/{id}/chat (send) with no cookie — same path shape, different method", async () => {
+      const fetchMock = vi.fn();
+      vi.stubGlobal("fetch", fetchMock);
+
+      const response = await forwardToBackend(
+        makeRequest("https://web.test/api/proxy/caro/matches/m1/chat", { method: "POST" }),
+        ["caro", "matches", "m1", "chat"]
+      );
+
+      expect(response.status).toBe(401);
+      expect(await response.json()).toEqual({ message: "Not signed in" });
+      expect(fetchMock).not.toHaveBeenCalled();
+    });
+
+    it("still 401s POST caro/matches/{id}/chat/mute with no cookie", async () => {
+      const fetchMock = vi.fn();
+      vi.stubGlobal("fetch", fetchMock);
+
+      const response = await forwardToBackend(
+        makeRequest("https://web.test/api/proxy/caro/matches/m1/chat/mute", { method: "POST" }),
+        ["caro", "matches", "m1", "chat", "mute"]
+      );
+
+      expect(response.status).toBe(401);
+      expect(await response.json()).toEqual({ message: "Not signed in" });
+      expect(fetchMock).not.toHaveBeenCalled();
+    });
+
+    it("forwards POST caro/matches/{id}/moves with no cookie and relays the backend's response (US3)", async () => {
+      const fetchMock = vi
+        .fn()
+        .mockResolvedValue(
+          jsonResponse(200, { statusCode: 200, message: "ok", data: { row: 0, col: 0 } })
+        );
+      vi.stubGlobal("fetch", fetchMock);
+
+      const response = await forwardToBackend(
+        makeRequest("https://web.test/api/proxy/caro/matches/m1/moves", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ row: 0, col: 0 }),
+        }),
+        ["caro", "matches", "m1", "moves"]
+      );
+
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      const [calledUrl, options] = fetchMock.mock.calls[0];
+      expect(calledUrl).toBe("https://api.test/api/caro/matches/m1/moves");
+      expect(options.headers.Authorization).toBeUndefined();
+      expect(response.status).toBe(200);
+    });
+
+    it("still 401s POST caro/matches/{id}/join with no cookie — neighboring authed action", async () => {
+      const fetchMock = vi.fn();
+      vi.stubGlobal("fetch", fetchMock);
+
+      const response = await forwardToBackend(
+        makeRequest("https://web.test/api/proxy/caro/matches/m1/join", { method: "POST" }),
+        ["caro", "matches", "m1", "join"]
+      );
+
+      expect(response.status).toBe(401);
+      expect(await response.json()).toEqual({ message: "Not signed in" });
+      expect(fetchMock).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("007-caro-game-dashboard: tournament-read optional-auth routes", () => {
+    it("forwards GET caro/tournaments with no cookie and relays the backend's response", async () => {
+      const fetchMock = vi
+        .fn()
+        .mockResolvedValue(jsonResponse(200, { statusCode: 200, message: "ok", data: [] }));
+      vi.stubGlobal("fetch", fetchMock);
+
+      const response = await forwardToBackend(
+        makeRequest("https://web.test/api/proxy/caro/tournaments"),
+        ["caro", "tournaments"]
+      );
+
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      const [calledUrl, options] = fetchMock.mock.calls[0];
+      expect(calledUrl).toBe("https://api.test/api/caro/tournaments");
+      expect(options.headers.Authorization).toBeUndefined();
+      expect(response.status).toBe(200);
+    });
+
+    it("forwards GET caro/tournaments/{id} with no cookie and relays the backend's response", async () => {
+      const fetchMock = vi
+        .fn()
+        .mockResolvedValue(jsonResponse(200, { statusCode: 200, message: "ok", data: { id: "t1" } }));
+      vi.stubGlobal("fetch", fetchMock);
+
+      const response = await forwardToBackend(
+        makeRequest("https://web.test/api/proxy/caro/tournaments/t1"),
+        ["caro", "tournaments", "t1"]
+      );
+
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      const [calledUrl, options] = fetchMock.mock.calls[0];
+      expect(calledUrl).toBe("https://api.test/api/caro/tournaments/t1");
+      expect(options.headers.Authorization).toBeUndefined();
+      expect(response.status).toBe(200);
+    });
+
+    it("forwards GET caro/tournaments/{id}/participants with no cookie and relays the backend's response", async () => {
+      const fetchMock = vi
+        .fn()
+        .mockResolvedValue(jsonResponse(200, { statusCode: 200, message: "ok", data: [] }));
+      vi.stubGlobal("fetch", fetchMock);
+
+      const response = await forwardToBackend(
+        makeRequest("https://web.test/api/proxy/caro/tournaments/t1/participants"),
+        ["caro", "tournaments", "t1", "participants"]
+      );
+
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      const [calledUrl, options] = fetchMock.mock.calls[0];
+      expect(calledUrl).toBe("https://api.test/api/caro/tournaments/t1/participants");
+      expect(options.headers.Authorization).toBeUndefined();
+      expect(response.status).toBe(200);
+    });
+
+    it("still 401s POST caro/tournaments/{id}/registrations with no cookie — requires an identity to register against", async () => {
+      const fetchMock = vi.fn();
+      vi.stubGlobal("fetch", fetchMock);
+
+      const response = await forwardToBackend(
+        makeRequest("https://web.test/api/proxy/caro/tournaments/t1/registrations", { method: "POST" }),
+        ["caro", "tournaments", "t1", "registrations"]
+      );
+
+      expect(response.status).toBe(401);
+      expect(await response.json()).toEqual({ message: "Not signed in" });
+      expect(fetchMock).not.toHaveBeenCalled();
+    });
+  });
+
   describe("US1: the real /accounts/me resource end-to-end", () => {
     const account = { id: "1", email: "a@b.com", username: "alice", avatarUrl: "https://a" };
 
