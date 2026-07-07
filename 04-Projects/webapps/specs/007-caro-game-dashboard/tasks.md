@@ -108,8 +108,8 @@ demoable MVP increment per spec.md's User Story 1.
 **Independent Test**: Signed in, click "Join" on a Lobby card and confirm `joinMatch` is called and
 the player is navigated to that match's view.
 
-- [ ] T038 [US2] In `apps/web/components/molecules/LobbyMatchCard.tsx`, wire the "Join" button's `onAction` to call `joinMatch({ id })` and navigate to `/game-caro/{id}` on success (depends on T024)
-- [ ] T039 [P] [US2] Add a test in `apps/web/components/molecules/LobbyMatchCard.test.tsx`: signed-in click on "Join" calls `joinMatch` and navigates to the match view (quickstart.md item 2 first half)
+- [X] T038 [US2] In `apps/web/components/molecules/LobbyMatchCard.tsx`, wire the "Join" button's `onAction` to call `joinMatch({ id })` and navigate to `/game-caro/{id}` on success (depends on T024)
+- [X] T039 [P] [US2] Add a test in `apps/web/components/molecules/LobbyMatchCard.test.tsx`: signed-in click on "Join" calls `joinMatch` and navigates to the match view (quickstart.md item 2 first half)
 
 **Checkpoint**: Joining works end-to-end; browsing (US1) is unaffected.
 

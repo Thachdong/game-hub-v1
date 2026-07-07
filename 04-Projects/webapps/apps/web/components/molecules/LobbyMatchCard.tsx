@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/atoms/Button";
 import { RequireSignIn } from "@/components/molecules/RequireSignIn";
 import { formatGameType } from "@/lib/gameType";
+import { joinMatchAction } from "@/lib/actions/caro";
 
 export function LobbyMatchCard({
   id,
@@ -11,16 +13,22 @@ export function LobbyMatchCard({
   creatorElo,
   boardSize,
   moveTimeSeconds,
-  onJoin,
 }: {
   id: string;
   creatorUsername: string;
   creatorElo: number | null;
   boardSize: string;
   moveTimeSeconds: number;
-  /** Placeholder until US2 wires the real join action. */
-  onJoin?: (id: string) => void;
 }) {
+  const router = useRouter();
+
+  async function handleJoin() {
+    const result = await joinMatchAction(id);
+    if (result.ok) {
+      router.push(`/game-caro/${id}`);
+    }
+  }
+
   return (
     <div className="flex flex-col gap-2 rounded border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
       <div className="flex items-center justify-between gap-2">
@@ -39,7 +47,7 @@ export function LobbyMatchCard({
         >
           View
         </Link>
-        <RequireSignIn onAction={() => onJoin?.(id)}>
+        <RequireSignIn onAction={handleJoin}>
           {({ onClick }) => <Button onClick={onClick}>Join</Button>}
         </RequireSignIn>
       </div>
