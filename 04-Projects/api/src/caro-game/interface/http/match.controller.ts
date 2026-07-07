@@ -15,6 +15,7 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
 import { ApiDataResponse, ApiErrorResponse } from '@common/decorators/api-response.decorator';
 import { JwtAuthGuard } from '../../../shared-auth/jwt-auth.guard';
+import { OptionalJwtGuard } from '../../../shared-auth/optional-jwt.guard';
 import { CreateMatchUseCase } from '../../application/use-cases/create-match.use-case';
 import { CancelMatchUseCase } from '../../application/use-cases/cancel-match.use-case';
 import { InvitePlayerUseCase } from '../../application/use-cases/invite-player.use-case';
@@ -45,7 +46,6 @@ interface AuthenticatedRequest extends Request {
 
 @ApiTags('Caro — Matches')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
 @Controller('caro/matches')
 export class MatchController {
   constructor(
@@ -62,9 +62,9 @@ export class MatchController {
   // ── Lobby ─────────────────────────────────────────────────────────────────
 
   @Get('lobby')
-  @ApiOperation({ summary: 'List open public matches in the lobby' })
+  @UseGuards(OptionalJwtGuard)
+  @ApiOperation({ summary: 'List open public matches in the lobby (guest-accessible)' })
   @ApiDataResponse(LobbyMatchDto, { isArray: true })
-  @ApiErrorResponse(HttpStatus.UNAUTHORIZED, 'Missing or expired JWT')
   async lobby(): Promise<LobbyMatchDto[]> {
     const matches = await this.getLobby.execute();
     return matches.map(this.toLobbyDto);
@@ -73,6 +73,7 @@ export class MatchController {
   // ── Create / join ─────────────────────────────────────────────────────────
 
   @Post()
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Create a new match' })
   @ApiDataResponse(CreateMatchResponseDto)
   @ApiErrorResponse(HttpStatus.CONFLICT, 'Player already in active match')
@@ -90,6 +91,7 @@ export class MatchController {
   }
 
   @Post(':id/join')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Join a public lobby match' })
   @ApiDataResponse(JoinMatchResponseDto)
   @ApiErrorResponse(HttpStatus.CONFLICT, 'Match not open or player already active')
@@ -104,6 +106,7 @@ export class MatchController {
   // ── Cancel / leave ────────────────────────────────────────────────────────
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Cancel a match (creator only, before it starts)' })
   @ApiDataResponse(CancelOrLeaveResponseDto)
   @ApiErrorResponse(HttpStatus.FORBIDDEN, 'Not the match creator')
@@ -117,6 +120,7 @@ export class MatchController {
   }
 
   @Post(':id/leave')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Leave a match before it starts (second player)' })
   @ApiDataResponse(CancelOrLeaveResponseDto)
   @ApiErrorResponse(HttpStatus.FORBIDDEN, 'Not a participant')
@@ -132,6 +136,7 @@ export class MatchController {
   // ── Invite ────────────────────────────────────────────────────────────────
 
   @Post(':id/invite')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Invite a friend to a private match' })
   @ApiDataResponse(InviteResponseDto)
   @ApiErrorResponse(HttpStatus.UNPROCESSABLE_ENTITY, 'Not friends with target player')
@@ -149,6 +154,7 @@ export class MatchController {
   }
 
   @Put(':id/invitation/respond')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Accept or decline a match invitation' })
   @ApiDataResponse(InvitationRespondResponseDto)
   @ApiErrorResponse(HttpStatus.CONFLICT, 'Player already in active match')
@@ -168,7 +174,8 @@ export class MatchController {
   // ── State / moves ─────────────────────────────────────────────────────────
 
   @Get(':id')
-  @ApiOperation({ summary: 'Get full match state including moves' })
+  @UseGuards(OptionalJwtGuard)
+  @ApiOperation({ summary: 'Get full match state including moves (guest-accessible)' })
   @ApiDataResponse(MatchStateDto)
   @ApiErrorResponse(HttpStatus.NOT_FOUND, 'Match not found')
   async getState(@Param('id', ParseUUIDPipe) id: string): Promise<MatchStateDto> {
@@ -177,7 +184,8 @@ export class MatchController {
   }
 
   @Get(':id/moves')
-  @ApiOperation({ summary: 'Get all moves for a match' })
+  @UseGuards(OptionalJwtGuard)
+  @ApiOperation({ summary: 'Get all moves for a match (guest-accessible)' })
   @ApiDataResponse(MoveDto, { isArray: true })
   @ApiErrorResponse(HttpStatus.NOT_FOUND, 'Match not found')
   async getMoves(@Param('id', ParseUUIDPipe) id: string): Promise<MoveDto[]> {
