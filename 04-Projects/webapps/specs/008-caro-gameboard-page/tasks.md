@@ -147,8 +147,8 @@ automatically if they don't; the non-creator participant can never start it them
 begins the match for both; the non-creator's click has no effect; letting the countdown expire ends
 the match for both with no winner (quickstart.md item 3).
 
-- [ ] T048 [US3] Wire `StartCountdown`'s `onStart` prop (stubbed in T035) to call `startMatch({ id: matchId })` for the creator; subscribe to `match:started` (drives the 2→3 transition, sets `currentTurnPlayerId`/`deadlineAt`) and `match:cancelled` (drives the 2→4 transition with no winner) (depends on T035, T046)
-- [ ] T049 [P] [US3] Add a test covering: creator click calls `startMatch`; non-creator click makes no call; a mocked `match:started` event transitions to state 3; a mocked `match:cancelled` event (no prior `match:started`) transitions to state 4 (quickstart.md item 3)
+- [X] T048 [US3] Wire `StartCountdown`'s `onStart` prop (stubbed in T035) in `GameboardContainer` to call a new `startMatchAction` Server Action for the creator; subscribe to `match:started` (drives the 2→3 transition, sets `currentTurnPlayerId`/`deadlineAt`) and `match:cancelled` (drives the 2→4 transition, sets `result: "cancelled"`/`winnerPlayerId: null`) (depends on T035, T046)
+- [X] T049 [P] [US3] Add a test covering: creator click calls `startMatchAction`; non-creator click makes no call (disabled control, no redirect); a mocked `match:started` event transitions to state 3; a mocked `match:cancelled` event (no prior `match:started`) transitions to state 4 (`GameboardContainer.test.tsx`, quickstart.md item 3)
 
 **Checkpoint**: Start/auto-cancel works live; US1/US2 are unaffected.
 

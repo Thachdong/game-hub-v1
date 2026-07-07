@@ -6,10 +6,12 @@ import { useRouter } from "next/navigation";
 
 const muteMatchViewerActionMock = vi.fn();
 const getMatchActionMock = vi.fn();
+const startMatchActionMock = vi.fn();
 
 vi.mock("@/lib/actions/caro", () => ({
   muteMatchViewerAction: muteMatchViewerActionMock,
   getMatchAction: getMatchActionMock,
+  startMatchAction: startMatchActionMock,
 }));
 
 type Handler = (payload: unknown) => void;
@@ -70,6 +72,7 @@ describe("GameboardContainer", () => {
   beforeEach(() => {
     muteMatchViewerActionMock.mockClear();
     getMatchActionMock.mockReset();
+    startMatchActionMock.mockReset();
   });
 
   it("renders the board and the side panel for the initial match state", () => {
@@ -223,6 +226,78 @@ describe("GameboardContainer", () => {
       expect(screen.getByTestId("gameboard-state-2")).toBeInTheDocument();
       expect(screen.getByText(/starts in/i)).toBeInTheDocument();
       expect(getMatchActionMock).toHaveBeenCalledWith("m1");
+    });
+  });
+
+  describe("US3: start / auto-cancel", () => {
+    function stateTwoMatch() {
+      return makeMatch({
+        status: "waiting_for_start",
+        playerO: { id: "p2", username: "bob", elo: 1400, winRate: 0.4 },
+        deadlineAt: new Date(Date.now() + 10_000).toISOString(),
+      });
+    }
+
+    it("the creator's Start click calls startMatchAction", () => {
+      mockedUseAuthSession.mockReturnValue({
+        isSignedIn: true,
+        account: { id: "c1", email: "c@b.com", username: "creator", avatarUrl: "" },
+        refresh: vi.fn(),
+        logout: vi.fn(),
+      });
+
+      render(<GameboardContainer initialMatch={stateTwoMatch()} />);
+
+      screen.getByRole("button", { name: /start/i }).click();
+
+      expect(startMatchActionMock).toHaveBeenCalledWith("m1");
+    });
+
+    it("the non-creator participant's Start click makes no call (disabled control)", () => {
+      mockedUseAuthSession.mockReturnValue({
+        isSignedIn: true,
+        account: { id: "p2", email: "p2@b.com", username: "bob", avatarUrl: "" },
+        refresh: vi.fn(),
+        logout: vi.fn(),
+      });
+
+      render(<GameboardContainer initialMatch={stateTwoMatch()} />);
+
+      const button = screen.getByRole("button", { name: /start/i }) as HTMLButtonElement;
+      expect(button.disabled).toBe(true);
+      button.click();
+
+      expect(startMatchActionMock).not.toHaveBeenCalled();
+    });
+
+    it("a mocked match:started event transitions to state 3", async () => {
+      mockedUseAuthSession.mockReturnValue({ isSignedIn: false, refresh: vi.fn(), logout: vi.fn() });
+
+      render(<GameboardContainer initialMatch={stateTwoMatch()} />);
+
+      act(() => {
+        handlers["match:started"]?.({
+          matchId: "m1",
+          currentTurnPlayerId: "c1",
+          deadlineAt: new Date(Date.now() + 15_000).toISOString(),
+        });
+      });
+
+      await waitFor(() => expect(screen.getByTestId("gameboard-state-3")).toBeInTheDocument());
+      expect(screen.getByRole("button", { name: /request draw/i })).toBeInTheDocument();
+    });
+
+    it("a mocked match:cancelled event (no prior match:started) transitions to state 4", async () => {
+      mockedUseAuthSession.mockReturnValue({ isSignedIn: false, refresh: vi.fn(), logout: vi.fn() });
+
+      render(<GameboardContainer initialMatch={stateTwoMatch()} />);
+
+      act(() => {
+        handlers["match:cancelled"]?.({ matchId: "m1", reason: "start_window_expired" });
+      });
+
+      await waitFor(() => expect(screen.getByTestId("gameboard-state-4")).toBeInTheDocument());
+      expect(screen.getByRole("button", { name: /review moves/i })).toBeInTheDocument();
     });
   });
 });

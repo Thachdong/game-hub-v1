@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { MatchState } from "@game-hub/caro-service";
-import { getMatchAction, muteMatchViewerAction } from "@/lib/actions/caro";
+import { getMatchAction, muteMatchViewerAction, startMatchAction } from "@/lib/actions/caro";
 import { useCaroRealtimeEvent } from "@/lib/useCaroRealtime";
 import { GameboardTemplate } from "@/components/templates/GameboardTemplate";
 import { GameBoard } from "@/components/organisms/GameBoard";
@@ -26,6 +26,17 @@ interface PlayerJoinedPayload {
   playerXId: string;
   playerOId: string;
   deadlineAt: string;
+}
+
+interface MatchStartedPayload {
+  matchId: string;
+  currentTurnPlayerId: string;
+  deadlineAt: string;
+}
+
+interface MatchCancelledPayload {
+  matchId: string;
+  reason: string;
 }
 
 /**
@@ -71,8 +82,34 @@ export function GameboardContainer({ initialMatch }: { initialMatch: MatchState 
     match.id
   );
 
+  // US3: creator starts the match before the countdown expires, or it's auto-cancelled.
+  useCaroRealtimeEvent<MatchStartedPayload>(
+    "match:started",
+    (payload) => {
+      setMatch((current) => ({
+        ...current,
+        status: "in_progress",
+        currentTurnPlayerId: payload.currentTurnPlayerId,
+        deadlineAt: payload.deadlineAt,
+      }));
+    },
+    match.id
+  );
+
+  useCaroRealtimeEvent<MatchCancelledPayload>(
+    "match:cancelled",
+    () => {
+      setMatch((current) => ({ ...current, status: "cancelled", result: "cancelled", winnerPlayerId: null }));
+    },
+    match.id
+  );
+
   function handleMute(viewerId: string) {
     void muteMatchViewerAction({ matchId: match.id, viewerId });
+  }
+
+  function handleStart() {
+    void startMatchAction(match.id);
   }
 
   const viewState = deriveViewState(match.status);
@@ -97,7 +134,7 @@ export function GameboardContainer({ initialMatch }: { initialMatch: MatchState 
           onMute={handleMute}
           replayIndex={replayIndex}
           onReplayIndexChange={setReplayIndex}
-          onStart={() => {}}
+          onStart={handleStart}
           onRequestDraw={() => {}}
           onSurrender={() => {}}
           onRespondToDraw={() => {}}
