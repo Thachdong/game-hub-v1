@@ -8,5 +8,6 @@ export class TournamentRegistration {
   tournamentPoints: number;
   winStreak: number;
   status: TournamentRegistrationStatus;
+  isPaused: boolean;
   registeredAt: Date;
 }

@@ -27,6 +27,7 @@ export class TournamentRegistrationTypeOrmRepository implements ITournamentRegis
         tournamentPoints: 0,
         winStreak: 0,
         status: 'idle',
+        isPaused: false,
       });
       const saved = await this.repo.save(entity);
       return this.toDomain(saved);
@@ -101,6 +102,7 @@ export class TournamentRegistrationTypeOrmRepository implements ITournamentRegis
     r.tournamentPoints = e.tournamentPoints;
     r.winStreak = e.winStreak;
     r.status = e.status as TournamentRegistration['status'];
+    r.isPaused = e.isPaused;
     r.registeredAt = e.registeredAt;
     return r;
   }
@@ -114,6 +116,7 @@ export class TournamentRegistrationTypeOrmRepository implements ITournamentRegis
     r.tournamentPoints = row.tournament_points;
     r.winStreak = row.win_streak;
     r.status = row.status as TournamentRegistration['status'];
+    r.isPaused = row.is_paused;
     r.registeredAt = row.registered_at;
     return r;
   }

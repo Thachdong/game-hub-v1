@@ -220,6 +220,7 @@ export class MatchController {
       visibility: match.visibility,
       status: match.status,
       creatorId: match.creatorId,
+      tournamentId: match.tournamentId,
       playerX: match.playerXId ? { id: match.playerXId, username: match.playerXId, elo: 0, winRate: 0 } : null,
       playerO: match.playerOId ? { id: match.playerOId, username: match.playerOId, elo: 0, winRate: 0 } : null,
       currentTurnPlayerId: match.currentTurnPlayerId ?? null,

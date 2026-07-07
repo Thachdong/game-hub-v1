@@ -29,7 +29,7 @@ independent implementation and testing of each.
 
 ## Phase 1: Setup
 
-- [ ] T001 Verify local dev prerequisites are in place per quickstart.md's Prerequisites section
+- [X] T001 Verify local dev prerequisites are in place per quickstart.md's Prerequisites section
   (`04-Projects/api` running against Postgres with existing migrations applied, ≥5 test accounts
   with Elo ≥ a test tournament's `minElo`, one test tournament created via
   `POST /api/caro/tournaments`) — see `specs/009-tournament-page/quickstart.md`
@@ -42,30 +42,30 @@ independent implementation and testing of each.
 
 **⚠️ CRITICAL**: No user story work should begin until this phase is complete.
 
-- [ ] T002 [P] Add the `is_paused` migration: `04-Projects/api/src/database/migrations/175XXXXXXXXXX-CaroTournamentPause.ts`
+- [X] T002 [P] Add the `is_paused` migration: `04-Projects/api/src/database/migrations/175XXXXXXXXXX-CaroTournamentPause.ts`
   (`ALTER TABLE caro_game.tournament_registrations ADD COLUMN is_paused boolean NOT NULL DEFAULT false`)
-- [ ] T003 [P] Add `isPaused` to the domain and ORM entities:
+- [X] T003 [P] Add `isPaused` to the domain and ORM entities:
   `04-Projects/api/src/caro-game/domain/entities/tournament-registration.ts` and
   `04-Projects/api/src/caro-game/infrastructure/persistence/typeorm-entities/tournament-registration.orm-entity.ts`
-- [ ] T004 [P] Expose `tournamentId` on the Match response:
+- [X] T004 [P] Expose `tournamentId` on the Match response:
   `04-Projects/api/src/caro-game/interface/dto/match.dto.ts` (`MatchStateDto` +`tournamentId`) and
   `04-Projects/api/src/caro-game/interface/http/match.controller.ts` (map the existing
   `Match.tournamentId` domain field through to the response)
-- [ ] T005 [P] Add tournament types to `packages/caro-service/src/types.ts`: `MatchState.tournamentId`,
+- [X] T005 [P] Add tournament types to `packages/caro-service/src/types.ts`: `MatchState.tournamentId`,
   `TournamentDetails`, `TournamentStanding`, `StandingsPage` (per data-model.md)
-- [ ] T006 [P] Add tournament-room presence tracking to
+- [X] T006 [P] Add tournament-room presence tracking to
   `04-Projects/api/src/realtime/realtime.gateway.ts`: a `tournamentPresence: Map<string, Set<string>>`
   keyed by room, populated/cleared on `join_room`/`leave_room`/`handleDisconnect` for rooms starting
   with `tournament:` (tracked by authenticated `client.userId`, not username), an emitted
   `caro.tournament.presence-joined` event via the existing `EventEmitter2` on join, and a
   `getPresentPlayerIds(room): string[]` accessor (research.md §2)
-- [ ] T007 [P] Extend the realtime bridge Route Handler for tournaments:
+- [X] T007 [P] Extend the realtime bridge Route Handler for tournaments:
   `apps/web/app/api/caro/realtime/route.ts` (+`?tournamentId=` query param joining
   `tournament:{tournamentId}`, +`TOURNAMENT_EVENTS` group
   (`tournament:status-changed`/`tournament:match-created`/`tournament:participant-updated`), move
   `match:started` out of the `matchId`-gated set into an always-forwarded one) and
   `apps/web/app/api/caro/realtime/route.test.ts`
-- [ ] T008 [P] Extend the realtime client hook: `apps/web/lib/useCaroRealtime.ts`
+- [X] T008 [P] Extend the realtime client hook: `apps/web/lib/useCaroRealtime.ts`
   (`acquireSharedSource(matchId?, tournamentId?)`; `useCaroRealtimeEvent` gains an optional
   `tournamentId` parameter alongside the existing `matchId` one)
 

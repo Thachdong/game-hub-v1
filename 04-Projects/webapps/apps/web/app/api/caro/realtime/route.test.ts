@@ -160,4 +160,36 @@ describe("GET /api/caro/realtime", () => {
       expect(disconnectMock).toHaveBeenCalled();
     });
   });
+
+  describe("spec 009: tournament-scoped room support", () => {
+    it("emits join_room with the tournament room and no viewer payload", async () => {
+      await GET(makeRequest("https://web.test/api/caro/realtime?tournamentId=t1"));
+
+      expect(emitMock).toHaveBeenCalledWith("join_room", { room: "tournament:t1" });
+    });
+
+    it("forwards every tournament-scoped event plus the always-on match:started", async () => {
+      const response = await GET(makeRequest("https://web.test/api/caro/realtime?tournamentId=t1"));
+
+      const chunkPromise = readOneChunk(response.body as ReadableStream<Uint8Array>);
+      handlers["tournament:match-created"]({ tournamentId: "t1", matchId: "m1" });
+
+      expect(await chunkPromise).toBe(
+        'event: tournament:match-created\ndata: {"tournamentId":"t1","matchId":"m1"}\n\n'
+      );
+      expect(handlers["tournament:status-changed"]).toBeDefined();
+      expect(handlers["tournament:participant-updated"]).toBeDefined();
+      expect(handlers["match:started"]).toBeDefined();
+      expect(handlers["match:move_placed"]).toBeUndefined();
+    });
+
+    it("emits leave_room and disconnects on cancel", async () => {
+      const response = await GET(makeRequest("https://web.test/api/caro/realtime?tournamentId=t1"));
+
+      await (response.body as ReadableStream<Uint8Array>).cancel();
+
+      expect(emitMock).toHaveBeenCalledWith("leave_room", { room: "tournament:t1" });
+      expect(disconnectMock).toHaveBeenCalled();
+    });
+  });
 });

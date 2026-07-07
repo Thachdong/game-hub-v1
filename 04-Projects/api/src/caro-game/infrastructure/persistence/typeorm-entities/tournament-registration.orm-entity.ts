@@ -33,6 +33,9 @@ export class TournamentRegistrationOrmEntity {
   @Column({ type: 'varchar', length: 20, default: 'idle' })
   status: string;
 
+  @Column({ name: 'is_paused', type: 'boolean', default: false })
+  isPaused: boolean;
+
   @CreateDateColumn({ name: 'registered_at', type: 'timestamptz' })
   registeredAt: Date;
 }

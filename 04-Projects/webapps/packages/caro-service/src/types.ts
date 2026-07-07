@@ -52,6 +52,8 @@ export interface MatchState {
   visibility: "public" | "private";
   status: string;
   creatorId: string;
+  /** Non-null only for a match created via tournament matchmaking (spec 009). */
+  tournamentId: string | null;
   playerX: CaroPlayerInMatch | null;
   playerO: CaroPlayerInMatch | null;
   currentTurnPlayerId: string | null;
@@ -136,4 +138,36 @@ export interface CreateTournamentInput {
   minElo: number;
   startAt: string;
   endAt: string;
+}
+
+export type TournamentStatus = "waiting" | "in_progress" | "ended" | "cancelled";
+
+export interface TournamentDetails {
+  tournamentId: string;
+  status: TournamentStatus;
+  startAt: string;
+  endAt: string;
+  minElo: number;
+  gameConfig: { id: string; timeLimitSeconds?: number } | null;
+  registrantCount: number;
+  createdAt: string;
+}
+
+export interface TournamentStanding {
+  rank: number;
+  registrationId: string;
+  playerId: string;
+  tournamentPoints: number;
+  winStreak: number;
+  isPaused: boolean;
+  status: "idle" | "in_match";
+  eloAtRegistration: number;
+  registeredAt: string;
+}
+
+export interface StandingsPage {
+  items: TournamentStanding[];
+  page: number;
+  pageSize: number;
+  total: number;
 }
