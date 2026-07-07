@@ -292,6 +292,76 @@ describe("forwardToBackend", () => {
     });
   });
 
+  describe("007-caro-game-dashboard: tournament-read optional-auth routes", () => {
+    it("forwards GET caro/tournaments with no cookie and relays the backend's response", async () => {
+      const fetchMock = vi
+        .fn()
+        .mockResolvedValue(jsonResponse(200, { statusCode: 200, message: "ok", data: [] }));
+      vi.stubGlobal("fetch", fetchMock);
+
+      const response = await forwardToBackend(
+        makeRequest("https://web.test/api/proxy/caro/tournaments"),
+        ["caro", "tournaments"]
+      );
+
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      const [calledUrl, options] = fetchMock.mock.calls[0];
+      expect(calledUrl).toBe("https://api.test/api/caro/tournaments");
+      expect(options.headers.Authorization).toBeUndefined();
+      expect(response.status).toBe(200);
+    });
+
+    it("forwards GET caro/tournaments/{id} with no cookie and relays the backend's response", async () => {
+      const fetchMock = vi
+        .fn()
+        .mockResolvedValue(jsonResponse(200, { statusCode: 200, message: "ok", data: { id: "t1" } }));
+      vi.stubGlobal("fetch", fetchMock);
+
+      const response = await forwardToBackend(
+        makeRequest("https://web.test/api/proxy/caro/tournaments/t1"),
+        ["caro", "tournaments", "t1"]
+      );
+
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      const [calledUrl, options] = fetchMock.mock.calls[0];
+      expect(calledUrl).toBe("https://api.test/api/caro/tournaments/t1");
+      expect(options.headers.Authorization).toBeUndefined();
+      expect(response.status).toBe(200);
+    });
+
+    it("forwards GET caro/tournaments/{id}/participants with no cookie and relays the backend's response", async () => {
+      const fetchMock = vi
+        .fn()
+        .mockResolvedValue(jsonResponse(200, { statusCode: 200, message: "ok", data: [] }));
+      vi.stubGlobal("fetch", fetchMock);
+
+      const response = await forwardToBackend(
+        makeRequest("https://web.test/api/proxy/caro/tournaments/t1/participants"),
+        ["caro", "tournaments", "t1", "participants"]
+      );
+
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      const [calledUrl, options] = fetchMock.mock.calls[0];
+      expect(calledUrl).toBe("https://api.test/api/caro/tournaments/t1/participants");
+      expect(options.headers.Authorization).toBeUndefined();
+      expect(response.status).toBe(200);
+    });
+
+    it("still 401s POST caro/tournaments/{id}/registrations with no cookie — requires an identity to register against", async () => {
+      const fetchMock = vi.fn();
+      vi.stubGlobal("fetch", fetchMock);
+
+      const response = await forwardToBackend(
+        makeRequest("https://web.test/api/proxy/caro/tournaments/t1/registrations", { method: "POST" }),
+        ["caro", "tournaments", "t1", "registrations"]
+      );
+
+      expect(response.status).toBe(401);
+      expect(await response.json()).toEqual({ message: "Not signed in" });
+      expect(fetchMock).not.toHaveBeenCalled();
+    });
+  });
+
   describe("US1: the real /accounts/me resource end-to-end", () => {
     const account = { id: "1", email: "a@b.com", username: "alice", avatarUrl: "https://a" };
 

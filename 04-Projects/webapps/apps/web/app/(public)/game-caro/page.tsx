@@ -1,13 +1,14 @@
-import { JoinMatchButton } from "@/components/molecules/JoinMatchButton";
+import { GameDashboardTemplate } from "@/components/templates/GameDashboardTemplate";
 
-export default function GameCaroListPage() {
-  // Placeholder list view (spec.md Assumptions — real content is a future feature). Renders for
-  // anonymous visitors (FR-008); only the "join" action below is gated (FR-009).
+// Real dashboard shell (spec.md) — panel content for each tab and the leaderboard is filled in by
+// User Story 1; this Foundational-phase version just proves the shell renders (research.md, plan.md).
+export default function GameCaroPage() {
   return (
     <main className="p-8">
-      <h1 className="text-xl font-semibold">Caro Games</h1>
-      <p className="text-gray-600">Coming soon.</p>
-      <JoinMatchButton />
+      <h1 className="text-xl font-semibold text-[var(--color-text-primary)]">Caro Games</h1>
+      <div className="mt-6">
+        <GameDashboardTemplate lobby={<div />} tournament={<div />} quickPair={<div />} leaderboard={<div />} />
+      </div>
     </main>
   );
 }

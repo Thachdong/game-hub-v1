@@ -13,12 +13,17 @@ function unauthenticatedResponse(): Response {
  * auth guard has been removed. `null` matches any single path segment (e.g. a match ID). See
  * specs/006-caro-guest-access/contracts/proxy-auth-policy.md for the authoritative contract,
  * including the neighboring authed paths this must not accidentally loosen (method is always
- * checked alongside the path shape).
+ * checked alongside the path shape). The three tournament-read rows below are added per
+ * specs/007-caro-game-dashboard/contracts/proxy-auth-policy-addendum.md — those backend endpoints
+ * are already public; only this webapp's own allowlist stood in the way.
  */
 const OPTIONAL_AUTH_ROUTES: { method: string; segments: (string | null)[] }[] = [
   { method: "GET", segments: ["caro", "matches", "lobby"] },
   { method: "GET", segments: ["caro", "matches", null] },
   { method: "POST", segments: ["caro", "matches", null, "moves"] },
+  { method: "GET", segments: ["caro", "tournaments"] },
+  { method: "GET", segments: ["caro", "tournaments", null] },
+  { method: "GET", segments: ["caro", "tournaments", null, "participants"] },
 ];
 
 function isOptionalAuthRoute(method: string, pathSegments: string[]): boolean {

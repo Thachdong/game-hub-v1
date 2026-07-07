@@ -29,7 +29,7 @@ webapp-only proxy fixes — all needed before any story's panel can render real 
 
 **Purpose**: Add the one new dependency this feature needs before any code references it
 
-- [ ] T001 Add `socket.io-client` as a dependency of `apps/web` (server-side use only, inside the new Route Handler — research.md §1) in `apps/web/package.json`, then install
+- [X] T001 Add `socket.io-client` as a dependency of `apps/web` (server-side use only, inside the new Route Handler — research.md §1) in `apps/web/package.json`, then install
 
 ---
 
@@ -40,22 +40,22 @@ user story below renders inside of or depends on
 
 **⚠️ CRITICAL**: No user story task can begin until this phase is complete
 
-- [ ] T002 [P] Remove the placeholder route `apps/web/app/(protected)/tournament/page.tsx` (and its directory if now empty) — Tournament becomes a tab of the public dashboard (plan.md Structure Decision, research.md §5)
-- [ ] T003 [P] In `apps/web/lib/proxy.ts`, add the three new `OPTIONAL_AUTH_ROUTES` entries for `GET caro/tournaments`, `GET caro/tournaments/{id}`, and `GET caro/tournaments/{id}/participants` (contracts/proxy-auth-policy-addendum.md rows 4–6)
-- [ ] T004 [P] Add tests in `apps/web/lib/proxy.test.ts` for the three new allowlisted paths (no cookie → forwarded, not synthesized-401) plus a regression case for `POST caro/tournaments/{id}/registrations` with no cookie still 401ing (contracts/proxy-auth-policy-addendum.md)
-- [ ] T005 [P] Create the shared game-type label helper `formatGameType(boardSize, moveTimeSeconds)` (e.g. `"18x18" , 15` → `"18×18 · 15s/move"`) in `apps/web/lib/gameType.ts`, used by Lobby, Tournament, and Quick Pair cards (data-model.md "GameConfig")
-- [ ] T006 [P] Add tests for `formatGameType` in `apps/web/lib/gameType.test.ts` covering all three `BoardSize` values and a sample of `MoveTimeSeconds` values
-- [ ] T007 [P] Create the `Tabs` molecule (`Lobby` / `Tournament` / `Quick Pair`, controlled active-tab state) in `apps/web/components/molecules/Tabs.tsx`
-- [ ] T008 [P] Add a test for `Tabs` in `apps/web/components/molecules/Tabs.test.tsx` covering tab switching and the active-tab indicator
-- [ ] T009 Create `GameDashboardTemplate` in `apps/web/components/templates/GameDashboardTemplate.tsx` — composes `Tabs` (left/center) with a right-side slot for the leaderboard panel, per spec.md's "leaderboard on the right" layout (depends on T007)
-- [ ] T010 [P] Add a test for `GameDashboardTemplate` in `apps/web/components/templates/GameDashboardTemplate.test.tsx` confirming the tab content and leaderboard slot both render
-- [ ] T011 Create the server-side realtime helper in `apps/web/lib/realtime.ts`: opens a `socket.io-client` connection to the backend's `/realtime` gateway, passing the caller's access token (from the httpOnly cookie, read the same way `apps/web/lib/proxy.ts` does) as `auth.token` when present, omitting it for a guest request (contracts/realtime-bridge.md)
-- [ ] T012 [P] Add tests for `apps/web/lib/realtime.ts` in `apps/web/lib/realtime.test.ts`, mocking `socket.io-client` for both the authenticated and guest (no-token) connection paths
-- [ ] T013 Create the SSE Route Handler `apps/web/app/api/caro/realtime/route.ts` using T011's helper, subscribing to `lobby:updated` and `quick_pair:matched` and re-streaming each as a `text/event-stream` message (contracts/realtime-bridge.md, data-model.md "Realtime event contract") (depends on T011)
-- [ ] T014 [P] Add a test for the Route Handler in `apps/web/app/api/caro/realtime/route.test.ts`: mock the underlying socket connection, emit both event types on it, and assert the response stream contains correctly formatted `event: <name>` / `data: <json>` messages (quickstart.md "Realtime bridge")
-- [ ] T015 Create the client-side hook `useCaroRealtimeEvent(eventName, handler)` in `apps/web/lib/useCaroRealtime.ts`, wrapping the native `EventSource` against `/api/caro/realtime` (contracts/realtime-bridge.md "Client usage") — no `socket.io-client` in the browser bundle
-- [ ] T016 [P] Add a test for the hook in `apps/web/lib/useCaroRealtime.test.ts` using a mocked `EventSource`
-- [ ] T017 Replace the placeholder content of `apps/web/app/(public)/game-caro/page.tsx` with `GameDashboardTemplate` wired to (still-empty) Lobby/Tournament/Quick Pair tab slots and a (still-empty) leaderboard slot, removing the old `JoinMatchButton` placeholder usage (depends on T009)
+- [X] T002 [P] Remove the placeholder route `apps/web/app/(protected)/tournament/page.tsx` (and its directory if now empty) — Tournament becomes a tab of the public dashboard (plan.md Structure Decision, research.md §5)
+- [X] T003 [P] In `apps/web/lib/proxy.ts`, add the three new `OPTIONAL_AUTH_ROUTES` entries for `GET caro/tournaments`, `GET caro/tournaments/{id}`, and `GET caro/tournaments/{id}/participants` (contracts/proxy-auth-policy-addendum.md rows 4–6)
+- [X] T004 [P] Add tests in `apps/web/lib/proxy.test.ts` for the three new allowlisted paths (no cookie → forwarded, not synthesized-401) plus a regression case for `POST caro/tournaments/{id}/registrations` with no cookie still 401ing (contracts/proxy-auth-policy-addendum.md)
+- [X] T005 [P] Create the shared game-type label helper `formatGameType(boardSize, moveTimeSeconds)` (e.g. `"18x18" , 15` → `"18×18 · 15s/move"`) in `apps/web/lib/gameType.ts`, used by Lobby, Tournament, and Quick Pair cards (data-model.md "GameConfig")
+- [X] T006 [P] Add tests for `formatGameType` in `apps/web/lib/gameType.test.ts` covering all three `BoardSize` values and a sample of `MoveTimeSeconds` values
+- [X] T007 [P] Create the `Tabs` molecule (`Lobby` / `Tournament` / `Quick Pair`, controlled active-tab state) in `apps/web/components/molecules/Tabs.tsx`
+- [X] T008 [P] Add a test for `Tabs` in `apps/web/components/molecules/Tabs.test.tsx` covering tab switching and the active-tab indicator
+- [X] T009 Create `GameDashboardTemplate` in `apps/web/components/templates/GameDashboardTemplate.tsx` — composes `Tabs` (left/center) with a right-side slot for the leaderboard panel, per spec.md's "leaderboard on the right" layout (depends on T007)
+- [X] T010 [P] Add a test for `GameDashboardTemplate` in `apps/web/components/templates/GameDashboardTemplate.test.tsx` confirming the tab content and leaderboard slot both render
+- [X] T011 Create the server-side realtime helper in `apps/web/lib/realtime.ts`: opens a `socket.io-client` connection to the backend's `/realtime` gateway, passing the caller's access token (from the httpOnly cookie, read the same way `apps/web/lib/proxy.ts` does) as `auth.token` when present, omitting it for a guest request (contracts/realtime-bridge.md)
+- [X] T012 [P] Add tests for `apps/web/lib/realtime.ts` in `apps/web/lib/realtime.test.ts`, mocking `socket.io-client` for both the authenticated and guest (no-token) connection paths
+- [X] T013 Create the SSE Route Handler `apps/web/app/api/caro/realtime/route.ts` using T011's helper, subscribing to `lobby:updated` and `quick_pair:matched` and re-streaming each as a `text/event-stream` message (contracts/realtime-bridge.md, data-model.md "Realtime event contract") (depends on T011)
+- [X] T014 [P] Add a test for the Route Handler in `apps/web/app/api/caro/realtime/route.test.ts`: mock the underlying socket connection, emit both event types on it, and assert the response stream contains correctly formatted `event: <name>` / `data: <json>` messages (quickstart.md "Realtime bridge")
+- [X] T015 Create the client-side hook `useCaroRealtimeEvent(eventName, handler)` in `apps/web/lib/useCaroRealtime.ts`, wrapping the native `EventSource` against `/api/caro/realtime` (contracts/realtime-bridge.md "Client usage") — no `socket.io-client` in the browser bundle
+- [X] T016 [P] Add a test for the hook in `apps/web/lib/useCaroRealtime.test.ts` using a mocked `EventSource`
+- [X] T017 Replace the placeholder content of `apps/web/app/(public)/game-caro/page.tsx` with `GameDashboardTemplate` wired to (still-empty) Lobby/Tournament/Quick Pair tab slots and a (still-empty) leaderboard slot, removing the old `JoinMatchButton` placeholder usage (depends on T009)
 
 **Checkpoint**: Foundation ready — the dashboard shell renders with three switchable tabs and a
 leaderboard slot, the realtime bridge is wired end-to-end (even though `lobby:updated` won't fire
