@@ -7,11 +7,19 @@ import { useRouter } from "next/navigation";
 const muteMatchViewerActionMock = vi.fn();
 const getMatchActionMock = vi.fn();
 const startMatchActionMock = vi.fn();
+const submitMoveActionMock = vi.fn();
+const requestDrawActionMock = vi.fn();
+const surrenderMatchActionMock = vi.fn();
+const respondToDrawRequestActionMock = vi.fn();
 
 vi.mock("@/lib/actions/caro", () => ({
   muteMatchViewerAction: muteMatchViewerActionMock,
   getMatchAction: getMatchActionMock,
   startMatchAction: startMatchActionMock,
+  submitMoveAction: submitMoveActionMock,
+  requestDrawAction: requestDrawActionMock,
+  surrenderMatchAction: surrenderMatchActionMock,
+  respondToDrawRequestAction: respondToDrawRequestActionMock,
 }));
 
 type Handler = (payload: unknown) => void;
@@ -73,6 +81,10 @@ describe("GameboardContainer", () => {
     muteMatchViewerActionMock.mockClear();
     getMatchActionMock.mockReset();
     startMatchActionMock.mockReset();
+    submitMoveActionMock.mockReset();
+    requestDrawActionMock.mockReset();
+    surrenderMatchActionMock.mockReset();
+    respondToDrawRequestActionMock.mockReset();
   });
 
   it("renders the board and the side panel for the initial match state", () => {
@@ -294,6 +306,120 @@ describe("GameboardContainer", () => {
 
       act(() => {
         handlers["match:cancelled"]?.({ matchId: "m1", reason: "start_window_expired" });
+      });
+
+      await waitFor(() => expect(screen.getByTestId("gameboard-state-4")).toBeInTheDocument());
+      expect(screen.getByRole("button", { name: /review moves/i })).toBeInTheDocument();
+    });
+  });
+
+  describe("US4: active play (moves, draw, surrender)", () => {
+    function stateThreeMatch(overrides: Partial<MatchState> = {}) {
+      return makeMatch({
+        status: "in_progress",
+        boardSize: "2x2",
+        playerX: { id: "c1", username: "creator", elo: 1500, winRate: 0.5 },
+        playerO: { id: "p2", username: "bob", elo: 1400, winRate: 0.4 },
+        currentTurnPlayerId: "c1",
+        ...overrides,
+      });
+    }
+
+    it("the current-turn participant's empty-cell click calls submitMoveAction", () => {
+      mockedUseAuthSession.mockReturnValue({
+        isSignedIn: true,
+        account: { id: "c1", email: "c@b.com", username: "creator", avatarUrl: "" },
+        refresh: vi.fn(),
+        logout: vi.fn(),
+      });
+
+      render(<GameboardContainer initialMatch={stateThreeMatch()} />);
+
+      screen.getByLabelText("Row 1, Column 1").click();
+
+      expect(submitMoveActionMock).toHaveBeenCalledWith({ id: "m1", row: 0, col: 0 });
+    });
+
+    it("a non-turn participant's click makes no call", () => {
+      mockedUseAuthSession.mockReturnValue({
+        isSignedIn: true,
+        account: { id: "p2", email: "p2@b.com", username: "bob", avatarUrl: "" },
+        refresh: vi.fn(),
+        logout: vi.fn(),
+      });
+
+      render(<GameboardContainer initialMatch={stateThreeMatch()} />);
+
+      const cell = screen.getByLabelText("Row 1, Column 1") as HTMLButtonElement;
+      expect(cell.disabled).toBe(true);
+
+      expect(submitMoveActionMock).not.toHaveBeenCalled();
+    });
+
+    it("appends a mocked match:move_placed event to the rendered board", async () => {
+      mockedUseAuthSession.mockReturnValue({
+        isSignedIn: true,
+        account: { id: "c1", email: "c@b.com", username: "creator", avatarUrl: "" },
+        refresh: vi.fn(),
+        logout: vi.fn(),
+      });
+
+      render(<GameboardContainer initialMatch={stateThreeMatch()} />);
+
+      act(() => {
+        handlers["match:move_placed"]?.({ playerId: "c1", row: 0, col: 0, sequenceNumber: 1, placedAt: "t" });
+      });
+
+      await waitFor(() => expect(screen.getByLabelText("Row 1, Column 1, X")).toBeInTheDocument());
+    });
+
+    it("Request Draw and Surrender each call their service action", () => {
+      mockedUseAuthSession.mockReturnValue({
+        isSignedIn: true,
+        account: { id: "c1", email: "c@b.com", username: "creator", avatarUrl: "" },
+        refresh: vi.fn(),
+        logout: vi.fn(),
+      });
+
+      render(<GameboardContainer initialMatch={stateThreeMatch()} />);
+
+      screen.getByRole("button", { name: /request draw/i }).click();
+      expect(requestDrawActionMock).toHaveBeenCalledWith("m1");
+
+      screen.getByRole("button", { name: /surrender/i }).click();
+      expect(surrenderMatchActionMock).toHaveBeenCalledWith("m1");
+    });
+
+    it("a mocked match:draw_requested event renders the accept/decline variant for the other participant, and each button calls respondToDrawRequestAction", async () => {
+      mockedUseAuthSession.mockReturnValue({
+        isSignedIn: true,
+        account: { id: "p2", email: "p2@b.com", username: "bob", avatarUrl: "" },
+        refresh: vi.fn(),
+        logout: vi.fn(),
+      });
+
+      render(<GameboardContainer initialMatch={stateThreeMatch()} />);
+
+      act(() => {
+        handlers["match:draw_requested"]?.({ matchId: "m1", fromPlayerId: "c1" });
+      });
+
+      await waitFor(() => expect(screen.getByRole("button", { name: /accept draw/i })).toBeInTheDocument());
+
+      screen.getByRole("button", { name: /accept draw/i }).click();
+      expect(respondToDrawRequestActionMock).toHaveBeenCalledWith({ id: "m1", action: "accept" });
+
+      screen.getByRole("button", { name: /decline draw/i }).click();
+      expect(respondToDrawRequestActionMock).toHaveBeenCalledWith({ id: "m1", action: "decline" });
+    });
+
+    it("a mocked match:ended event transitions to state 4", async () => {
+      mockedUseAuthSession.mockReturnValue({ isSignedIn: false, refresh: vi.fn(), logout: vi.fn() });
+
+      render(<GameboardContainer initialMatch={stateThreeMatch()} />);
+
+      act(() => {
+        handlers["match:ended"]?.({ matchId: "m1", result: "x_wins", winnerPlayerId: "c1", reason: "five_in_a_row" });
       });
 
       await waitFor(() => expect(screen.getByTestId("gameboard-state-4")).toBeInTheDocument());

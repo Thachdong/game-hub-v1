@@ -163,10 +163,10 @@ end accordingly.
 move (appears live for the opponent and viewers); "Request Draw"/"Surrender" end the match
 accordingly (quickstart.md item 4).
 
-- [ ] T050 [US4] Wire `GameBoard`'s `onCellClick` (via the page/side panel) to call `submitMove({ id: matchId, row, col })` only when the clicking viewer `isSelf` on the participant whose id matches `currentTurnPlayerId`; subscribe to `match:move_placed` (append to `moves`) and `match:turn_changed` (update `currentTurnPlayerId`/`deadlineAt`) (depends on T009, T015)
-- [ ] T051 [P] [US4] Add a test covering: current-turn participant click calls `submitMove`; non-turn or non-participant click makes no call; a mocked `match:move_placed` event appends the move to the rendered board (quickstart.md item 4)
-- [ ] T052 [US4] Wire `InGameActions`' `onRequestDraw`/`onSurrender`/`onRespondToDraw` props (stubbed in T037) to `requestDraw({ id: matchId })`, `surrenderMatch({ id: matchId })`, and `respondToDrawRequest({ id: matchId, action })` respectively; subscribe to `match:draw_requested`, `match:draw_declined`, and `match:ended` (drives the 3→4 transition with `result`/`winnerPlayerId`) (depends on T037, T048)
-- [ ] T053 [P] [US4] Add a test covering: Request Draw/Surrender/accept/decline each call their service function; a mocked `match:draw_requested` renders the accept/decline variant for the other participant; a mocked `match:ended` transitions to state 4 (quickstart.md item 4)
+- [X] T050 [US4] Wire `GameBoard`'s `onCellClick` in `GameboardContainer` to call a new `submitMoveAction` Server Action — `GameBoard` itself already only invokes the callback when the clicking viewer is signed in, a participant, and it's their turn (Phase 3's gating extension); subscribe to `match:move_placed` (append to `moves`) and `match:turn_changed` (update `currentTurnPlayerId`/`deadlineAt`)
+- [X] T051 [P] [US4] Add a test covering: current-turn participant click calls `submitMoveAction`; non-turn participant's click is disabled (no call); a mocked `match:move_placed` event appends the move to the rendered board (`GameboardContainer.test.tsx`, quickstart.md item 4)
+- [X] T052 [US4] Wire `InGameActions`' `onRequestDraw`/`onSurrender`/`onRespondToDraw` props (stubbed in T037) to new `requestDrawAction`/`surrenderMatchAction`/`respondToDrawRequestAction` Server Actions; subscribe to `match:draw_requested` (sets `pendingDrawRequestFromId`), `match:draw_declined` (clears it), and `match:ended` (drives the 3→4 transition, sets `result`/`winnerPlayerId`)
+- [X] T053 [P] [US4] Add a test covering: Request Draw/Surrender each call their action; a mocked `match:draw_requested` renders the accept/decline variant for the other participant, each button calling `respondToDrawRequestAction`; a mocked `match:ended` transitions to state 4 (`GameboardContainer.test.tsx`, quickstart.md item 4)
 
 **Checkpoint**: Active play (moves, draw, surrender) works live; US1–US3 are unaffected.
 

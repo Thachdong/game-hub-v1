@@ -1,8 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import type { MatchState } from "@game-hub/caro-service";
-import { getMatchAction, muteMatchViewerAction, startMatchAction } from "@/lib/actions/caro";
+import type { CaroMove, MatchState } from "@game-hub/caro-service";
+import {
+  getMatchAction,
+  muteMatchViewerAction,
+  requestDrawAction,
+  respondToDrawRequestAction,
+  startMatchAction,
+  submitMoveAction,
+  surrenderMatchAction,
+} from "@/lib/actions/caro";
 import { useCaroRealtimeEvent } from "@/lib/useCaroRealtime";
 import { GameboardTemplate } from "@/components/templates/GameboardTemplate";
 import { GameBoard } from "@/components/organisms/GameBoard";
@@ -36,6 +44,24 @@ interface MatchStartedPayload {
 
 interface MatchCancelledPayload {
   matchId: string;
+  reason: string;
+}
+
+interface TurnChangedPayload {
+  matchId: string;
+  currentTurnPlayerId: string;
+  deadlineAt: string;
+}
+
+interface DrawRequestedPayload {
+  matchId: string;
+  fromPlayerId: string;
+}
+
+interface MatchEndedPayload {
+  matchId: string;
+  result: string;
+  winnerPlayerId: string | null;
   reason: string;
 }
 
@@ -104,12 +130,79 @@ export function GameboardContainer({ initialMatch }: { initialMatch: MatchState 
     match.id
   );
 
+  // US4: placing moves, requesting/responding to a draw, surrendering.
+  useCaroRealtimeEvent<CaroMove>(
+    "match:move_placed",
+    (move) => {
+      setMatch((current) => ({ ...current, moves: [...current.moves, move] }));
+    },
+    match.id
+  );
+
+  useCaroRealtimeEvent<TurnChangedPayload>(
+    "match:turn_changed",
+    (payload) => {
+      setMatch((current) => ({
+        ...current,
+        currentTurnPlayerId: payload.currentTurnPlayerId,
+        deadlineAt: payload.deadlineAt,
+      }));
+    },
+    match.id
+  );
+
+  useCaroRealtimeEvent<DrawRequestedPayload>(
+    "match:draw_requested",
+    (payload) => {
+      setMatch((current) => ({ ...current, pendingDrawRequestFromId: payload.fromPlayerId }));
+    },
+    match.id
+  );
+
+  useCaroRealtimeEvent(
+    "match:draw_declined",
+    () => {
+      setMatch((current) => ({ ...current, pendingDrawRequestFromId: null }));
+    },
+    match.id
+  );
+
+  useCaroRealtimeEvent<MatchEndedPayload>(
+    "match:ended",
+    (payload) => {
+      setMatch((current) => ({
+        ...current,
+        status: "completed",
+        result: payload.result,
+        winnerPlayerId: payload.winnerPlayerId,
+        pendingDrawRequestFromId: null,
+      }));
+    },
+    match.id
+  );
+
   function handleMute(viewerId: string) {
     void muteMatchViewerAction({ matchId: match.id, viewerId });
   }
 
   function handleStart() {
     void startMatchAction(match.id);
+  }
+
+  function handleCellClick(row: number, col: number) {
+    void submitMoveAction({ id: match.id, row, col });
+  }
+
+  function handleRequestDraw() {
+    void requestDrawAction(match.id);
+  }
+
+  function handleSurrender() {
+    void surrenderMatchAction(match.id);
+  }
+
+  function handleRespondToDraw(action: "accept" | "decline") {
+    void respondToDrawRequestAction({ id: match.id, action });
   }
 
   const viewState = deriveViewState(match.status);
@@ -125,6 +218,7 @@ export function GameboardContainer({ initialMatch }: { initialMatch: MatchState 
           replayIndex={replayIndex ?? undefined}
           interactive={viewState === 3}
           currentTurnPlayerId={match.currentTurnPlayerId}
+          onCellClick={handleCellClick}
         />
       }
       sidePanel={
@@ -135,9 +229,9 @@ export function GameboardContainer({ initialMatch }: { initialMatch: MatchState 
           replayIndex={replayIndex}
           onReplayIndexChange={setReplayIndex}
           onStart={handleStart}
-          onRequestDraw={() => {}}
-          onSurrender={() => {}}
-          onRespondToDraw={() => {}}
+          onRequestDraw={handleRequestDraw}
+          onSurrender={handleSurrender}
+          onRespondToDraw={handleRespondToDraw}
         />
       }
     />
