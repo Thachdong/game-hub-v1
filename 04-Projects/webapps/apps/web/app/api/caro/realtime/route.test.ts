@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const cookieStore = new Map<string, string>();
+const getSessionStatusMock = vi.fn();
 
 vi.mock("next/headers", () => ({
   cookies: vi.fn(async () => ({
@@ -8,9 +9,18 @@ vi.mock("next/headers", () => ({
   })),
 }));
 
+vi.mock("@/lib/session", async () => {
+  const actual = await vi.importActual<typeof import("@/lib/session")>("@/lib/session");
+  return {
+    ...actual,
+    getSessionStatus: getSessionStatusMock,
+  };
+});
+
 type Handler = (payload: unknown) => void;
 let handlers: Record<string, Handler>;
 let disconnectMock: ReturnType<typeof vi.fn>;
+let emitMock: ReturnType<typeof vi.fn>;
 const connectRealtimeMock = vi.fn();
 
 vi.mock("@/lib/realtime", () => ({
@@ -19,6 +29,10 @@ vi.mock("@/lib/realtime", () => ({
 
 const { GET } = await import("./route.js");
 const { ACCESS_COOKIE_NAME } = await import("@/lib/session");
+
+function makeRequest(url: string): Request {
+  return new Request(url);
+}
 
 async function readOneChunk(stream: ReadableStream<Uint8Array>): Promise<string> {
   const reader = stream.getReader();
@@ -31,23 +45,27 @@ describe("GET /api/caro/realtime", () => {
     cookieStore.clear();
     handlers = {};
     disconnectMock = vi.fn();
+    emitMock = vi.fn();
     connectRealtimeMock.mockReset();
     connectRealtimeMock.mockReturnValue({
       on: vi.fn((event: string, cb: Handler) => {
         handlers[event] = cb;
       }),
+      emit: emitMock,
       disconnect: disconnectMock,
     });
+    getSessionStatusMock.mockReset();
+    getSessionStatusMock.mockResolvedValue({ isSignedIn: false });
   });
 
   it("responds with a text/event-stream content type", async () => {
-    const response = await GET();
+    const response = await GET(makeRequest("https://web.test/api/caro/realtime"));
 
     expect(response.headers.get("content-type")).toBe("text/event-stream");
   });
 
   it("forwards a lobby:updated event as a correctly formatted SSE message", async () => {
-    const response = await GET();
+    const response = await GET(makeRequest("https://web.test/api/caro/realtime"));
 
     const chunkPromise = readOneChunk(response.body as ReadableStream<Uint8Array>);
     handlers["lobby:updated"]({ matchId: "m1", action: "created" });
@@ -58,7 +76,7 @@ describe("GET /api/caro/realtime", () => {
   });
 
   it("forwards a quick_pair:matched event as a correctly formatted SSE message", async () => {
-    const response = await GET();
+    const response = await GET(makeRequest("https://web.test/api/caro/realtime"));
 
     const chunkPromise = readOneChunk(response.body as ReadableStream<Uint8Array>);
     handlers["quick_pair:matched"]({ matchId: "m2" });
@@ -69,14 +87,77 @@ describe("GET /api/caro/realtime", () => {
   it("connects with the access token from the cookie when present", async () => {
     cookieStore.set(ACCESS_COOKIE_NAME, "token-abc");
 
-    await GET();
+    await GET(makeRequest("https://web.test/api/caro/realtime"));
 
     expect(connectRealtimeMock).toHaveBeenCalledWith("token-abc");
   });
 
   it("connects with null when there is no access token cookie (guest)", async () => {
-    await GET();
+    await GET(makeRequest("https://web.test/api/caro/realtime"));
 
     expect(connectRealtimeMock).toHaveBeenCalledWith(null);
+  });
+
+  it("does not join a room or subscribe to match events when matchId is absent", async () => {
+    await GET(makeRequest("https://web.test/api/caro/realtime"));
+
+    expect(emitMock).not.toHaveBeenCalled();
+    expect(handlers["match:move_placed"]).toBeUndefined();
+  });
+
+  describe("spec 008: match-scoped room support", () => {
+    it("emits join_room with the match room and no username for a guest request", async () => {
+      await GET(makeRequest("https://web.test/api/caro/realtime?matchId=m1"));
+
+      expect(emitMock).toHaveBeenCalledWith("join_room", {
+        room: "match:m1",
+        matchViewerUsername: undefined,
+      });
+    });
+
+    it("emits join_room with the signed-in viewer's username", async () => {
+      cookieStore.set(ACCESS_COOKIE_NAME, "token-abc");
+      getSessionStatusMock.mockResolvedValue({
+        isSignedIn: true,
+        account: { id: "u1", email: "a@b.com", username: "alice", avatarUrl: "" },
+      });
+
+      await GET(makeRequest("https://web.test/api/caro/realtime?matchId=m1"));
+
+      expect(emitMock).toHaveBeenCalledWith("join_room", {
+        room: "match:m1",
+        matchViewerUsername: "alice",
+      });
+    });
+
+    it("forwards every match-scoped event as a correctly framed SSE message", async () => {
+      const response = await GET(makeRequest("https://web.test/api/caro/realtime?matchId=m1"));
+
+      const chunkPromise = readOneChunk(response.body as ReadableStream<Uint8Array>);
+      handlers["match:viewer_joined"]({ matchId: "m1", viewerId: "u2", viewerUsername: "bob" });
+
+      expect(await chunkPromise).toBe(
+        'event: match:viewer_joined\ndata: {"matchId":"m1","viewerId":"u2","viewerUsername":"bob"}\n\n'
+      );
+      expect(handlers["match:player_joined"]).toBeDefined();
+      expect(handlers["match:started"]).toBeDefined();
+      expect(handlers["match:move_placed"]).toBeDefined();
+      expect(handlers["match:turn_changed"]).toBeDefined();
+      expect(handlers["match:draw_requested"]).toBeDefined();
+      expect(handlers["match:draw_declined"]).toBeDefined();
+      expect(handlers["match:ended"]).toBeDefined();
+      expect(handlers["match:cancelled"]).toBeDefined();
+      expect(handlers["match:chat"]).toBeDefined();
+      expect(handlers["match:viewer_left"]).toBeDefined();
+    });
+
+    it("emits leave_room and disconnects on cancel", async () => {
+      const response = await GET(makeRequest("https://web.test/api/caro/realtime?matchId=m1"));
+
+      await (response.body as ReadableStream<Uint8Array>).cancel();
+
+      expect(emitMock).toHaveBeenCalledWith("leave_room", { room: "match:m1" });
+      expect(disconnectMock).toHaveBeenCalled();
+    });
   });
 });

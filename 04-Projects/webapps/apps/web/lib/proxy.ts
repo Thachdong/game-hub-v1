@@ -21,6 +21,7 @@ const OPTIONAL_AUTH_ROUTES: { method: string; segments: (string | null)[] }[] = 
   { method: "GET", segments: ["caro", "matches", "lobby"] },
   { method: "GET", segments: ["caro", "matches", null] },
   { method: "POST", segments: ["caro", "matches", null, "moves"] },
+  { method: "GET", segments: ["caro", "matches", null, "chat"] },
   { method: "GET", segments: ["caro", "tournaments"] },
   { method: "GET", segments: ["caro", "tournaments", null] },
   { method: "GET", segments: ["caro", "tournaments", null, "participants"] },

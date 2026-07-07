@@ -253,6 +253,52 @@ describe("forwardToBackend", () => {
       expect(fetchMock).not.toHaveBeenCalled();
     });
 
+    it("forwards GET caro/matches/{id}/chat with no cookie and relays the backend's response (spec 008)", async () => {
+      const fetchMock = vi
+        .fn()
+        .mockResolvedValue(jsonResponse(200, { statusCode: 200, message: "ok", data: [] }));
+      vi.stubGlobal("fetch", fetchMock);
+
+      const response = await forwardToBackend(
+        makeRequest("https://web.test/api/proxy/caro/matches/m1/chat"),
+        ["caro", "matches", "m1", "chat"]
+      );
+
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      const [calledUrl, options] = fetchMock.mock.calls[0];
+      expect(calledUrl).toBe("https://api.test/api/caro/matches/m1/chat");
+      expect(options.headers.Authorization).toBeUndefined();
+      expect(response.status).toBe(200);
+    });
+
+    it("still 401s POST caro/matches/{id}/chat (send) with no cookie — same path shape, different method", async () => {
+      const fetchMock = vi.fn();
+      vi.stubGlobal("fetch", fetchMock);
+
+      const response = await forwardToBackend(
+        makeRequest("https://web.test/api/proxy/caro/matches/m1/chat", { method: "POST" }),
+        ["caro", "matches", "m1", "chat"]
+      );
+
+      expect(response.status).toBe(401);
+      expect(await response.json()).toEqual({ message: "Not signed in" });
+      expect(fetchMock).not.toHaveBeenCalled();
+    });
+
+    it("still 401s POST caro/matches/{id}/chat/mute with no cookie", async () => {
+      const fetchMock = vi.fn();
+      vi.stubGlobal("fetch", fetchMock);
+
+      const response = await forwardToBackend(
+        makeRequest("https://web.test/api/proxy/caro/matches/m1/chat/mute", { method: "POST" }),
+        ["caro", "matches", "m1", "chat", "mute"]
+      );
+
+      expect(response.status).toBe(401);
+      expect(await response.json()).toEqual({ message: "Not signed in" });
+      expect(fetchMock).not.toHaveBeenCalled();
+    });
+
     it("forwards POST caro/matches/{id}/moves with no cookie and relays the backend's response (US3)", async () => {
       const fetchMock = vi
         .fn()

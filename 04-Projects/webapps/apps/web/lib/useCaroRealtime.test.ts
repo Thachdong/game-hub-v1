@@ -59,6 +59,16 @@ describe("useCaroRealtimeEvent", () => {
     expect(handler).toHaveBeenCalledWith({ matchId: "m1", action: "created" });
   });
 
+  it("opens an EventSource against /api/caro/realtime?matchId=... when a matchId is supplied (spec 008)", () => {
+    vi.stubGlobal("EventSource", FakeEventSource);
+    const handler = vi.fn();
+
+    renderHook(() => useCaroRealtimeEvent("match:move_placed", handler, "m1"));
+
+    expect(FakeEventSource.instances).toHaveLength(1);
+    expect(FakeEventSource.instances[0].url).toBe("/api/caro/realtime?matchId=m1");
+  });
+
   it("shares a single EventSource connection across multiple hook instances and closes it once all unmount", () => {
     vi.stubGlobal("EventSource", FakeEventSource);
 
