@@ -131,8 +131,8 @@ Start countdown appear live the moment a second player joins, without a reload.
 event swaps `WaitingForOpponentCard` for a real `PlayerCard` and mounts `StartCountdown`, without a
 page reload (quickstart.md item 2).
 
-- [ ] T046 [US2] In `GameboardSidePanel` (or the page, whichever owns match state), subscribe to `match:player_joined` and merge its payload (`playerXId`, `playerOId`, `deadlineAt`) into local match state, driving the 1→2 transition (depends on T013, T043)
-- [ ] T047 [P] [US2] Add a test covering a mocked `match:player_joined` event transitioning the rendered side panel from state 1 to state 2 without a full remount (quickstart.md item 2)
+- [X] T046 [US2] In `GameboardContainer` (owns match state — see T043's note), subscribe to `match:player_joined`. **Deviation**: the payload (`joinerId`, `playerXId`, `playerOId`, `deadlineAt`) doesn't carry the joining player's username/elo/winRate (data-model.md's event contract table), so rather than merging partial fields, the handler calls a new `getMatchAction` Server Action (wraps `getMatch`) and replaces `match` wholesale with the freshly-fetched full state, driving the 1→2 transition
+- [X] T047 [P] [US2] Add a test covering a mocked `match:player_joined` event transitioning the rendered side panel from state 1 to state 2 without a full remount (`GameboardContainer.test.tsx`, quickstart.md item 2)
 
 **Checkpoint**: Waiting → matched transition works live; US1's spectating is unaffected.
 

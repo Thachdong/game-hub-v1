@@ -3,6 +3,7 @@
 import { cookies } from "next/headers";
 import {
   createMatch,
+  getMatch,
   joinMatch,
   listMatchChat,
   muteMatchViewer,
@@ -48,6 +49,14 @@ export async function requestQuickPairAction(configId: string) {
 }
 
 // --- Gameboard (spec 008) ---------------------------------------------------
+
+/**
+ * Used to refresh full match state (including a newly-joined player's username/elo/winRate,
+ * which `match:player_joined`'s payload doesn't carry) after a realtime transition event.
+ */
+export async function getMatchAction(id: string) {
+  return withCaroService(() => getMatch({ id }));
+}
 
 export async function startMatchAction(id: string) {
   return withCaroService(() => startMatch({ id }));

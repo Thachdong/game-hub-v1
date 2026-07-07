@@ -5,9 +5,11 @@ import { useAuthSession } from "@/components/templates/Providers";
 import { useRouter } from "next/navigation";
 
 const muteMatchViewerActionMock = vi.fn();
+const getMatchActionMock = vi.fn();
 
 vi.mock("@/lib/actions/caro", () => ({
   muteMatchViewerAction: muteMatchViewerActionMock,
+  getMatchAction: getMatchActionMock,
 }));
 
 type Handler = (payload: unknown) => void;
@@ -67,6 +69,7 @@ function makeMatch(overrides: Partial<MatchState> = {}): MatchState {
 describe("GameboardContainer", () => {
   beforeEach(() => {
     muteMatchViewerActionMock.mockClear();
+    getMatchActionMock.mockReset();
   });
 
   it("renders the board and the side panel for the initial match state", () => {
@@ -178,6 +181,48 @@ describe("GameboardContainer", () => {
 
       expect(muteMatchViewerActionMock).not.toHaveBeenCalled();
       expect(push).toHaveBeenCalledWith("/login?callbackUrl=%2Fgame-caro%2Fm1");
+    });
+  });
+
+  describe("US2: waiting for opponent transitions live on match:player_joined", () => {
+    it("swaps the waiting placeholder for the opponent's PlayerCard and shows the countdown, without a reload", async () => {
+      mockedUseAuthSession.mockReturnValue({
+        isSignedIn: true,
+        account: { id: "c1", email: "c@b.com", username: "creator", avatarUrl: "" },
+        refresh: vi.fn(),
+        logout: vi.fn(),
+      });
+      const deadlineAt = new Date(Date.now() + 15_000).toISOString();
+      getMatchActionMock.mockResolvedValue({
+        ok: true,
+        statusCode: 200,
+        message: "ok",
+        data: makeMatch({
+          status: "waiting_for_start",
+          playerO: { id: "p2", username: "bob", elo: 1400, winRate: 0.4 },
+          deadlineAt,
+        }),
+      });
+
+      render(<GameboardContainer initialMatch={makeMatch()} />);
+
+      expect(screen.getByText("Waiting for opponent…")).toBeInTheDocument();
+
+      act(() => {
+        handlers["match:player_joined"]?.({
+          matchId: "m1",
+          joinerId: "p2",
+          playerXId: "c1",
+          playerOId: "p2",
+          deadlineAt,
+        });
+      });
+
+      await waitFor(() => expect(screen.getByText("bob")).toBeInTheDocument());
+      expect(screen.queryByText("Waiting for opponent…")).not.toBeInTheDocument();
+      expect(screen.getByTestId("gameboard-state-2")).toBeInTheDocument();
+      expect(screen.getByText(/starts in/i)).toBeInTheDocument();
+      expect(getMatchActionMock).toHaveBeenCalledWith("m1");
     });
   });
 });

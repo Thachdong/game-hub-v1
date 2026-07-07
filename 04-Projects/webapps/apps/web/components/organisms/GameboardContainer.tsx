@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { MatchState } from "@game-hub/caro-service";
-import { muteMatchViewerAction } from "@/lib/actions/caro";
+import { getMatchAction, muteMatchViewerAction } from "@/lib/actions/caro";
 import { useCaroRealtimeEvent } from "@/lib/useCaroRealtime";
 import { GameboardTemplate } from "@/components/templates/GameboardTemplate";
 import { GameBoard } from "@/components/organisms/GameBoard";
@@ -20,6 +20,14 @@ interface ViewerLeftPayload {
   viewerId: string;
 }
 
+interface PlayerJoinedPayload {
+  matchId: string;
+  joinerId: string;
+  playerXId: string;
+  playerOId: string;
+  deadlineAt: string;
+}
+
 /**
  * Owns the gameboard's live match/viewer-list/replay state (a Server Component page can't hold
  * React state or realtime subscriptions itself) and composes `GameboardTemplate`'s two slots.
@@ -27,9 +35,21 @@ interface ViewerLeftPayload {
  * (contracts/realtime-bridge-addendum.md).
  */
 export function GameboardContainer({ initialMatch }: { initialMatch: MatchState }) {
-  const [match] = useState(initialMatch);
+  const [match, setMatch] = useState(initialMatch);
   const [viewers, setViewers] = useState<ViewerEntry[]>([]);
   const [replayIndex, setReplayIndex] = useState<number | null>(null);
+
+  // match:player_joined's payload only carries ids (data-model.md's Realtime event contract), not
+  // the joining player's username/elo/winRate — refetch full state to render their PlayerCard.
+  useCaroRealtimeEvent<PlayerJoinedPayload>(
+    "match:player_joined",
+    (payload) => {
+      void getMatchAction(payload.matchId).then((result) => {
+        if (result.ok) setMatch(result.data);
+      });
+    },
+    match.id
+  );
 
   useCaroRealtimeEvent<ViewerJoinedPayload>(
     "match:viewer_joined",
