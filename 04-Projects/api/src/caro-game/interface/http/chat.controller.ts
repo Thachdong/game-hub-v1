@@ -14,7 +14,6 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
 import { ApiDataResponse, ApiErrorResponse } from '@common/decorators/api-response.decorator';
 import { JwtAuthGuard } from '../../../shared-auth/jwt-auth.guard';
-import { OptionalJwtGuard } from '../../../shared-auth/optional-jwt.guard';
 import { SendChatMessageUseCase } from '../../application/use-cases/send-chat-message.use-case';
 import { GetChatHistoryUseCase } from '../../application/use-cases/get-chat-history.use-case';
 import { MuteViewerUseCase } from '../../application/use-cases/mute-viewer.use-case';
@@ -26,6 +25,7 @@ interface AuthenticatedRequest extends Request {
 
 @ApiTags('Caro — Chat')
 @ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 @Controller('caro/matches/:matchId/chat')
 export class ChatController {
   constructor(
@@ -35,8 +35,7 @@ export class ChatController {
   ) {}
 
   @Get()
-  @UseGuards(OptionalJwtGuard)
-  @ApiOperation({ summary: 'Get chat history for a match (guest-accessible)' })
+  @ApiOperation({ summary: 'Get chat history for a match' })
   @ApiDataResponse(ChatMessageResponseDto, { isArray: true })
   @ApiErrorResponse(HttpStatus.NOT_FOUND, 'Match not found')
   async history(
@@ -53,7 +52,6 @@ export class ChatController {
   }
 
   @Post()
-  @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Send a chat message in a match' })
   @ApiDataResponse(ChatMessageResponseDto)
@@ -73,7 +71,6 @@ export class ChatController {
   }
 
   @Post('mute')
-  @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Mute a viewer in this match (participants only)' })
   @ApiErrorResponse(HttpStatus.FORBIDDEN, 'Not a participant')

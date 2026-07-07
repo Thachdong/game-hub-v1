@@ -20,8 +20,8 @@ interface JoinMatchResult {
   status: string;
 }
 
-// Time the creator has to click "Start" after a second player joins (15 s)
-const START_WINDOW_SECONDS = 15;
+// Time the creator has to click "Start" after a second player joins (30 s)
+const START_WINDOW_SECONDS = 30;
 
 @Injectable()
 export class JoinMatchUseCase {
