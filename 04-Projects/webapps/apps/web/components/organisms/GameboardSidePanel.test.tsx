@@ -75,6 +75,46 @@ describe("GameboardSidePanel", () => {
     expect(screen.getByTestId("chat-box")).toBeInTheDocument();
   });
 
+  it("state 1: falls back to a synthesized own card from creatorId when playerX is null (real backend shape before a second player joins)", () => {
+    mockedUseAuthSession.mockReturnValue({
+      isSignedIn: true,
+      account: { id: "c1", email: "c@b.com", username: "creator", avatarUrl: "" },
+      refresh: vi.fn(),
+      logout: vi.fn(),
+    });
+
+    render(
+      <GameboardSidePanel
+        match={makeMatch({ playerX: null })}
+        viewers={[]}
+        replayIndex={null}
+        {...noopHandlers()}
+      />
+    );
+
+    expect(screen.getByText("creator (You)")).toBeInTheDocument();
+  });
+
+  it("state 1: shows a shortened-id fallback card for a viewer who isn't the creator, when playerX is null", () => {
+    mockedUseAuthSession.mockReturnValue({
+      isSignedIn: true,
+      account: { id: "spectator1", email: "s@b.com", username: "spec", avatarUrl: "" },
+      refresh: vi.fn(),
+      logout: vi.fn(),
+    });
+
+    render(
+      <GameboardSidePanel
+        match={makeMatch({ playerX: null })}
+        viewers={[]}
+        replayIndex={null}
+        {...noopHandlers()}
+      />
+    );
+
+    expect(screen.getByText("Player c1")).toBeInTheDocument();
+  });
+
   it("state 2: shows both cards and the Start countdown", () => {
     render(
       <GameboardSidePanel

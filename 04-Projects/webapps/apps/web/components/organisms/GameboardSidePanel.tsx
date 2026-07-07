@@ -61,6 +61,25 @@ export function GameboardSidePanel({
   const isParticipant =
     account != null && (account.id === match.playerX?.id || account.id === match.playerO?.id);
 
+  /**
+   * `MatchState.playerX`/`playerO` are both `null` until a second player joins (the backend only
+   * populates them once `JoinMatchUseCase` runs) — caught via live/manual testing (quickstart.md
+   * item 8's spirit, T058), not covered in research.md's known-gaps list. Falls back to a
+   * synthesized card from `creatorId` so state 1 still shows something for FR-003's "own player
+   * card": the session's own username when the current viewer is the creator, otherwise
+   * `PlayerCard`'s existing username-equals-id fallback (`Player {id.slice(0,6)}`).
+   */
+  function resolveState1OwnPlayer(): CaroPlayerInMatch {
+    if (match.playerX) return match.playerX;
+    const isCurrentViewerCreator = account?.id === match.creatorId;
+    return {
+      id: match.creatorId,
+      username: isCurrentViewerCreator && account ? account.username : match.creatorId,
+      elo: 0,
+      winRate: 0,
+    };
+  }
+
   function resolveSenderUsername(senderId: string): string {
     if (match.playerX?.id === senderId) return match.playerX.username;
     if (match.playerO?.id === senderId) return match.playerO.username;
@@ -97,7 +116,7 @@ export function GameboardSidePanel({
     case 1:
       stateContent = (
         <>
-          {match.playerX ? renderPlayerCard(match.playerX) : null}
+          {renderPlayerCard(resolveState1OwnPlayer())}
           <WaitingForOpponentCard />
         </>
       );
