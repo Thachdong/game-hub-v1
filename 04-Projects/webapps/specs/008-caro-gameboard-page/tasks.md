@@ -179,8 +179,8 @@ accordingly (quickstart.md item 4).
 **Independent Test**: On a finished match's gameboard, clicking "Review Moves" and then
 prev/next steps the board through every recorded move in the correct order (quickstart.md item 5).
 
-- [ ] T054 [US5] Wire `MoveReplayControls`' prev/next stepping to drive `GameBoard`'s `replayIndex` prop (client-side only, no service call, derived from the already-fetched `moves`) when the match is in state 4 (depends on T009, T039)
-- [ ] T055 [P] [US5] Add a test covering: clicking Review Moves then stepping prev/next moves `replayIndex` through the full range and `GameBoard` reflects the board at each step (quickstart.md item 5)
+- [X] T054 [US5] Wire `MoveReplayControls`' prev/next stepping to drive `GameBoard`'s `replayIndex` prop (client-side only, no service call, derived from the already-fetched `moves`) when the match is in state 4. Already functionally wired since Phase 3/T043 — `GameboardContainer`'s `replayIndex` state was passed to both `GameBoard` and `GameboardSidePanel`/`MoveReplayControls` from the start (needed to exist for `GameBoard`'s prop to compile); this task's remaining work was verifying and testing that wiring end to end for the US5 story slice specifically (depends on T009, T039)
+- [X] T055 [P] [US5] Add a test covering: clicking Review Moves then stepping prev/next moves `replayIndex` through the full range and `GameBoard` reflects the board at each step, with no `submitMoveAction` call (`GameboardContainer.test.tsx`, quickstart.md item 5)
 
 **Checkpoint**: All five user stories are independently functional.
 

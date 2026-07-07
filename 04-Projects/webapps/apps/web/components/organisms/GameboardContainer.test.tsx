@@ -426,4 +426,50 @@ describe("GameboardContainer", () => {
       expect(screen.getByRole("button", { name: /review moves/i })).toBeInTheDocument();
     });
   });
+
+  describe("US5: review a finished match's moves", () => {
+    it("steps replayIndex through the full range via Review Moves + prev/next, truncating GameBoard's rendered moves at each step (no service call)", () => {
+      mockedUseAuthSession.mockReturnValue({ isSignedIn: false, refresh: vi.fn(), logout: vi.fn() });
+
+      render(
+        <GameboardContainer
+          initialMatch={makeMatch({
+            status: "completed",
+            boardSize: "2x2",
+            playerX: { id: "c1", username: "creator", elo: 1500, winRate: 0.5 },
+            playerO: { id: "p2", username: "bob", elo: 1400, winRate: 0.4 },
+            result: "x_wins",
+            winnerPlayerId: "c1",
+            moves: [
+              { playerId: "c1", row: 0, col: 0, sequenceNumber: 1, placedAt: "t" },
+              { playerId: "p2", row: 0, col: 1, sequenceNumber: 2, placedAt: "t" },
+            ],
+          })}
+        />
+      );
+
+      // Before entering replay mode, the full final board already renders (FR-002).
+      expect(screen.getByLabelText("Row 1, Column 1, X")).toBeInTheDocument();
+      expect(screen.getByLabelText("Row 1, Column 2, O")).toBeInTheDocument();
+
+      act(() => screen.getByRole("button", { name: /review moves/i }).click());
+      expect(screen.getByText("Move 2 / 2")).toBeInTheDocument();
+
+      act(() => screen.getByRole("button", { name: /prev/i }).click());
+      expect(screen.getByText("Move 1 / 2")).toBeInTheDocument();
+      expect(screen.getByLabelText("Row 1, Column 1, X")).toBeInTheDocument();
+      expect(screen.getByLabelText("Row 1, Column 2")).toBeInTheDocument();
+
+      act(() => screen.getByRole("button", { name: /prev/i }).click());
+      expect(screen.getByText("Move 0 / 2")).toBeInTheDocument();
+      expect(screen.getByLabelText("Row 1, Column 1")).toBeInTheDocument();
+
+      act(() => screen.getByRole("button", { name: /next/i }).click());
+      act(() => screen.getByRole("button", { name: /next/i }).click());
+      expect(screen.getByText("Move 2 / 2")).toBeInTheDocument();
+      expect(screen.getByLabelText("Row 1, Column 2, O")).toBeInTheDocument();
+
+      expect(submitMoveActionMock).not.toHaveBeenCalled();
+    });
+  });
 });
