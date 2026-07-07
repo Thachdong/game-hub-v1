@@ -6,6 +6,7 @@ import {
 import { REALTIME_PUSH_PORT, IRealtimePushPort } from '../../../realtime/realtime-push.port';
 import { REALTIME_ROOM_PORT, IRealtimeRoomPort } from '../../../realtime/realtime-push.port';
 import { TournamentMatchmakingService } from '../../infrastructure/matchmaking/tournament-matchmaking.service';
+import { TournamentMatchAutoStartService } from '../../infrastructure/scheduling/tournament-match-auto-start.service';
 
 @Injectable()
 export class PairIdlePlayersUseCase {
@@ -17,6 +18,7 @@ export class PairIdlePlayersUseCase {
     @Inject(REALTIME_ROOM_PORT)
     private readonly realtimeRoom: IRealtimeRoomPort,
     private readonly matchmakingService: TournamentMatchmakingService,
+    private readonly autoStartService: TournamentMatchAutoStartService,
   ) {}
 
   async execute(tournamentId: string): Promise<void> {
@@ -28,6 +30,8 @@ export class PairIdlePlayersUseCase {
       if (!result) break;
 
       const { match, tournamentMatch } = result;
+
+      this.autoStartService.schedule(match.id, match.deadlineAt!);
 
       await this.realtimeRoom.pushToRoom(
         `tournament:${tournamentId}`,

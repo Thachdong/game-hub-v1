@@ -56,4 +56,6 @@ export interface IMatchRepositoryPort {
   findNextSequenceNumber(matchId: string): Promise<number>;
   /** Creates an auto-started tournament match (no lobby phase). */
   createTournamentMatch(data: CreateTournamentMatchData): Promise<Match>;
+  /** `auto_starting` matches whose 5s auto-start deadline has already passed (research.md §4's restart-safety sweep). */
+  findOverdueAutoStarting(now: Date): Promise<Match[]>;
 }

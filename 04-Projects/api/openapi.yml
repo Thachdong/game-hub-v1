@@ -1,6 +1,6 @@
 openapi: 3.0.0
 paths:
-  /api/auth/google:
+  /auth/google:
     get:
       operationId: AuthController_googleLogin
       summary: Initiate Google OAuth login
@@ -10,7 +10,7 @@ paths:
           description: Redirect to Google consent page
       tags:
         - Auth
-  /api/auth/google/callback:
+  /auth/google/callback:
     get:
       operationId: AuthController_googleCallback
       summary: Google OAuth callback
@@ -41,7 +41,7 @@ paths:
                         example: null
       tags:
         - Auth
-  /api/auth/refresh:
+  /auth/refresh:
     post:
       operationId: AuthController_refresh
       summary: Refresh access token
@@ -93,7 +93,7 @@ paths:
         - Auth
       security:
         - bearer: []
-  /api/accounts/me:
+  /accounts/me:
     get:
       operationId: AccountController_getMe
       summary: Get authenticated account profile
@@ -126,7 +126,7 @@ paths:
         - Account
       security:
         - bearer: []
-  /api/games:
+  /games:
     get:
       operationId: GamesController_list
       summary: List all games, with hasProfile flag when authenticated
@@ -146,7 +146,7 @@ paths:
         - Games
       security:
         - bearer: []
-  /api/friends/requests:
+  /friends/requests:
     post:
       operationId: FriendsController_sendRequest
       summary: Send a friend request by target email
@@ -230,7 +230,7 @@ paths:
         - Friends
       security:
         - bearer: []
-  /api/friends/requests/{id}:
+  /friends/requests/{id}:
     patch:
       operationId: FriendsController_resolve
       summary: Accept or reject a friend request
@@ -300,7 +300,7 @@ paths:
         - Friends
       security:
         - bearer: []
-  /api/friends:
+  /friends:
     get:
       operationId: FriendsController_list
       summary: List friends
@@ -320,7 +320,7 @@ paths:
         - Friends
       security:
         - bearer: []
-  /api/admin/games/{gameId}/admins:
+  /admin/games/{gameId}/admins:
     post:
       operationId: AdminController_assign
       summary: Assign Game Admin role
@@ -377,7 +377,7 @@ paths:
         - Admin
       security:
         - bearer: []
-  /api/admin/games/{gameId}/admins/{accountId}:
+  /admin/games/{gameId}/admins/{accountId}:
     delete:
       operationId: AdminController_revoke
       summary: Revoke Game Admin role
@@ -425,7 +425,7 @@ paths:
         - Admin
       security:
         - bearer: []
-  /api/notifications:
+  /notifications:
     get:
       operationId: NotificationsController_list
       summary: Get authenticated player notification list (newest first)
@@ -492,7 +492,7 @@ paths:
         - Notifications
       security:
         - bearer: []
-  /api/notifications/{id}/read:
+  /notifications/{id}/read:
     patch:
       operationId: NotificationsController_markRead
       summary: Mark a notification as read (idempotent)
@@ -569,7 +569,7 @@ paths:
         - Notifications
       security:
         - bearer: []
-  /api/report-types:
+  /report-types:
     get:
       operationId: ReportTypesController_list
       summary: List active report types available for submission
@@ -587,7 +587,7 @@ paths:
         - Report Types
       security:
         - bearer: []
-  /api/reports:
+  /reports:
     post:
       operationId: ReportsController_submit
       summary: Submit a report against another user
@@ -617,7 +617,7 @@ paths:
         - Reports
       security:
         - bearer: []
-  /api/admin/reports:
+  /admin/reports:
     get:
       operationId: AdminReportsController_list
       summary: List reports (admin view, cursor-paginated)
@@ -663,7 +663,7 @@ paths:
         - Admin — Reports
       security:
         - bearer: []
-  /api/admin/reports/{id}/confirm:
+  /admin/reports/{id}/confirm:
     patch:
       operationId: AdminReportsController_confirm
       summary: Confirm a pending report as valid or invalid
@@ -698,7 +698,7 @@ paths:
         - Admin — Reports
       security:
         - bearer: []
-  /api/admin/report-types:
+  /admin/report-types:
     get:
       operationId: AdminReportTypesController_list
       summary: List all report types including inactive (admin view)
@@ -747,7 +747,7 @@ paths:
         - Admin — Report Types
       security:
         - bearer: []
-  /api/admin/report-types/{id}:
+  /admin/report-types/{id}:
     patch:
       operationId: AdminReportTypesController_update
       summary: Update a report type (name, deductionPoints, active)
@@ -806,7 +806,7 @@ paths:
         - Admin — Report Types
       security:
         - bearer: []
-  /api/trust-score/me:
+  /trust-score/me:
     get:
       operationId: TrustScoreController_getMyScore
       summary: Get my trust score and lock status
@@ -824,7 +824,7 @@ paths:
         - Trust Score
       security:
         - bearer: []
-  /api/admin/caro/game-configs:
+  /admin/caro/game-configs:
     post:
       operationId: AdminGameConfigsController_create
       summary: Create a new game configuration
@@ -947,7 +947,7 @@ paths:
         - Admin — Caro Game Configs
       security:
         - bearer: []
-  /api/admin/caro/game-configs/{id}:
+  /admin/caro/game-configs/{id}:
     patch:
       operationId: AdminGameConfigsController_update
       summary: Update board size and/or move time of a configuration
@@ -1098,7 +1098,7 @@ paths:
         - Admin — Caro Game Configs
       security:
         - bearer: []
-  /api/admin/caro/game-configs/{id}/reactivate:
+  /admin/caro/game-configs/{id}/reactivate:
     post:
       operationId: AdminGameConfigsController_reactivate
       summary: Reactivate a previously deactivated configuration
@@ -1175,7 +1175,7 @@ paths:
         - Admin — Caro Game Configs
       security:
         - bearer: []
-  /api/caro/game-configs:
+  /caro/game-configs:
     get:
       operationId: GameConfigsController_list
       summary: List active game configurations available for game creation
@@ -1208,10 +1208,10 @@ paths:
         - Caro — Game Configs
       security:
         - bearer: []
-  /api/caro/matches/lobby:
+  /caro/matches/lobby:
     get:
       operationId: MatchController_lobby
-      summary: List open public matches in the lobby
+      summary: List open public matches in the lobby (no authentication required)
       parameters: []
       responses:
         '200':
@@ -1226,27 +1226,12 @@ paths:
                         type: array
                         items:
                           $ref: '#/components/schemas/LobbyMatchDto'
-        '401':
-          description: Missing or expired JWT
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: '#/components/schemas/ApiResponseDto'
-                  - properties:
-                      statusCode:
-                        example: 401
-                      data:
-                        nullable: true
-                        example: null
       tags:
         - Caro — Matches
-      security:
-        - bearer: []
-  /api/caro/matches:
+  /caro/matches:
     post:
       operationId: MatchController_create
-      summary: Create a new match
+      summary: Create a new match (authentication required)
       parameters: []
       requestBody:
         required: true
@@ -1295,10 +1280,10 @@ paths:
         - Caro — Matches
       security:
         - bearer: []
-  /api/caro/matches/{id}/join:
+  /caro/matches/{id}/join:
     post:
       operationId: MatchController_join
-      summary: Join a public lobby match
+      summary: Join a public lobby match (authentication required)
       parameters:
         - name: id
           required: true
@@ -1346,10 +1331,10 @@ paths:
         - Caro — Matches
       security:
         - bearer: []
-  /api/caro/matches/{id}:
+  /caro/matches/{id}:
     delete:
       operationId: MatchController_cancel
-      summary: Cancel a match (creator only, before it starts)
+      summary: Cancel a match (creator only, before it starts; authentication required)
       parameters:
         - name: id
           required: true
@@ -1399,7 +1384,9 @@ paths:
         - bearer: []
     get:
       operationId: MatchController_getState
-      summary: Get full match state including moves
+      summary: >-
+        Get full match state including moves (no authentication required for
+        public matches)
       parameters:
         - name: id
           required: true
@@ -1432,12 +1419,10 @@ paths:
                         example: null
       tags:
         - Caro — Matches
-      security:
-        - bearer: []
-  /api/caro/matches/{id}/leave:
+  /caro/matches/{id}/leave:
     post:
       operationId: MatchController_leave
-      summary: Leave a match before it starts (second player)
+      summary: Leave a match before it starts (second player; authentication required)
       parameters:
         - name: id
           required: true
@@ -1485,10 +1470,10 @@ paths:
         - Caro — Matches
       security:
         - bearer: []
-  /api/caro/matches/{id}/invite:
+  /caro/matches/{id}/invite:
     post:
       operationId: MatchController_invite
-      summary: Invite a friend to a private match
+      summary: Invite a friend to a private match (authentication required)
       parameters:
         - name: id
           required: true
@@ -1542,10 +1527,10 @@ paths:
         - Caro — Matches
       security:
         - bearer: []
-  /api/caro/matches/{id}/invitation/respond:
+  /caro/matches/{id}/invitation/respond:
     put:
       operationId: MatchController_respondToInvitation
-      summary: Accept or decline a match invitation
+      summary: Accept or decline a match invitation (authentication required)
       parameters:
         - name: id
           required: true
@@ -1599,10 +1584,12 @@ paths:
         - Caro — Matches
       security:
         - bearer: []
-  /api/caro/matches/{id}/moves:
+  /caro/matches/{id}/moves:
     get:
       operationId: MatchController_getMoves
-      summary: Get all moves for a match
+      summary: >-
+        Get all moves for a match (no authentication required for public
+        matches)
       parameters:
         - name: id
           required: true
@@ -1637,8 +1624,6 @@ paths:
                         example: null
       tags:
         - Caro — Matches
-      security:
-        - bearer: []
     post:
       operationId: GameplayController_move
       summary: Place a move on the board
@@ -1695,7 +1680,7 @@ paths:
         - Caro — Gameplay
       security:
         - bearer: []
-  /api/caro/matches/{id}/start:
+  /caro/matches/{id}/start:
     post:
       operationId: GameplayController_start
       summary: Start a match (creator only)
@@ -1746,7 +1731,7 @@ paths:
         - Caro — Gameplay
       security:
         - bearer: []
-  /api/caro/matches/{id}/surrender:
+  /caro/matches/{id}/surrender:
     post:
       operationId: GameplayController_surrenderMatch
       summary: Surrender the match
@@ -1787,7 +1772,7 @@ paths:
         - Caro — Gameplay
       security:
         - bearer: []
-  /api/caro/matches/{id}/draw-request:
+  /caro/matches/{id}/draw-request:
     post:
       operationId: GameplayController_sendDrawRequest
       summary: Send a draw request to the opponent
@@ -1828,7 +1813,7 @@ paths:
         - Caro — Gameplay
       security:
         - bearer: []
-  /api/caro/matches/{id}/draw-request/respond:
+  /caro/matches/{id}/draw-request/respond:
     put:
       operationId: GameplayController_respondToDrawRequest
       summary: Accept or decline a draw request
@@ -1875,7 +1860,7 @@ paths:
         - Caro — Gameplay
       security:
         - bearer: []
-  /api/caro/quick-pair:
+  /caro/quick-pair:
     post:
       operationId: QuickPairController_pair
       summary: Enter the quick pair queue or instantly match with a waiting opponent
@@ -1949,7 +1934,7 @@ paths:
         - Caro — Quick Pair
       security:
         - bearer: []
-  /api/caro/matches/{matchId}/chat:
+  /caro/matches/{matchId}/chat:
     get:
       operationId: ChatController_history
       summary: Get chat history for a match
@@ -2045,7 +2030,7 @@ paths:
         - Caro — Chat
       security:
         - bearer: []
-  /api/caro/matches/{matchId}/chat/mute:
+  /caro/matches/{matchId}/chat/mute:
     post:
       operationId: ChatController_mute
       summary: Mute a viewer in this match (participants only)
@@ -2092,7 +2077,7 @@ paths:
         - Caro — Chat
       security:
         - bearer: []
-  /api/caro/leaderboard:
+  /caro/leaderboard:
     get:
       operationId: LeaderboardController_top10
       summary: Get top 10 players by ELO
@@ -2125,7 +2110,7 @@ paths:
         - Caro — Leaderboard
       security:
         - bearer: []
-  /api/caro/players/me:
+  /caro/players/me:
     get:
       operationId: PlayerProfileController_myProfile
       summary: Get own Caro player profile
@@ -2158,7 +2143,7 @@ paths:
         - Caro — Player Profiles
       security:
         - bearer: []
-  /api/caro/players/{playerId}:
+  /caro/players/{playerId}:
     get:
       operationId: PlayerProfileController_profile
       summary: Get Caro player profile by player ID
@@ -2196,7 +2181,7 @@ paths:
         - Caro — Player Profiles
       security:
         - bearer: []
-  /api/caro/players/me/history:
+  /caro/players/me/history:
     get:
       operationId: PlayerProfileController_myHistory
       summary: Get own match history (cursor-paginated)
@@ -2227,7 +2212,7 @@ paths:
         - Caro — Player Profiles
       security:
         - bearer: []
-  /api/caro/players/{playerId}/history:
+  /caro/players/{playerId}/history:
     get:
       operationId: PlayerProfileController_playerHistory
       summary: Get match history for a player (cursor-paginated)
@@ -2263,7 +2248,7 @@ paths:
         - Caro — Player Profiles
       security:
         - bearer: []
-  /api/caro/tournament-creator-requests:
+  /caro/tournament-creator-requests:
     post:
       operationId: TournamentController_requestCreatorRole
       summary: Request the Tournament Creator role
@@ -2275,7 +2260,7 @@ paths:
         - tournament
       security:
         - bearer: []
-  /api/caro/tournaments:
+  /caro/tournaments:
     post:
       operationId: TournamentController_createTournament
       summary: Create a new tournament (Tournament Creator only)
@@ -2323,7 +2308,7 @@ paths:
           description: ''
       tags:
         - tournament
-  /api/caro/tournaments/{tournamentId}/registrations:
+  /caro/tournaments/{tournamentId}/registrations:
     post:
       operationId: TournamentController_registerForTournament
       summary: Register for a tournament (ELO-gated)
@@ -2340,7 +2325,7 @@ paths:
         - tournament
       security:
         - bearer: []
-  /api/caro/tournaments/{tournamentId}/participants:
+  /caro/tournaments/{tournamentId}/participants:
     get:
       operationId: TournamentController_getParticipants
       summary: Get tournament participant list ordered by score (public)
@@ -2355,7 +2340,7 @@ paths:
           description: ''
       tags:
         - tournament
-  /api/caro/tournaments/{tournamentId}/chat:
+  /caro/tournaments/{tournamentId}/chat:
     post:
       operationId: TournamentController_sendChatMessage
       summary: Send a chat message (registered participants only)
@@ -2394,7 +2379,7 @@ paths:
         - tournament
       security:
         - bearer: []
-  /api/caro/tournaments/{tournamentId}:
+  /caro/tournaments/{tournamentId}:
     get:
       operationId: TournamentController_getTournament
       summary: Get tournament details (public)
@@ -2409,7 +2394,7 @@ paths:
           description: ''
       tags:
         - tournament
-  /api/caro/admin/tournament-creator-requests:
+  /caro/admin/tournament-creator-requests:
     get:
       operationId: TournamentAdminController_listRequests
       summary: List tournament creator role requests
@@ -2430,7 +2415,7 @@ paths:
         - tournament-admin
       security:
         - bearer: []
-  /api/caro/admin/tournament-creator-requests/{requestId}:
+  /caro/admin/tournament-creator-requests/{requestId}:
     patch:
       operationId: TournamentAdminController_reviewRequest
       summary: Approve or reject a tournament creator role request
@@ -2453,7 +2438,7 @@ paths:
         - tournament-admin
       security:
         - bearer: []
-  /api/caro/admin/tournament-creators/{playerId}:
+  /caro/admin/tournament-creators/{playerId}:
     delete:
       operationId: TournamentAdminController_revokeRole
       summary: Revoke Tournament Creator role from a player

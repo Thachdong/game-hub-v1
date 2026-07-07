@@ -170,14 +170,14 @@ export class MatchTypeOrmRepository implements IMatchRepositoryPort {
         : [data.blackPlayerId, data.whitePlayerId];
 
     const now = new Date();
-    const deadline = new Date(now.getTime() + 30 * 1000);
+    const deadline = new Date(now.getTime() + 5 * 1000);
 
     const entity = this.matchRepo.create({
       configId: data.gameConfigId,
       boardSize: '18x18',
       moveTimeSeconds: 30,
       visibility: 'public',
-      status: 'in_progress',
+      status: 'auto_starting',
       creatorId: data.whitePlayerId,
       secondPlayerId: data.blackPlayerId,
       playerXId,
@@ -195,6 +195,13 @@ export class MatchTypeOrmRepository implements IMatchRepositoryPort {
     });
     const saved = await this.matchRepo.save(entity);
     return this.toDomain(saved);
+  }
+
+  async findOverdueAutoStarting(now: Date): Promise<Match[]> {
+    const entities = await this.matchRepo.find({
+      where: { status: 'auto_starting' as Match['status'], deadlineAt: LessThan(now) },
+    });
+    return entities.map(this.toDomain);
   }
 
   private toDomain(e: MatchOrmEntity): Match {
