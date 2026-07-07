@@ -28,7 +28,10 @@ export class CancelTournamentUseCase {
     const tournament = await this.tournamentRepo.findById(tournamentId);
     if (!tournament) throw new TournamentNotFoundError();
 
-    const registrations = await this.registrationRepo.findAllByTournament(tournamentId);
+    const { items: registrations } = await this.registrationRepo.findAllByTournament(tournamentId, {
+      page: 1,
+      pageSize: Number.MAX_SAFE_INTEGER,
+    });
     tournament.status = 'cancelled';
     await this.tournamentRepo.save(tournament);
 

@@ -8,6 +8,8 @@ export interface IRealtimeRoomPort {
   joinRoom(socketId: string, room: string): Promise<void>;
   leaveRoom(socketId: string, room: string): Promise<void>;
   pushToRoom(room: string, event: string, payload: unknown): Promise<void>;
+  /** playerIds currently present (open SSE connection) in the given room (research.md §2). */
+  getPresentPlayerIds(room: string): string[];
 }
 
 export const REALTIME_ROOM_PORT = Symbol('IRealtimeRoomPort');

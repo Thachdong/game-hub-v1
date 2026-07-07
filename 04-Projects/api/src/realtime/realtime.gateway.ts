@@ -11,6 +11,7 @@ import {
 import { Server, Socket } from 'socket.io';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { AuthConfig } from '@config/auth.config';
 
 interface HandshakeWithAuth {
@@ -22,6 +23,8 @@ type SocketRole = 'authenticated' | 'observer';
 interface AuthenticatedSocket extends Socket {
   userId?: string;
   role: SocketRole;
+  /** Tournament rooms this socket has joined, so handleDisconnect can clear presence for all of them. */
+  joinedTournamentRooms?: Set<string>;
 }
 
 @WebSocketGateway({ path: '/realtime', cors: true })
@@ -33,10 +36,13 @@ export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect
   private readonly connections = new Map<string, Set<AuthenticatedSocket>>();
   /** room → set of authenticated viewer usernames currently in the room */
   private readonly roomViewers = new Map<string, Set<string>>();
+  /** tournament room → set of authenticated playerIds currently present (research.md §2) */
+  private readonly tournamentPresence = new Map<string, Set<string>>();
 
   constructor(
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   handleConnection(client: AuthenticatedSocket): void {
@@ -76,6 +82,10 @@ export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect
           this.connections.delete(client.userId);
         }
       }
+
+      for (const room of client.joinedTournamentRooms ?? []) {
+        this.tournamentPresence.get(room)?.delete(client.userId);
+      }
     }
   }
 
@@ -99,6 +109,18 @@ export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect
         });
       }
     }
+
+    // Track authenticated presence in tournament rooms (research.md §2/§3)
+    if (room.startsWith('tournament:') && client.role === 'authenticated' && client.userId) {
+      if (!this.tournamentPresence.has(room)) this.tournamentPresence.set(room, new Set());
+      this.tournamentPresence.get(room)!.add(client.userId);
+      client.joinedTournamentRooms ??= new Set();
+      client.joinedTournamentRooms.add(room);
+      this.eventEmitter.emit('caro.tournament.presence-joined', {
+        tournamentId: room.replace('tournament:', ''),
+        playerId: client.userId,
+      });
+    }
   }
 
   @SubscribeMessage('leave_room')
@@ -119,6 +141,11 @@ export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect
         });
       }
     }
+
+    if (room.startsWith('tournament:') && client.userId) {
+      this.tournamentPresence.get(room)?.delete(client.userId);
+      client.joinedTournamentRooms?.delete(room);
+    }
   }
 
   getViewersInRoom(room: string): string[] {
@@ -127,6 +154,10 @@ export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect
 
   clearRoomViewers(room: string): void {
     this.roomViewers.delete(room);
+  }
+
+  getPresentPlayerIds(room: string): string[] {
+    return Array.from(this.tournamentPresence.get(room) ?? []);
   }
 
   pushToUser(userId: string, event: string, payload: unknown): void {

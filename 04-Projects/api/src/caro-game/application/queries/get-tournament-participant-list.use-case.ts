@@ -2,8 +2,14 @@ import { Inject, Injectable } from '@nestjs/common';
 import {
   TOURNAMENT_REGISTRATION_REPOSITORY_PORT,
   ITournamentRegistrationRepository,
+  FindAllByTournamentResult,
 } from '../../domain/ports/tournament-registration.repository.port';
-import { TournamentRegistration } from '../../domain/entities/tournament-registration';
+
+export interface GetTournamentParticipantListInput {
+  tournamentId: string;
+  page: number;
+  pageSize: number;
+}
 
 @Injectable()
 export class GetTournamentParticipantListUseCase {
@@ -12,7 +18,10 @@ export class GetTournamentParticipantListUseCase {
     private readonly registrationRepo: ITournamentRegistrationRepository,
   ) {}
 
-  async execute(tournamentId: string): Promise<TournamentRegistration[]> {
-    return this.registrationRepo.findAllByTournament(tournamentId);
+  async execute(input: GetTournamentParticipantListInput): Promise<FindAllByTournamentResult> {
+    return this.registrationRepo.findAllByTournament(input.tournamentId, {
+      page: input.page,
+      pageSize: input.pageSize,
+    });
   }
 }

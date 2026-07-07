@@ -67,3 +67,20 @@ export class TournamentDetailsDto extends TournamentSummaryDto {
   @ApiProperty({ nullable: true })
   gameConfig: { id: string; name?: string; timeLimitSeconds?: number } | null;
 }
+
+export class ListParticipantsQueryDto {
+  @ApiProperty({ required: false, default: 1, minimum: 1 })
+  @IsOptional()
+  @IsNumber()
+  @Min(1)
+  @Type(() => Number)
+  page?: number;
+
+  @ApiProperty({ required: false, default: 20, minimum: 1, maximum: 50 })
+  @IsOptional()
+  @IsNumber()
+  @Min(1)
+  @Max(50)
+  @Type(() => Number)
+  pageSize?: number;
+}

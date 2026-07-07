@@ -5,6 +5,8 @@ import { TournamentRegistrationOrmEntity } from './typeorm-entities/tournament-r
 import {
   ITournamentRegistrationRepository,
   CreateRegistrationData,
+  FindAllByTournamentOptions,
+  FindAllByTournamentResult,
 } from '../../domain/ports/tournament-registration.repository.port';
 import { TournamentRegistration } from '../../domain/entities/tournament-registration';
 import { AlreadyRegisteredError } from '../../domain/errors';
@@ -27,6 +29,7 @@ export class TournamentRegistrationTypeOrmRepository implements ITournamentRegis
         tournamentPoints: 0,
         winStreak: 0,
         status: 'idle',
+        isPaused: false,
       });
       const saved = await this.repo.save(entity);
       return this.toDomain(saved);
@@ -45,23 +48,33 @@ export class TournamentRegistrationTypeOrmRepository implements ITournamentRegis
     return entity ? this.toDomain(entity) : null;
   }
 
-  async findAllByTournament(tournamentId: string): Promise<TournamentRegistration[]> {
-    const entities = await this.repo.find({
+  async findAllByTournament(
+    tournamentId: string,
+    options: FindAllByTournamentOptions,
+  ): Promise<FindAllByTournamentResult> {
+    const [entities, total] = await this.repo.findAndCount({
       where: { tournamentId },
       order: { tournamentPoints: 'DESC', registeredAt: 'ASC' },
+      skip: (options.page - 1) * options.pageSize,
+      take: options.pageSize,
     });
-    return entities.map(e => this.toDomain(e));
+    return { items: entities.map(e => this.toDomain(e)), total };
   }
 
-  async claimTwoIdlePlayers(tournamentId: string): Promise<TournamentRegistration[]> {
+  async claimTwoIdlePlayers(
+    tournamentId: string,
+    presentPlayerIds: string[],
+  ): Promise<TournamentRegistration[]> {
+    if (presentPlayerIds.length === 0) return [];
     // ADR-CARO-GAME-003: SKIP LOCKED inside a transaction
     const rows = await this.dataSource.query<TournamentRegistrationOrmEntity[]>(
       `SELECT * FROM caro_game.tournament_registrations
-       WHERE tournament_id = $1 AND status = 'idle'
+       WHERE tournament_id = $1 AND status = 'idle' AND is_paused = false
+         AND player_id = ANY($2)
        ORDER BY tournament_points ASC, registered_at ASC
        FOR UPDATE SKIP LOCKED
        LIMIT 2`,
-      [tournamentId],
+      [tournamentId, presentPlayerIds],
     );
     if (rows.length < 2) return [];
     return rows.map(r => this.toDomainRaw(r));
@@ -92,6 +105,17 @@ export class TournamentRegistrationTypeOrmRepository implements ITournamentRegis
     return this.toDomain(entity);
   }
 
+  async setPaused(tournamentId: string, playerId: string, paused: boolean): Promise<TournamentRegistration> {
+    await this.dataSource.query(
+      `UPDATE caro_game.tournament_registrations
+       SET is_paused = $1
+       WHERE tournament_id = $2 AND player_id = $3`,
+      [paused, tournamentId, playerId],
+    );
+    const entity = await this.repo.findOneOrFail({ where: { tournamentId, playerId } });
+    return this.toDomain(entity);
+  }
+
   private toDomain(e: TournamentRegistrationOrmEntity): TournamentRegistration {
     const r = new TournamentRegistration();
     r.id = e.id;
@@ -101,6 +125,7 @@ export class TournamentRegistrationTypeOrmRepository implements ITournamentRegis
     r.tournamentPoints = e.tournamentPoints;
     r.winStreak = e.winStreak;
     r.status = e.status as TournamentRegistration['status'];
+    r.isPaused = e.isPaused;
     r.registeredAt = e.registeredAt;
     return r;
   }
@@ -114,6 +139,7 @@ export class TournamentRegistrationTypeOrmRepository implements ITournamentRegis
     r.tournamentPoints = row.tournament_points;
     r.winStreak = row.win_streak;
     r.status = row.status as TournamentRegistration['status'];
+    r.isPaused = row.is_paused;
     r.registeredAt = row.registered_at;
     return r;
   }

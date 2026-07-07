@@ -49,6 +49,7 @@ export class MatchStateDto {
   @ApiProperty() visibility: string;
   @ApiProperty() status: string;
   @ApiProperty() creatorId: string;
+  @ApiProperty({ nullable: true }) tournamentId: string | null;
   @ApiProperty({ type: PlayerInMatchDto, nullable: true }) playerX: PlayerInMatchDto | null;
   @ApiProperty({ type: PlayerInMatchDto, nullable: true }) playerO: PlayerInMatchDto | null;
   @ApiProperty({ nullable: true }) currentTurnPlayerId: string | null;

@@ -36,7 +36,10 @@ export class StartTournamentUseCase {
     const count = await this.tournamentRepo.countRegistrants(tournamentId);
     if (count < MIN_PLAYERS) {
       // Delegate to CancelTournamentUseCase logic inline to avoid circular injection
-      const registrations = await this.registrationRepo.findAllByTournament(tournamentId);
+      const { items: registrations } = await this.registrationRepo.findAllByTournament(tournamentId, {
+        page: 1,
+        pageSize: Number.MAX_SAFE_INTEGER,
+      });
       tournament.status = 'cancelled';
       await this.tournamentRepo.save(tournament);
 

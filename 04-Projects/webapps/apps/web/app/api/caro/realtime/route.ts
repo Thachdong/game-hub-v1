@@ -6,8 +6,10 @@ import { connectRealtime } from "@/lib/realtime";
  * Events this bridge always relays (contracts/realtime-bridge.md, data-model.md
  * "Realtime event contract"). `lobby:updated` is not yet emitted by the backend
  * (research.md §2 row 5) — subscribing to it ahead of time is a safe, inert default.
+ * `match:started` is always-on too (contracts/realtime-tournament-addendum.md): it's how a
+ * participant sitting on the tournament page — with no `matchId` yet — learns to navigate (FR-007).
  */
-const LOBBY_EVENTS = ["lobby:updated", "quick_pair:matched"] as const;
+const LOBBY_EVENTS = ["lobby:updated", "quick_pair:matched", "match:started"] as const;
 
 /**
  * Match-scoped events, forwarded only when a `matchId` query param is supplied
@@ -15,7 +17,6 @@ const LOBBY_EVENTS = ["lobby:updated", "quick_pair:matched"] as const;
  */
 const MATCH_EVENTS = [
   "match:player_joined",
-  "match:started",
   "match:move_placed",
   "match:turn_changed",
   "match:draw_requested",
@@ -28,6 +29,16 @@ const MATCH_EVENTS = [
 ] as const;
 
 /**
+ * Tournament-scoped events, forwarded only when a `tournamentId` query param is supplied
+ * (contracts/realtime-tournament-addendum.md).
+ */
+const TOURNAMENT_EVENTS = [
+  "tournament:status-changed",
+  "tournament:match-created",
+  "tournament:participant-updated",
+] as const;
+
+/**
  * SSE bridge to the backend's Socket.IO `/realtime` gateway (contracts/realtime-bridge.md,
  * contracts/realtime-bridge-addendum.md). The access token is read from the httpOnly cookie
  * here, server-side, and used only to open this route's own outbound socket.io-client
@@ -36,20 +47,31 @@ const MATCH_EVENTS = [
  *
  * When `?matchId=` is present, this also joins the backend gateway's `match:{matchId}` room
  * (passing the signed-in viewer's username, omitted for guests) and forwards every match-scoped
- * event in addition to the two lobby-level ones.
+ * event in addition to the always-on ones.
+ *
+ * When `?tournamentId=` is present (contracts/realtime-tournament-addendum.md), this instead joins
+ * `tournament:{tournamentId}` (presence tracked server-side by authenticated userId, from the JWT
+ * already used to open this socket — no extra payload needed) and forwards the tournament-scoped
+ * events. A page never needs both params at once.
  */
 export async function GET(request: Request): Promise<Response> {
   const store = await cookies();
   const accessToken = store.get(ACCESS_COOKIE_NAME)?.value ?? null;
   const socket = connectRealtime(accessToken);
 
-  const matchId = new URL(request.url).searchParams.get("matchId");
+  const url = new URL(request.url);
+  const matchId = url.searchParams.get("matchId");
+  const tournamentId = url.searchParams.get("tournamentId");
   const matchViewerUsername = matchId ? (await getSessionStatus()).account?.username : undefined;
 
   const stream = new ReadableStream<Uint8Array>({
     start(controller) {
       const encoder = new TextEncoder();
-      const eventNames: readonly string[] = matchId ? [...LOBBY_EVENTS, ...MATCH_EVENTS] : LOBBY_EVENTS;
+      const eventNames: readonly string[] = matchId
+        ? [...LOBBY_EVENTS, ...MATCH_EVENTS]
+        : tournamentId
+          ? [...LOBBY_EVENTS, ...TOURNAMENT_EVENTS]
+          : LOBBY_EVENTS;
 
       for (const eventName of eventNames) {
         socket.on(eventName, (payload: unknown) => {
@@ -59,11 +81,15 @@ export async function GET(request: Request): Promise<Response> {
 
       if (matchId) {
         socket.emit("join_room", { room: `match:${matchId}`, matchViewerUsername });
+      } else if (tournamentId) {
+        socket.emit("join_room", { room: `tournament:${tournamentId}` });
       }
     },
     cancel() {
       if (matchId) {
         socket.emit("leave_room", { room: `match:${matchId}` });
+      } else if (tournamentId) {
+        socket.emit("leave_room", { room: `tournament:${tournamentId}` });
       }
       socket.disconnect();
     },
