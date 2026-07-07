@@ -9,16 +9,42 @@ function unauthenticatedResponse(): Response {
 }
 
 /**
+ * Path shapes allowed to proceed with no access_token cookie, matching backend endpoints whose
+ * auth guard has been removed. `null` matches any single path segment (e.g. a match ID). See
+ * specs/006-caro-guest-access/contracts/proxy-auth-policy.md for the authoritative contract,
+ * including the neighboring authed paths this must not accidentally loosen (method is always
+ * checked alongside the path shape).
+ */
+const OPTIONAL_AUTH_ROUTES: { method: string; segments: (string | null)[] }[] = [
+  { method: "GET", segments: ["caro", "matches", "lobby"] },
+  { method: "GET", segments: ["caro", "matches", null] },
+  { method: "POST", segments: ["caro", "matches", null, "moves"] },
+];
+
+function isOptionalAuthRoute(method: string, pathSegments: string[]): boolean {
+  return OPTIONAL_AUTH_ROUTES.some(
+    (route) =>
+      route.method === method &&
+      route.segments.length === pathSegments.length &&
+      route.segments.every((segment, i) => segment === null || segment === pathSegments[i])
+  );
+}
+
+/**
  * Reads the access_token cookie, attaches it as a Bearer token on an outbound call to the
  * backend, transparently refreshes and retries once on a 401, and relays the backend's response
  * verbatim. The one sanctioned raw-fetch call site in this app — see research.md §8 for why this
  * doesn't violate the service-interface-layer rule that applies everywhere else.
+ *
+ * A small allowlist (OPTIONAL_AUTH_ROUTES above) lets specific now-public endpoints proceed with
+ * no cookie at all, forwarding without an Authorization header instead of being rejected up
+ * front (specs/006-caro-guest-access).
  */
 export async function forwardToBackend(request: Request, pathSegments: string[]): Promise<Response> {
   const store = await cookies();
   const accessToken = store.get(ACCESS_COOKIE_NAME)?.value ?? null;
 
-  if (!accessToken) {
+  if (!accessToken && !isOptionalAuthRoute(request.method, pathSegments)) {
     return unauthenticatedResponse();
   }
 
@@ -27,7 +53,7 @@ export async function forwardToBackend(request: Request, pathSegments: string[])
 
   let backendResponse = await callBackend(targetUrl, request, body, accessToken);
 
-  if (backendResponse.status === 401) {
+  if (accessToken && backendResponse.status === 401) {
     const newAccessToken = await refreshSession();
     if (!newAccessToken) {
       return unauthenticatedResponse();
@@ -47,14 +73,17 @@ function callBackend(
   targetUrl: string,
   request: Request,
   body: string | undefined,
-  accessToken: string
+  accessToken: string | null
 ): Promise<Response> {
+  const headers: Record<string, string> = {
+    "Content-Type": request.headers.get("content-type") ?? "application/json",
+  };
+  if (accessToken) {
+    headers.Authorization = `Bearer ${accessToken}`;
+  }
   return fetch(targetUrl, {
     method: request.method,
-    headers: {
-      "Content-Type": request.headers.get("content-type") ?? "application/json",
-      Authorization: `Bearer ${accessToken}`,
-    },
+    headers,
     body,
   });
 }

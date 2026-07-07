@@ -30,7 +30,7 @@ implementation and testing of each story. All work is concentrated in two files:
 
 **Purpose**: Establish a baseline before touching `forwardToBackend`
 
-- [ ] T001 Run `turbo run test --filter=@game-hub/web -- proxy.test.ts` to confirm the existing suite in `apps/web/lib/proxy.test.ts` passes before any change (baseline for later regression checks)
+- [X] T001 Run `turbo run test --filter=@game-hub/web -- proxy.test.ts` to confirm the existing suite in `apps/web/lib/proxy.test.ts` passes before any change (baseline for later regression checks)
 
 ---
 
@@ -40,9 +40,9 @@ implementation and testing of each story. All work is concentrated in two files:
 
 **⚠️ CRITICAL**: No user story task can begin until this phase is complete
 
-- [ ] T002 [Foundational] In `apps/web/lib/proxy.ts`, restructure `forwardToBackend` so the target URL and request body are built (`buildTargetUrl`, reading the body) before the `accessToken` presence check, and change `callBackend`'s signature to accept `accessToken: string | null`, omitting the `Authorization` header entirely when it is `null` (research.md §1, data-model.md)
-- [ ] T003 [Foundational] In `apps/web/lib/proxy.ts`, add an `isOptionalAuthRoute(method: string, pathSegments: string[]): boolean` matcher with no entries yet (always returns `false`), and wire it into `forwardToBackend`'s no-cookie branch: when it returns `true`, call the backend via T002's nullable-token path and relay the response instead of returning the synthesized 401 (contracts/proxy-auth-policy.md)
-- [ ] T004 [Foundational] Re-run `apps/web/lib/proxy.test.ts` (existing suite, unmodified) to confirm T002–T003's refactor changes no observable behavior yet — checkpoint before any story adds a real entry
+- [X] T002 [Foundational] In `apps/web/lib/proxy.ts`, restructure `forwardToBackend` so the target URL and request body are built (`buildTargetUrl`, reading the body) before the `accessToken` presence check, and change `callBackend`'s signature to accept `accessToken: string | null`, omitting the `Authorization` header entirely when it is `null` (research.md §1, data-model.md)
+- [X] T003 [Foundational] In `apps/web/lib/proxy.ts`, add an `isOptionalAuthRoute(method: string, pathSegments: string[]): boolean` matcher with no entries yet (always returns `false`), and wire it into `forwardToBackend`'s no-cookie branch: when it returns `true`, call the backend via T002's nullable-token path and relay the response instead of returning the synthesized 401 (contracts/proxy-auth-policy.md)
+- [X] T004 [Foundational] Re-run `apps/web/lib/proxy.test.ts` (existing suite, unmodified) to confirm T002–T003's refactor changes no observable behavior yet — checkpoint before any story adds a real entry
 
 **Checkpoint**: Foundation ready — the allowlist mechanism exists and is inert; each user story below can now add its own entry independently
 
@@ -54,9 +54,9 @@ implementation and testing of each story. All work is concentrated in two files:
 
 **Independent Test**: With no `access_token` cookie set, request `GET caro/matches/lobby` through `forwardToBackend` and confirm the backend is called and its response relayed, instead of getting the synthesized 401.
 
-- [ ] T005 [US1] In `apps/web/lib/proxy.ts`, add the `GET` + `["caro", "matches", "lobby"]` entry to `isOptionalAuthRoute` (contracts/proxy-auth-policy.md row 1)
-- [ ] T006 [P] [US1] Add a test in `apps/web/lib/proxy.test.ts`: `GET caro/matches/lobby` with no `access_token` cookie forwards to the backend (mocked `fetch` called) and relays the response verbatim (quickstart.md case 1)
-- [ ] T007 [P] [US1] Add a test in `apps/web/lib/proxy.test.ts`: the same path with a valid `access_token` cookie still attaches the `Bearer` header exactly as today — no regression for signed-in callers (spec FR-005/FR-006, quickstart.md case 5)
+- [X] T005 [US1] In `apps/web/lib/proxy.ts`, add the `GET` + `["caro", "matches", "lobby"]` entry to `isOptionalAuthRoute` (contracts/proxy-auth-policy.md row 1)
+- [X] T006 [P] [US1] Add a test in `apps/web/lib/proxy.test.ts`: `GET caro/matches/lobby` with no `access_token` cookie forwards to the backend (mocked `fetch` called) and relays the response verbatim (quickstart.md case 1)
+- [X] T007 [P] [US1] Add a test in `apps/web/lib/proxy.test.ts`: the same path with a valid `access_token` cookie still attaches the `Bearer` header exactly as today — no regression for signed-in callers (spec FR-005/FR-006, quickstart.md case 5)
 
 **Checkpoint**: Guests can browse the open match lobby; every other Caro path still 401s with no cookie (T004's baseline still holds everywhere else)
 
@@ -68,9 +68,9 @@ implementation and testing of each story. All work is concentrated in two files:
 
 **Independent Test**: With no cookie set, request `GET caro/matches/{id}` and confirm the backend is called and its response relayed; then confirm `DELETE caro/matches/{id}` with no cookie still 401s.
 
-- [ ] T008 [US2] In `apps/web/lib/proxy.ts`, add the `GET` + `["caro", "matches", <single wildcard segment>]` entry to `isOptionalAuthRoute`, keyed on method so it does not also match `DELETE` on the same path shape (contracts/proxy-auth-policy.md row 2)
-- [ ] T009 [P] [US2] Add a test in `apps/web/lib/proxy.test.ts`: `GET caro/matches/{id}` with no cookie forwards to the backend and relays the response (quickstart.md case 2)
-- [ ] T010 [P] [US2] Add a regression test in `apps/web/lib/proxy.test.ts`: `DELETE caro/matches/{id}` (creator-cancel — same path shape, different method) with no cookie still returns the synthesized 401 with `fetch` not called (contracts/proxy-auth-policy.md non-match table)
+- [X] T008 [US2] In `apps/web/lib/proxy.ts`, add the `GET` + `["caro", "matches", <single wildcard segment>]` entry to `isOptionalAuthRoute`, keyed on method so it does not also match `DELETE` on the same path shape (contracts/proxy-auth-policy.md row 2)
+- [X] T009 [P] [US2] Add a test in `apps/web/lib/proxy.test.ts`: `GET caro/matches/{id}` with no cookie forwards to the backend and relays the response (quickstart.md case 2)
+- [X] T010 [P] [US2] Add a regression test in `apps/web/lib/proxy.test.ts`: `DELETE caro/matches/{id}` (creator-cancel — same path shape, different method) with no cookie still returns the synthesized 401 with `fetch` not called (contracts/proxy-auth-policy.md non-match table)
 
 **Checkpoint**: Guests can browse the lobby and view a match; creator-cancel and every other same-resource action remain gated
 
@@ -82,9 +82,9 @@ implementation and testing of each story. All work is concentrated in two files:
 
 **Independent Test**: With no cookie set, request `POST caro/matches/{id}/moves` and confirm the backend is called and its response relayed; then confirm a neighboring action like `POST caro/matches/{id}/join` with no cookie still 401s.
 
-- [ ] T011 [US3] In `apps/web/lib/proxy.ts`, add the `POST` + `["caro", "matches", <single wildcard segment>, "moves"]` entry to `isOptionalAuthRoute` (contracts/proxy-auth-policy.md row 3)
-- [ ] T012 [P] [US3] Add a test in `apps/web/lib/proxy.test.ts`: `POST caro/matches/{id}/moves` with no cookie forwards to the backend and relays the response (quickstart.md case 3)
-- [ ] T013 [P] [US3] Add a regression test in `apps/web/lib/proxy.test.ts`: a neighboring same-resource action, `POST caro/matches/{id}/join`, with no cookie still returns the synthesized 401 with `fetch` not called (quickstart.md case 4)
+- [X] T011 [US3] In `apps/web/lib/proxy.ts`, add the `POST` + `["caro", "matches", <single wildcard segment>, "moves"]` entry to `isOptionalAuthRoute` (contracts/proxy-auth-policy.md row 3)
+- [X] T012 [P] [US3] Add a test in `apps/web/lib/proxy.test.ts`: `POST caro/matches/{id}/moves` with no cookie forwards to the backend and relays the response (quickstart.md case 3)
+- [X] T013 [P] [US3] Add a regression test in `apps/web/lib/proxy.test.ts`: a neighboring same-resource action, `POST caro/matches/{id}/join`, with no cookie still returns the synthesized 401 with `fetch` not called (quickstart.md case 4)
 
 **Checkpoint**: All three spec user stories are functional; every other Caro action (create, join, invite, start, surrender, draw request, leave/cancel) remains authed
 
@@ -94,9 +94,9 @@ implementation and testing of each story. All work is concentrated in two files:
 
 **Purpose**: Verify the whole feature end-to-end and keep documentation honest
 
-- [ ] T014 [P] Run `turbo run test --filter=@game-hub/web -- proxy.test.ts` for the full suite (all new cases from T006–T013 plus every pre-existing case) and confirm all pass
-- [ ] T015 Update the doc comment atop `forwardToBackend` in `apps/web/lib/proxy.ts` to mention the three allowlisted exceptions and point at `contracts/proxy-auth-policy.md` as the source of truth
-- [ ] T016 Walk through quickstart.md's manual/live validation steps against a running backend, if available, to confirm end-to-end behavior beyond the mocked test suite
+- [X] T014 [P] Run `turbo run test --filter=@game-hub/web -- proxy.test.ts` for the full suite (all new cases from T006–T013 plus every pre-existing case) and confirm all pass
+- [X] T015 Update the doc comment atop `forwardToBackend` in `apps/web/lib/proxy.ts` to mention the three allowlisted exceptions and point at `contracts/proxy-auth-policy.md` as the source of truth
+- [ ] T016 Walk through quickstart.md's manual/live validation steps against a running backend, if available, to confirm end-to-end behavior beyond the mocked test suite (skipped — no backend instance available in this environment; the mocked `proxy.test.ts` suite in T014 is the executed validation)
 
 ---
 
