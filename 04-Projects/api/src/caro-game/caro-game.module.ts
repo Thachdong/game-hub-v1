@@ -101,6 +101,7 @@ import { StartTournamentUseCase } from './application/commands/start-tournament.
 import { CancelTournamentUseCase } from './application/commands/cancel-tournament.use-case';
 import { EndTournamentUseCase } from './application/commands/end-tournament.use-case';
 import { TournamentSchedulerService } from './infrastructure/scheduling/tournament-scheduler.service';
+import { TournamentMatchAutoStartService } from './infrastructure/scheduling/tournament-match-auto-start.service';
 import { TournamentCancelledHandler } from './infrastructure/events/tournament-cancelled.handler';
 
 // ── US5 matchmaking ───────────────────────────────────────────────────────────
@@ -204,6 +205,7 @@ import { TournamentAdminController } from './interface/http/tournament-admin.con
     CancelTournamentUseCase,
     EndTournamentUseCase,
     TournamentSchedulerService,
+    TournamentMatchAutoStartService,
     TournamentCancelledHandler,
 
     // ── US5 matchmaking ───────────────────────────────────────────────────

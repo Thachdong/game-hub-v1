@@ -1,0 +1,17 @@
+# Opt-in hot-reload override.
+#
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+#
+# Bind-mounts source into the container and runs `nest start --watch`
+# instead of the compiled prod build. Only use this when actively editing
+# API code inside the container; for "just run the API so I can develop
+# the webapp against it" use docker-compose.yml alone.
+services:
+  api:
+    build:
+      target: dev
+    image: game-hub-api:dev
+    volumes:
+      - ./:/app
+      - /app/node_modules
+    command: npm run start:dev

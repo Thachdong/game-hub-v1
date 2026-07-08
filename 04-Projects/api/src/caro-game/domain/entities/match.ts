@@ -3,6 +3,7 @@ import { BoardSize, MoveTimeSeconds } from './game-config';
 export type MatchStatus =
   | 'looking_for_opponent'
   | 'waiting_for_start'
+  | 'auto_starting'
   | 'in_progress'
   | 'completed'
   | 'cancelled';
