@@ -33,6 +33,28 @@ services:
       pgsql:
         condition: service_healthy
 
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: ${API_TARGET:-runtime}
+    image: game-hub-api:${API_TARGET:-runtime}
+    container_name: game_hub_api
+    restart: unless-stopped
+    init: true
+    env_file:
+      - .env
+    environment:
+      PORT: ${PORT:-3000}
+      # Override the host-oriented DATABASE_URL from .env so the API reaches
+      # Postgres via the compose network instead of localhost.
+      DATABASE_URL: postgresql://${POSTGRES_USER:-game_hub_user}:${POSTGRES_PASSWORD:-game_hub_pass}@pgsql:5432/${POSTGRES_DB:-game_hub}
+    ports:
+      - "${API_PORT:-3000}:${PORT:-3000}"
+    depends_on:
+      pgsql:
+        condition: service_healthy
+
 volumes:
   pgsql_data:
   pgadmin_data:
