@@ -35,8 +35,10 @@ module.exports = {
   },
   overrides: [
     {
-      // Infrastructure and interface layers are allowed to import from anywhere
-      files: ['src/**/infrastructure/**/*.ts', 'src/**/interface/**/*.ts', 'src/config/**/*.ts', 'src/app.module.ts', 'src/main.ts', 'src/database/**/*.ts', 'src/**/account-social.module.ts'],
+      // Infrastructure and interface layers are allowed to import from anywhere.
+      // NestJS *.module.ts files are composition roots: they wire domain/application
+      // ports to infrastructure adapters via DI, so they must be exempt too.
+      files: ['src/**/infrastructure/**/*.ts', 'src/**/interface/**/*.ts', 'src/config/**/*.ts', 'src/main.ts', 'src/database/**/*.ts', 'src/**/*.module.ts'],
       rules: {
         'no-restricted-imports': 'off',
       },
